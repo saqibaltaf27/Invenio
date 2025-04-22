@@ -9,7 +9,7 @@
 
 </div>
 
-<h2> ⭐ About the Project </h2>
+<h2> ⭐Project Info </h2>
 It is a software where an organization can manage their product stock, customers, suppliers, orders and view different statistics of the inventory. Also an individual employee of that organization can work here for the organization.
 <br></br>
 
@@ -43,39 +43,15 @@ It is a software where an organization can manage their product stock, customers
   </tr>
 </table>
 
-If you want to contribute to the project, you can follow the steps given below:
 
-1. Star this repository.
 
-2. Fork this repository by clicking on the grey "Fork" button on the top right corner of this page.
-
-3. Clone the forked repository. Go to your GitHub account, open the forked repository, click on the code button and then click the copy to clipboard icon.Open a terminal and run the following command:
-
-```bash
-git clone "url you just copied"
-```
-
-where "url you just copied" (without the quotation marks) is the url to this repository (your fork of this project).
-
-4. Change the repository directory
-
-```bash
-cd
-```
-
-5. Create a branch
-
-```bash
-git switch -c your-new-branch-name
-```
-
-6. Installation: Please follow the below links to download/install the software.
+Installation: Please follow the below links to download/install the software.
 
 - [VS Code](https://code.visualstudio.com/download)
 - [Node JS](https://nodejs.org/)
 - [XAMPP](https://www.apachefriends.org/download.html)
 
-7. Setup Database : Create a new database `inventory`. Then execute the below script to create tables.
+Setup Database : Create a new database `inventory`. Then execute the below script to create tables.
 
 ```bash
 CREATE TABLE `customers` (
@@ -191,14 +167,12 @@ ALTER TABLE `user`
 ALTER TABLE `user_roles`
   ADD PRIMARY KEY (`user_role_id`);
 ```
-
-8. Install dependencies
+Install dependencies
 
 ```bash
 npm install
 ```
-
-9. Make all the necessary changes to the project and follow the given commands.
+Make all the necessary changes to the project and follow the given commands.
 
 ```bash
 git status
@@ -211,22 +185,10 @@ git add .
 ```bash
 git commit -m "Add a message"
 ```
-
-10. Push the changes to github.
+Push the changes to github.
 
 ```bash
 git push origin -u your-branch-name
 ```
-
-11. Open a Pull request. If you go to your repository on GitHub, you'll see a "Compare & pull request" button. Click on that button. Then, click on "Create pull request" button.
-
-12. Your changes will be reviewed and merged into the main branch if they seem correct.
-
-## Contributors
-
-<a href="https://github.com/Rajdip789/Inventory-management-system/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Rajdip789/Inventory-management-system" />
-</a>
-
 
 <h2 align="center"> Thank you 😊 </h2>

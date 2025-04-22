@@ -1,14 +1,5 @@
 <h1> Inventory Management System </h1>
 
-<div align="center">
-
-<a href="">[![GitHub issues](https://img.shields.io/github/issues/saqibaltaf27/IMS)](https://github.com/saqibaltaf27/IMS/issues)
-<a href="">[![GitHub forks](https://img.shields.io/github/forks/saqibaltaf27/IMS)](https://github.com/saqibaltaf27/IMS/network)
-<a href="">[![GitHub forks](https://img.shields.io/github/stars/saqibaltaf27/IMS)](https://github.com/saqibaltaf27/IMS/stargazers)
-<a href="">[![GitHub forks](https://img.shields.io/github/license/saqibaltaf27/IMS)](https://github.com/saqibaltaf27/IMS)
-
-</div>
-
 <h2> ⭐Project Info </h2>
 It is a software where an organization can manage their product stock, customers, suppliers, orders and view different statistics of the inventory. Also an individual employee of that organization can work here for the organization.
 <br></br>

@@ -25,17 +25,6 @@ It is a software where an organization can manage their product stock, customers
   
 </div>
 
-<h2>📝 How to Contribute? </h2>
-
-<table>
-  <tr>
-    <td valign="top"><img src="https://github.com/Rajdip789/Inventory-management-system/blob/main/frontend/public/images/showcase1.png" alter="Landing Page"/></td>
-    <td valign="top"><img src="https://github.com/Rajdip789/Inventory-management-system/blob/main/frontend/public/images/showcase2.png" alter="Landing Page"/></td>
-  </tr>
-</table>
-
-
-
 Installation: Please follow the below links to download/install the software.
 
 - [VS Code](https://code.visualstudio.com/download)

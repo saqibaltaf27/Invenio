@@ -11,10 +11,11 @@ function App() {
 		<div className={darkMode ? "dark" : ""} > 
 			<BrowserRouter>
 				<Routes>
-					<Route path='*' element={<NotFound />}/>
-					<Route path='/unauthorized' element={<Unauthorized />}/>
-					{ <Route path='/login' element={<Login />}/> }
-					<Route path='/forgetpassword' element={<Forgetpassword />}/>
+				<Route path="/" element={<Login />} />
+				<Route path="/login" element={<Login />} />
+				<Route path="/forgetpassword" element={<Forgetpassword />} />
+				<Route path="/unauthorized" element={<Unauthorized />} />
+				<Route path="*" element={<NotFound />} />
 					
 					<Route path='/' element={<Layout/>}>
 						<Route path='/dashboard' element={<Dashboard/>}/>

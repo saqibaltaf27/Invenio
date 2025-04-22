@@ -2,10 +2,10 @@
 
 <div align="center">
 
-<a href="">[![GitHub issues](https://img.shields.io/github/issues/Rajdip789/Inventory-management-system)](https://github.com/saqibaltaf27/IMS/issues)
-<a href="">[![GitHub forks](https://img.shields.io/github/forks/Rajdip789/Inventory-management-system)](https://github.com/saqibaltaf27/IMS/network)
-<a href="">[![GitHub forks](https://img.shields.io/github/stars/Rajdip789/Inventory-management-system)](https://github.com/saqibaltaf27/IMS/stargazers)
-<a href="">[![GitHub forks](https://img.shields.io/github/license/Rajdip789/Inventory-management-system)](https://github.com/saqibaltaf27/IMS)
+<a href="">[![GitHub issues](https://img.shields.io/github/issues/saqibaltaf27/IMS)](https://github.com/saqibaltaf27/IMS/issues)
+<a href="">[![GitHub forks](https://img.shields.io/github/forks/saqibaltaf27/IMS)](https://github.com/saqibaltaf27/IMS/network)
+<a href="">[![GitHub forks](https://img.shields.io/github/stars/saqibaltaf27/IMS)](https://github.com/saqibaltaf27/IMS/stargazers)
+<a href="">[![GitHub forks](https://img.shields.io/github/license/saqibaltaf27/IMS)](https://github.com/saqibaltaf27/IMS)
 
 </div>
 

@@ -1,282 +1,189 @@
 const db = require('../db/conn.js');
-const jwt = require('jsonwebtoken');
-const uniqid = require("uniqid")
-const fs = require("fs")
-const path = require("path")
+const uniqid = require("uniqid");
+const fs = require("fs");
+const path = require("path");
 
 class Product {
-	constructor() {
-		//console.log('Product object initialized');
-	}
+  constructor() {
+    //console.log('Product object initialized');
+  }
 
-	getProducts = (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
+  // Helper function to handle database queries
+  async queryDatabase(query, params = []) {
+    try {
+      const result = await db.query(query, {
+        replacements: params,
+        type: db.QueryTypes.SELECT,
+      });
+      return result;
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
 
-			new Promise((resolve, reject) => {
+  getProducts = async (req, res) => {
+    try {
+      if (!req.session || !req.session.email) {
+        return res.status(401).send({ message: "Unauthorized" });
+      }
+  
+      const { search_value = "", sort_column = "name", sort_order = "ASC", start_value = 0 } = req.body;
+  
+      let whereClause = "";
+      const values = [];
+  
+      if (search_value.trim() !== "") {
+        whereClause = `WHERE name LIKE @searchValue OR description LIKE @searchValue`;
+        values.push(`%${search_value}%`);
+      }
+  
+      const validColumns = ["name", "description", "gender", "size", "product_stock", "timeStamp"];
+      const validOrders = ["ASC", "DESC"];
+      let orderClause = "";
+  
+      if (validColumns.includes(sort_column) && validOrders.includes(sort_order)) {
+        orderClause = `ORDER BY ${sort_column} ${sort_order}`;
+      }
+  
+      const limitClause = `OFFSET @startValue ROWS FETCH NEXT 10 ROWS ONLY`;
+      values.push(parseInt(start_value));
+  
+      const productQuery = `SELECT * FROM products ${whereClause} ${orderClause} ${limitClause}`;
+  
+      const products = await this.queryDatabase(productQuery, {
+        searchValue: `%${search_value}%`,
+        startValue: parseInt(start_value),
+      });
+  
+      if (search_value.trim() !== "") {
+        return res.send({
+          operation: "success",
+          message: "Search results fetched",
+          info: { products, count: products.length },
+        });
+      }
+  
+      const countResult = await this.queryDatabase("SELECT COUNT(*) AS val FROM products");
+  
+      res.send({
+        operation: "success",
+        message: "Products fetched",
+        info: {
+          products,
+          count: countResult[0].val,
+        },
+      });
+    } catch (error) {
+      console.error("getProducts error:", error);
+      res.status(500).send({ operation: "error", message: "Internal server error" });
+    }
+  };
 
-				let tsa = ""
-				if (req.body.search_value != "") {
-					tsa = `WHERE name LIKE "%${req.body.search_value}%" OR description LIKE "%${req.body.search_value}%"`
-				}
+  getProductsSearch = async (req, res) => {
+    try {
+      const searchValue = req.body.search_value;
+      const query = `SELECT * FROM products WHERE name LIKE @searchValue + '%'`;
+      const products = await this.queryDatabase(query, { searchValue });
+      res.send({
+        operation: "success",
+        message: '10 products fetched',
+        info: { products },
+      });
+    } catch (err) {
+      console.log(err);
+      res.send({ operation: "error", message: 'Something went wrong' });
+    }
+  };
 
-				let tso = ""
-				if ((req.body.sort_column != "") && (req.body.sort_order != "")) {
-					tso = `ORDER BY ${req.body.sort_column} ${req.body.sort_order}`
-				}
+  getProductsDetailsById = async (req, res) => {
+    try {
+      const query = `SELECT * FROM products WHERE product_id IN (?)`;
+      const products = await this.queryDatabase(query, [req.body.product_id_list]);
+      res.send({
+        operation: "success",
+        message: 'Success',
+        info: { products },
+      });
+    } catch (err) {
+      console.log(err);
+      res.send({ operation: "error", message: 'Something went wrong' });
+    }
+  };
 
-				let q = "SELECT * FROM products " + tsa + tso + " LIMIT ?, 10"
-				db.query(q, [req.body.start_value], (err, result) => {
-					if (err) {
-						return reject(err);
-					}
+  addProduct = async (req, res) => {
+    try {
+      const { name, gender, size, material, category, description, product_stock, f_name, selling_price, purchase_price } = req.body;
+      const query = `INSERT INTO products (product_id, name, gender, size, material, category, description, product_stock, image, selling_price, purchase_price) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+      const result = await this.queryDatabase(query, [
+        uniqid(), name, gender, size, material, category, description, product_stock, f_name, selling_price, purchase_price,
+      ]);
+      res.send({ operation: "success", message: 'Product added successfully' });
+    } catch (err) {
+      console.log(err);
+      res.send({ operation: "error", message: 'Something went wrong' });
+    }
+  };
 
-					if (req.body.search_value != "") {
-						return resolve({ operation: "success", message: 'search products got', info: { products: result, count: result.length } });
-					}
+  updateProduct = async (req, res) => {
+    try {
+      const { product_id, name, gender, size, material, category, description, product_stock, f_name, selling_price, purchase_price } = req.body;
+      let imageUpdate = f_name ? `image = ?` : '';
+      const query = `UPDATE products SET name = ?, gender = ?, size = ?, material = ?, category = ?, description = ?, product_stock = ?, ${imageUpdate} selling_price = ?, purchase_price = ? WHERE product_id = ?`;
 
-					let q = "SELECT COUNT(*) AS val FROM products"
-					db.query(q, (err, result2) => {
-						if (err) {
-							return reject(err);
-						}
-						// console.log(result2)
-						resolve({ operation: "success", message: '10 products got', info: { products: result, count: result2[0].val } });
-					})
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
+      const params = f_name ? [name, gender, size, material, category, description, product_stock, f_name, selling_price, purchase_price, product_id] :
+                              [name, gender, size, material, category, description, product_stock, selling_price, purchase_price, product_id];
 
-	getProductsSearch = (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
+      const result = await this.queryDatabase(query, params);
+      res.send({ operation: "success", message: 'Product updated successfully' });
+    } catch (err) {
+      console.log(err);
+      res.send({ operation: "error", message: 'Something went wrong' });
+    }
+  };
 
-			new Promise((resolve, reject) => {
-				let q = `SELECT * FROM products WHERE name LIKE '${req.body.search_value}%' LIMIT 10`
-				db.query(q, (err, result) => {
-					if (err) {
-						return reject(err);
-					}
-					// console.log(result)
-					resolve({ operation: "success", message: '10 products got', info: { products: result } });
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
+  deleteProduct = async (req, res) => {
+    try {
+      const productId = req.body.product_id;
+      const query = `SELECT * FROM products WHERE product_id = ?`;
+      const result = await this.queryDatabase(query, [productId]);
 
-	getProductsDetailsById = (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
+      if (result[0]?.image) {
+        const imagePath = path.join(__dirname, 'public', 'uploads', result[0].image);
+        fs.unlinkSync(imagePath); // Use fs.unlinkSync for synchronous deletion
+      }
 
-			new Promise((resolve, reject) => {
-				let q = `SELECT * FROM products WHERE product_id IN (?)`
-				db.query(q, [req.body.product_id_list], (err, result) => {
-					if (err) {
-						return reject(err);
-					}
-					// console.log(result)
-					resolve({ operation: "success", message: 'Success', info: { products: result } });
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
+      const deleteQuery = `DELETE FROM products WHERE product_id = ?`;
+      await this.queryDatabase(deleteQuery, [productId]);
 
-	addProduct = (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
+      res.send({ operation: "success", message: 'Product deleted successfully' });
+    } catch (err) {
+      console.log(err);
+      res.send({ operation: "error", message: 'Something went wrong' });
+    }
+  };
 
-			new Promise((resolve, reject) => {
-				let q = "INSERT INTO `products`(`product_id`, `name`, `gender`, `size`, `material`, `category`, `description`, `product_stock`, `image`, `selling_price`, `purchase_price`) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-				db.query(q, [uniqid(), req.body.name, req.body.gender, req.body.size, req.body.material, req.body.category, req.body.description, req.body.product_stock, req.body.f_name, req.body.selling_price, req.body.purchase_price], (err, result) => {
-					if (err) {
-						return reject(err);
-					}
-					resolve({ operation: "success", message: 'Product added successfully' });
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
+  deleteProductImage = async (req, res) => {
+    try {
+      const productId = req.body.product_id;
+      const query = `SELECT * FROM products WHERE product_id = ?`;
+      const result = await this.queryDatabase(query, [productId]);
 
-	updateProduct = (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
+      if (result[0]?.image) {
+        const imagePath = path.join(__dirname, 'public', 'uploads', result[0].image);
+        fs.unlinkSync(imagePath); // Use fs.unlinkSync for synchronous deletion
 
-			new Promise((resolve, reject) => {
-				let ts = ""
-				if (req.body.f_name) {
-					ts = `image="${req.body.f_name}",`
-				}
-				let q = "UPDATE `products` SET `name`=?,`gender`=?,`size`=?,`material`=?,`category`=?,`description`=?,`product_stock`=?," + ts + "`selling_price`=?,`purchase_price`=? WHERE product_id=?"
-				db.query(q, [req.body.name, req.body.gender, req.body.size, req.body.material, req.body.category, req.body.description, req.body.product_stock, req.body.selling_price, req.body.purchase_price, req.body.product_id], (err, result) => {
-					if (err) {
-						return reject(err);
-					}
-					resolve({ operation: "success", message: 'Product updated successfully' });
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
-
-	deleteProduct = (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
-
-			new Promise((resolve, reject) => {
-				let q = "SELECT * FROM `products` WHERE product_id = ?"
-				db.query(q, [req.body.product_id], (err, result) => {
-					if (err) {
-						return reject(err);
-					}
-
-					let p
-					if (result[0].image != null) {
-						p = new Promise((res, rej) => {
-							let pathToFile = path.resolve("./") + "/public/uploads/" + result[0].image
-							//console.log(pathToFile)
-							fs.unlink(pathToFile, function (ferr) {
-								if (ferr) {
-									rej(ferr);
-								}
-								res();
-							})
-						})
-					}
-					else {
-						p = Promise.resolve();
-					}
-
-					p.then(() => {
-						let q2 = "DELETE FROM `products` WHERE product_id = ?"
-						db.query(q2, [req.body.product_id], (err2, result2) => {
-							if (err2) {
-								return reject(err2);
-							}
-							resolve({ operation: "success", message: 'product deleted successfully' });
-						})
-					})
-						.catch((err3) => {
-							reject(err3)
-						})
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
-
-	deleteProductImage = (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
-
-			new Promise((resolve, reject) => {
-				let q = "SELECT * FROM `products` WHERE product_id = ?"
-				db.query(q, [req.body.product_id], (err, result) => {
-					if (err) {
-						return reject(err);
-					}
-
-					let pathToFile = path.resolve("./") + "/public/uploads/" + result[0].image
-
-					fs.unlink(pathToFile, function (err) {
-						if (err) {
-							return reject(err);
-						}
-
-						let q2 = "UPDATE `products` SET image = NULL WHERE product_id = ?"
-						db.query(q2, [req.body.product_id], (err, result2) => {
-							if (err) {
-								return reject(err);
-							}
-							resolve({ operation: "success", message: 'product image deleted successfully' });
-						})
-					})
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
+        const updateQuery = `UPDATE products SET image = NULL WHERE product_id = ?`;
+        await this.queryDatabase(updateQuery, [productId]);
+        res.send({ operation: "success", message: 'Product image deleted successfully' });
+      } else {
+        res.send({ operation: "error", message: 'Image not found' });
+      }
+    } catch (err) {
+      console.log(err);
+      res.send({ operation: "error", message: 'Something went wrong' });
+    }
+  };
 }
 
 module.exports = Product;

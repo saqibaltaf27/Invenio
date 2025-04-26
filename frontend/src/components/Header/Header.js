@@ -21,21 +21,38 @@ const Header = () => {
 
 	const getProfile = async () => {
 		try{
-			const email = localStorage.getItem('email');
+			let email = null;
+
+		// Case 1: check if stored directly
+		if (localStorage.getItem('email')) {
+			email = localStorage.getItem('email');
+		}
+		// Case 2: check if stored in 'user' object
+		else if (localStorage.getItem('user')) {
+			const user = JSON.parse(localStorage.getItem('user'));
+			email = user?.email;
+		}
+
+		console.log("Fetching Profile for userId:", email);
+
+		if (!email) {
+			console.error("Email missing in localStorage");
+			return;
+		}
 			const result = await fetch('http://localhost:5000/api/get_profile', {
 				method: 'POST',
 				headers: {
-					'Content/Type': 'application/json'
+					'Content-Type': 'application/json'
 				},
 				credentials: 'include',
 				body: JSON.stringify({ email })
-			})
+			});
 
 		const body = await result.json()
-		if(body?.info?.profile?.length){
-			setUserName(body.info.profile[0].user_name)
-			setUserImage(body.info.profile[0].image)
-			setUserEmail(body.info.profile[0].email)
+		if (body?.data?.user_name) {
+			setUserName(body.user_name);
+			setUserEmail(body.email);
+			setUserImage(body.image);
 		} else {
 			console.error("Invalid profile structure", body);
 		}

@@ -1,5 +1,5 @@
-import React from 'react'
-import './States.scss'
+import React from 'react';
+import './States.scss';
 
 const Loader = () => {
 	return (
@@ -10,7 +10,7 @@ const Loader = () => {
 				</div>
 			</div>
 		</div>
-	)
-}
+	);
+};
 
-export default Loader
+export default Loader;

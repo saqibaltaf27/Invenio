@@ -19,39 +19,8 @@ import Menu from "@mui/icons-material/Menu";
 
 function AsideNavbar() {
 	const { dispatch } = useContext(DarkModeContext);
-	const [permission, setPermission] = useState([])
-	const [toggel, setToggel] = useState(false)
-
-	useEffect(() => {
-
-		fetch('http://localhost:5000/api/verify_token', {
-			method: 'POST',
-			credentials: 'include'
-		})
-			.then(async (response) => {
-				let body = await response.json()
-				if (body.operation === 'success') {
-					fetch('http://localhost:5000/api/get_permission', {
-						method: 'POST',
-						credentials: 'include'
-					})
-						.then(async (response) => {
-							let body = await response.json()
-
-							let p = JSON.parse(body.info)
-							setPermission(p)
-						})
-						.catch((error) => {
-							console.log(error)
-						})
-				} else {
-					window.location.href = '/login'
-				}
-			})
-			.catch((error) => {
-				console.log(error)
-			})
-	}, [])
+	const [permission, setPermission] = useState([]);
+	const [toggel, setToggel] = useState(false);
 
 	const logout = () => {
 		swal({
@@ -91,9 +60,7 @@ function AsideNavbar() {
 				</div>
 				<div className="center">
 					<ul>
-						{
-							permission.length > 0 && permission.find(x => x.page === 'dashboard').view === true &&
-							<>
+				
 								<p className="title">MAIN</p>
 								<Link to="/dashboard" style={{ textDecoration: "none" }}>
 									<li>
@@ -101,97 +68,85 @@ function AsideNavbar() {
 										<span>Dashboard</span>
 									</li>
 								</Link>
-							</>
-						}
+		
 
-						{
-							permission.length > 0 && (permission.find(x => x.page === 'employees').view === true || permission.find(x => x.page === 'products').view === true) &&
-							<p className="title">LISTS</p>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'employees').view === true &&
+								<p className="title">LISTS</p>
+						
+					
 							<Link to="/employees" style={{ textDecoration: "none" }}>
 								<li>
 									<PersonOutlineIcon className="icon" />
 									<span>Employees</span>
 								</li>
 							</Link>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'products').view === true &&
+						
+						
 							<Link to="/products" style={{ textDecoration: "none" }}>
 								<li>
 									<StoreIcon className="icon" />
 									<span>Products</span>
 								</li>
 							</Link>
-						}
+					
 
-						{
-							permission.length > 0 && (permission.find(x => x.page === 'suppliers').view === true || permission.find(x => x.page === 'expenses').view === true) &&
+						 
 							<p className="title">PURCHASE</p>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'suppliers').view === true &&
+						
+						
+							
 							<Link to="/suppliers" style={{ textDecoration: "none" }}>
 								<li>
 									<StoreIcon className="icon" />
 									<span>Suppliers</span>
 								</li>
 							</Link>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'expenses').view === true &&
+						
+						
 							<Link to="/expenses" style={{ textDecoration: "none" }}>
 								<li>
 									<NotificationsNoneIcon className="icon" />
 									<span>Expenses</span>
 								</li>
 							</Link>
-						}
+						
 
-						{
-							permission.length > 0 && (permission.find(x => x.page === 'customers').view === true || permission.find(x => x.page === 'orders').view === true) &&
+						
 							<p className="title">SELLS</p>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'customers').view === true &&
+						
+						
 							<Link to="/customers" style={{ textDecoration: "none" }}>
 								<li>
 									<SettingsSystemDaydreamOutlinedIcon className="icon" />
 									<span>Customers</span>
 								</li>
 							</Link>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'orders').view === true &&
+						
+						
 							<Link to="/orders" style={{ textDecoration: "none" }}>
 								<li>
 									<PsychologyOutlinedIcon className="icon" />
 									<span>Orders</span>
 								</li>
 							</Link>
-						}
+						
 
 						<p className="title">USER</p>
-						{
-							permission.length > 0 && permission.find(x => x.page === 'profile').view === true &&
+						
 							<Link to="/profile" style={{ textDecoration: "none" }}>
 								<li>
 									<AccountCircleOutlinedIcon className="icon" />
 									<span>Profile</span>
 								</li>
 							</Link>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'settings').view === true &&
+						
+				
 							<Link to="/settings" style={{ textDecoration: "none" }}>
 								<li>
 									<SettingsApplicationsIcon className="icon" />
 									<span>Settings</span>
 								</li>
 							</Link>
-						}
+						
 						<li onClick={() => { logout() }}>
 							<ExitToAppIcon className="icon" />
 							<span>Logout</span>
@@ -217,8 +172,7 @@ function AsideNavbar() {
 				</div>
 				<div className="center">
 					<ul>
-						{
-							permission.length > 0 && permission.find(x => x.page === 'dashboard').view === true &&
+	
 							<>
 								<p className="title">MAIN</p>
 								<Link to="/dashboard" style={{ textDecoration: "none" }}>
@@ -228,96 +182,85 @@ function AsideNavbar() {
 									</li>
 								</Link>
 							</>
-						}
+					
 
-						{
-							permission.length > 0 && (permission.find(x => x.page === 'employees').view === true || permission.find(x => x.page === 'products').view === true) &&
+					
 							<p className="title">LISTS</p>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'employees').view === true &&
+						
+						
 							<Link to="/employees" style={{ textDecoration: "none" }}>
 								<li>
 									<PersonOutlineIcon className="icon" />
 									<span>Employees</span>
 								</li>
 							</Link>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'products').view === true &&
+						
+						
 							<Link to="/products" style={{ textDecoration: "none" }}>
 								<li>
 									<StoreIcon className="icon" />
 									<span>Products</span>
 								</li>
 							</Link>
-						}
+						
 
-						{
-							permission.length > 0 && (permission.find(x => x.page === 'suppliers').view === true || permission.find(x => x.page === 'expenses').view === true) &&
+					
 							<p className="title">PURCHASE</p>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'suppliers').view === true &&
+						
+						
 							<Link to="/suppliers" style={{ textDecoration: "none" }}>
 								<li>
 									<StoreIcon className="icon" />
 									<span>Suppliers</span>
 								</li>
 							</Link>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'expenses').view === true &&
+						
+						
 							<Link to="/expenses" style={{ textDecoration: "none" }}>
 								<li>
 									<NotificationsNoneIcon className="icon" />
 									<span>Expenses</span>
 								</li>
 							</Link>
-						}
+						
 
-						{
-							permission.length > 0 && (permission.find(x => x.page === 'customers').view === true || permission.find(x => x.page === 'orders').view === true) &&
+					
 							<p className="title">SELLS</p>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'customers').view === true &&
+						
+						
 							<Link to="/customers" style={{ textDecoration: "none" }}>
 								<li>
 									<SettingsSystemDaydreamOutlinedIcon className="icon" />
 									<span>Customers</span>
 								</li>
 							</Link>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'orders').view === true &&
+						
+					
 							<Link to="/orders" style={{ textDecoration: "none" }}>
 								<li>
 									<PsychologyOutlinedIcon className="icon" />
 									<span>Orders</span>
 								</li>
 							</Link>
-						}
+						
 
 						<p className="title">USER</p>
-						{
-							permission.length > 0 && permission.find(x => x.page === 'profile').view === true &&
+					
 							<Link to="/profile" style={{ textDecoration: "none" }}>
 								<li>
 									<AccountCircleOutlinedIcon className="icon" />
 									<span>Profile</span>
 								</li>
 							</Link>
-						}
-						{
-							permission.length > 0 && permission.find(x => x.page === 'settings').view === true &&
+						
+					
 							<Link to="/settings" style={{ textDecoration: "none" }}>
 								<li>
 									<SettingsApplicationsIcon className="icon" />
 									<span>Settings</span>
 								</li>
 							</Link>
-						}
+						
 						<li onClick={() => { logout() }}>
 							<ExitToAppIcon className="icon" />
 							<span>Logout</span>

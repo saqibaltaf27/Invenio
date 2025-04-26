@@ -147,4 +147,4 @@ function Table(props) {
 	)
 }
 
-export default Table
+export default Table;

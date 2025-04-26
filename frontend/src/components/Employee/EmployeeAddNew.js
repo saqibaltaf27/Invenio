@@ -2,117 +2,87 @@ import React, { useEffect, useState } from 'react'
 import './EmployeeAddNew.scss'
 
 import swal from 'sweetalert';
-import CryptoJS from 'crypto-js';
+//import CryptoJS from 'crypto-js';
 import Loader from '../PageStates/Loader';
 import Error from '../PageStates/Error';
+import { create } from '@mui/material/styles/createTransitions';
 
 function EmployeeAddNew() {
-	const [pageState, setPageState] = useState(1)
-	const [permission, setPermission] = useState(null)
+	const [pageState, setPageState] = useState(1);
+	const [permission, setPermission] = useState({create: true});
 
-	const [name, setName] = useState('')
-	const [address, setAddress] = useState('')
-	const [email, setEmail] = useState('')
-	const [password, setPassword] = useState('')
+	const [name, setName] = useState('');
+	const [address, setAddress] = useState('');
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
 
-	const [submitButtonState, setSubmitButtonState] = useState(false)
-
-	useEffect(() => {
-
-		fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/verifiy_token`, {
-			method: 'POST',
-			credentials: 'include'
-		})
-			.then(async (response) => {
-				let body = await response.json()
-				if (body.operation === 'success') {
-
-					fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/get_permission`, {
-						method: 'POST',
-						credentials: 'include'
-					})
-						.then(async (response) => {
-							let body = await response.json()
-
-							//console.log(JSON.parse(body.info));
-							let p = JSON.parse(body.info).find(x => x.page === 'employees')
-							if (p.view && p.create) {
-								setPermission(p)
-							} else {
-								window.location.href = '/unauthorized';
-							}
-						})
-						.catch((error) => {
-							console.log(error)
-						})
-				} else {
-					window.location.href = '/login'
-				}
-			})
-			.catch((error) => {
-				console.log(error)
-			})
-	}, [])
+	const [submitButtonState, setSubmitButtonState] = useState(false);
 
 	useEffect(() => {
-		if (permission !== null) {
-			setPageState(2);
-		}
-	}, [permission])
+		const fetchData = async () => {
+			try{
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+				setPageState(2);
+			} catch(error){
+				setPageState(3);
+			}
+		};
+		fetchData();
+	}, []);
 
 	const insertEmployee = async () => {
 		if (name === "") {
-			swal("Oops!", "Name can't be empty", "error")
+			swal("Oops!", "Name can't be empty", "error");
 			return;
 		}
 
 		if (email === "") {
-			swal("Oops!", "Email can't be empty", "error")
+			swal("Oops!", "Email can't be empty", "error");
 			return;
 		}
 
 		let regex = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-z]+)$/;
 		if (!regex.test(email)) {
-			swal("Oops!", "Please enter valid email", "error")
+			swal("Oops!", "Please enter valid email", "error");
 			return;
 		}
 
 		if (password === "") {
-			swal("Oops!", "Password can't be empty", "error")
+			swal("Oops!", "Password can't be empty", "error");
 			return;
 		}
 
-		let obj = {}
-		obj.name = name;
-		obj.address = address;
-		obj.email = email;
-		obj.password = CryptoJS.AES.encrypt(password, process.env.REACT_APP_CRYPTOJS_SEED).toString();
-
+		let obj = {
+			name,
+			address,
+			email,
+			password, 
+		};
 		setSubmitButtonState(true)
 
-		let response = await fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/add_employee`, {
+		let response = await fetch(`http://localhost:5000/api/add_employee`, {
 			method: 'POST',
 			headers: {
-				'Content-type': 'application/json; charset=UTF-8'
+				'Content-type': 'application/json'
 			},
 			body: JSON.stringify(obj),
 			credentials: 'include',
 		})
-		let body = await response.json()
+		const body = await response.json();
 
-		setSubmitButtonState(false)
+		setSubmitButtonState(false);
 		//console.log(body)
 
 		if (body.operation === 'success') {
-			console.log('Employee added successfully')
-			swal("Success!", "Employee added successfully", "success")
+			console.log('Employee added successfully');
+			swal("Success!", "Employee added successfully", "success");
 
-			setName('')
-			setAddress('')
-			setEmail('')
-			setPassword('')
+			setName('');
+			setAddress('');
+			setEmail('');
+			setPassword('');
 		} else {
-			swal("Oops!", body.message, "error")
+			swal("Oops!", body.message, "error");
 		}
 	}
 

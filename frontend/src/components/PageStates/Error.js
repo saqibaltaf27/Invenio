@@ -1,7 +1,7 @@
-import React from 'react'
-import './States.scss'
+import React from 'react';
+import './States.scss';
 
-const Error = () => {
+const ErrorComponent = () => {
 	return (
 		<div className="card">
 			<div className="container">
@@ -15,4 +15,4 @@ const Error = () => {
 	)
 }
 
-export default Error
+export default ErrorComponent;

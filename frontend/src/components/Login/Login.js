@@ -3,15 +3,14 @@ import './Login.scss';
 
 import { SnackbarProvider, enqueueSnackbar } from 'notistack';
 import swal from 'sweetalert';
-//import CryptoJS from 'crypto-js';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { EmailOutlined, SecurityOutlined } from "@mui/icons-material";
 
 function Login() {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [submitButtonState, setSubmitButtonState] = useState(false);
-	//let msg = 'Admin: email- testadmin@gmail.com, password- testadmin@12345\nEmployee: email- testemp@gmail.com, password- testemp@12345'
+	const navigate = useNavigate();
 
 	useEffect(() => {}, [])
 
@@ -38,26 +37,32 @@ function Login() {
 		
 		setSubmitButtonState(true)
 
-		let response = await fetch('http://localhost:5000/api/login', {
-			method: 'POST',
-			headers: {
-				'Content-type': 'application/json; charset=UTF-8',
-			},
-			body: JSON.stringify(obj),
-			credentials: 'include'
-		})
-		let body = await response.json()
-
-		//await new Promise(r => setTimeout(r, 10000))
-		setSubmitButtonState(false)
-
-		if (body.operation === 'success') {
-			localStorage.setItem('user', JSON.stringify(body.user || { email })); // Save user info
-			window.location.href = '/dashboard';
-		} else {
-			swal("Oops!", body.message, "error")
-		}
-	}
+		try {
+			const response = await fetch('http://localhost:5000/api/login', {
+			  method: 'POST',
+			  headers: {
+				'Content-Type': 'application/json'
+			  },
+			  body: JSON.stringify(obj),
+			  credentials: 'include'
+			});
+	  
+			const body = await response.json();
+			console.log("Login Response:", body);
+	  
+			if (response.ok && body.user) {
+			  localStorage.setItem('user', JSON.stringify(body.user));
+			  navigate('/dashboard');
+			} else {
+			  swal("Oops!", body.message || 'Login failed', "error");
+			}
+		  } catch (error) {
+			console.error("Login Error:", error);
+			swal("Oops!", "Something went wrong. Please try again later.", "error");
+		  } finally {
+			setSubmitButtonState(false);
+		  }
+		};
 
 	return (
 		<div className='login'>

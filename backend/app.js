@@ -16,15 +16,17 @@ app.use(cookieParser())
 
 const corsOption = {
     origin: 'http://localhost:3000',
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 	credentials: true,
 };
-app.use(cors(corsOption));
+app.use('*' ,cors(corsOption));
 app.use(session({
-	secret: 'cfc3042fc6631c2106f65dfb810a9ecb5a91f1fa4d385a5c16a7796fe8bb5a5e',
+	secret: 'cfc3042fc6631c2106f65d',
 	resave: false,
 	saveUninitialized: false,
-	cookie: { secure: false,  httpOnly: true }
-  }))
+	cookie: { secure: false,  httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }
+  }));
+  
 app.use(express.static('public'));
 
 const userRoutes = require('./routes/user.routes');
@@ -49,4 +51,4 @@ app.use('/api', expensesRoutes);
 
 app.listen(port, () => {
 	console.log(`App listening on port ${port}!`)
-})
+});

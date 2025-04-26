@@ -26,10 +26,10 @@ function App() {
 				<Dashboard />
 				</ProtectedRoute>
 				} />
-            <Route path="/employees" element={<ProtectedRoute element={<Employee />} />} />
-            <Route path="/employees/addnew" element={<ProtectedRoute element={<EmployeeAddNew />} />} />
-            <Route path="/products" element={<ProtectedRoute element={<Product />} />} />
-            <Route path="/products/addnew" element={<ProtectedRoute element={<ProductAddNew />} />} />
+            <Route path="/employees" element={<ProtectedRoute><Employee /></ProtectedRoute>} />
+            <Route path="/employees/addnew" element={<ProtectedRoute><EmployeeAddNew /> </ProtectedRoute> } />
+            <Route path="/products" element={<Product />}/>
+            <Route path="/products/addnew" element={<ProtectedRoute><ProductAddNew /></ProtectedRoute>} />
             <Route path="/suppliers" element={<ProtectedRoute element={<Supplier />} />} />
             <Route path="/suppliers/addnew" element={<ProtectedRoute element={<SupplierAddNew />} />} />
             <Route path="/expenses" element={<ProtectedRoute element={<Expense />} />} />
@@ -38,7 +38,7 @@ function App() {
             <Route path="/customers/addnew" element={<ProtectedRoute element={<CustomerAddNew />} />} />
             <Route path="/orders" element={<ProtectedRoute element={<Order />} />} />
             <Route path="/orders/addnew" element={<ProtectedRoute element={<OrderAddNew />} />} />
-            <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute element={<Settings />} />} />
           </Route>
         </Routes>

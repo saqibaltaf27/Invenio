@@ -1,14 +1,12 @@
 const uniqid = require("uniqid");
-const bcryp = require('bcrypt');
+
 const fs = require("fs");
 const path = require('path');
 const {sql, poolPromise} = require('../db/conn');
-//const { pool } = require('mssql');
+
 
 class User {
-	constructor(email, password) {
-        this.email = email;
-        this.password = password;
+	constructor() {
     }
 
 	async login (req, res) {
@@ -33,14 +31,16 @@ class User {
 				
 				const user = result.recordset[0];  
 				console.log("User from DB: ", user);
-				req.session.user = {
-					id: user.id,
-					email: user.email,
-					role: user.role
-				}
-
+				
 			if (password === user.password) {
-					return res.status(200).json({ operation: 'success', message: 'Login successful' });
+				req.session.user = {
+					user_id: user.user_id,
+					user_name: user.user_name,
+					email: user.email,
+					password: user.password,
+					role: user.user_role
+				  };
+					return res.status(200).json({ message: 'Login successful', user: req.session.user });
 				} else {
 					return res.status(401).json({ operation: 'error', message: 'Incorrect password' });		
 			}
@@ -52,44 +52,64 @@ class User {
 	};
 
 	logout = async (req, res) => {
-		//res.cookie("accessToken", "", { maxAge: 1, sameSite: 'none', secure: true });
-		return res.status(200).send({ operation: "success", message: 'Logged out successfully'});
-	  };
+		req.session.destroy(err => {
+			if (err) {
+				console.error("Logout error:", err);
+				return res.status(500).json({ operation: "error", message: 'Logout failed' });
+			}
+			res.clearCookie('connect.sid'); 
+			return res.status(200).json({ operation: "success", message: 'Logged out successfully' });
+		});
+	};
 
-	  getEmployees = async (req, res) => {
-		const { search_value, sort_column, sort_order, start_value } = req.body;
-
+	getEmployees = async (req, res) => {
+		const { search_value = '', sort_column = 'admin', sort_order = 'ASC', start_value = 0 } = req.body;
+	
 		try {
 			const pool = await poolPromise;
-
-			let baseQuery = `SELECT user_id, user_name, address, email, permissions, timeStamp FROM [user] WHERE user_role != 'admin'`;
+			const request = pool.request();
+	
+			let query = `
+				SELECT user_id, user_name, address, email, permissions, timeStamp
+				FROM [user]
+				WHERE user_role != 'admin'
+			`;
+	
 			if (search_value) {
-				baseQuery += ` AND (user_name LIKE @search OR address LIKE @search)`;
+				query += ` AND (user_name LIKE @search OR address LIKE @search)`;
+				request.input('search', sql.VarChar, `%${search_value}%`);
 			}
-			if (sort_column && sort_order) {
-				baseQuery += ` ORDER BY ${sort_column} ${sort_order}`;
+	
+			const allowedColumns = ['user_name', 'address', 'email', 'timeStamp'];
+			const allowedOrders = ['ASC', 'DESC'];
+			if (allowedColumns.includes(sort_column) && allowedOrders.includes(sort_order.toUpperCase())) {
+				query += ` ORDER BY ${sort_column} ${sort_order.toUpperCase()}`;
+			} else {
+				query += ` ORDER BY user_name ASC`; 
 			}
-
-			baseQuery += ` OFFSET @offset ROWS FETCH NEXT 10 ROWS ONLY`;
-
-			const result = await pool
-				.request()
-				.input('search', sql.VarChar, `%${search_value}%`)
-				.input('offset', sql.Int, start_value)
-				.query(baseQuery);
-
-			const countResult = await pool
-				.request()
-				.query(`SELECT COUNT(*) AS val FROM [user] WHERE user_role != 'admin'`);
-
-			res.send({
+	
+			query += ` OFFSET @offset ROWS FETCH NEXT 10 ROWS ONLY`;
+			request.input('offset', sql.Int, start_value);
+	
+			// Fetch data
+			const employees = await request.query(query);
+	
+			// Get count (for pagination UI)
+			const countResult = await pool.request().query(`
+				SELECT COUNT(*) AS val FROM [user] WHERE user_role != 'admin'
+			`);
+	
+			res.status(200).json({
 				operation: "success",
-				message: search_value ? 'Search employees got' : '10 employees got',
-				info: { employees: result.recordset, count: countResult.recordset[0].val }
+				message: search_value ? 'Filtered employees fetched' : 'Employees fetched',
+				info: {
+					employees: employees.recordset,
+					count: countResult.recordset[0].val
+				}
 			});
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
+		} catch (err) {
+			console.error('Error fetching employees:', err);
+			res.status(500).json({ operation: "error", message: "Something went wrong", error: err.message });
 		}
 	};
 

@@ -1,21 +1,23 @@
-//const db = require('../db/conn.js');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const CryptoJS = require("crypto-js");
-const uniqid = require("uniqid")
-const fs = require("fs")
+const uniqid = require("uniqid");
+const bcryp = require('bcrypt');
+const fs = require("fs");
 const path = require('path');
-const {sql, poolPromise} = require('../db/conn.js');
-const saltRounds = 10;
+const {sql, poolPromise} = require('../db/conn');
+//const { pool } = require('mssql');
 
 class User {
-	constructor() {
-	}
+	constructor(email, password) {
+        this.email = email;
+        this.password = password;
+    }
 
 	async login (req, res) {
 		console.log('Login Module Start');
 		const {email, password} = req.body;
 		try {
+			console.log('Email:', email);
+        	console.log('Password:', password);
+
 			const pool = await poolPromise;
 			const result = await pool
 				.request()
@@ -31,23 +33,13 @@ class User {
 				
 				const user = result.recordset[0];  
 				console.log("User from DB: ", user);
-				if (password === user.password) {
-					const accessToken = jwt.sign(
-						{
-							email: email,
-							role: "admin",
-						},
-						'cfc3042fc6631c2106f65dfb810a9ecb5a91f1fa4d385a5c16a7796fe8bb5a5e',
-						{ expiresIn: '1h' }
-					);
+				req.session.user = {
+					id: user.id,
+					email: user.email,
+					role: user.role
+				}
 
-					res.cookie('accessToken', accessToken, {
-						httpOnly: true,
-						maxAge: 60 * 60 * 1000,
-						sameSite: 'none',
-						secure: true,
-					});
-
+			if (password === user.password) {
 					return res.status(200).json({ operation: 'success', message: 'Login successful' });
 				} else {
 					return res.status(401).json({ operation: 'error', message: 'Incorrect password' });		
@@ -60,271 +52,158 @@ class User {
 	};
 
 	logout = async (req, res) => {
-		res.cookie("accessToken", "", { maxAge: 1, sameSite: 'none', secure: true });
-		res.send({ operation: "success", message: 'Logout successfully'});
+		//res.cookie("accessToken", "", { maxAge: 1, sameSite: 'none', secure: true });
+		return res.status(200).send({ operation: "success", message: 'Logged out successfully'});
 	  };
 
-	refreshToken = async (req, res) => {
+	  getEmployees = async (req, res) => {
+		const { search_value, sort_column, sort_order, start_value } = req.body;
+
 		try {
-			let prevToken = req.cookies.accessToken;
-			let d = jwt.decode(prevToken, { complete: true });
+			const pool = await poolPromise;
 
-			let newToken = jwt.sign(
-				{
-					email: d.payload.email,
-					role: d.payload.role
-				},
-				'cfc3042fc6631c2106f65dfb810a9ecb5a91f1fa4d385a5c16a7796fe8bb5a5e',
-				{ expiresIn: '1h' }
-			);
-			res.cookie('accessToken', newToken, { httpOnly: true, sameSite: 'none', secure: true }); 
-			res.send({ operation: "success", message: 'Token refreshed' });
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
-
-	verifyToken = async (req, res) => {
-		let temptoken = req.cookies.accessToken;
-		
-		jwt.verify(temptoken, 'cfc3042fc6631c2106f65dfb810a9ecb5a91f1fa4d385a5c16a7796fe8bb5a5e', (err, payload) => {
-			if (err) {
-				res.send({ operation: "error", message: 'Token expired' });
-				console.log("jwt token failed from api");
+			let baseQuery = `SELECT user_id, user_name, address, email, permissions, timeStamp FROM [user] WHERE user_role != 'admin'`;
+			if (search_value) {
+				baseQuery += ` AND (user_name LIKE @search OR address LIKE @search)`;
 			}
-			console.log("token verfied from api")
-			res.json({ operation: "success", message: 'Token verified' });
-		})
-	}
+			if (sort_column && sort_order) {
+				baseQuery += ` ORDER BY ${sort_column} ${sort_order}`;
+			}
 
-	getPermission = async (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
+			baseQuery += ` OFFSET @offset ROWS FETCH NEXT 10 ROWS ONLY`;
 
-			new Promise((resolve, reject) => {
-				let q = "SELECT permissions FROM [user] WHERE email=? AND user_role=?"
-				db.query(q, [email, role], (err, result) => {
-					if (err) {
-						reject(err);
-						return;
-					}
+			const result = await pool
+				.request()
+				.input('search', sql.VarChar, `%${search_value}%`)
+				.input('offset', sql.Int, start_value)
+				.query(baseQuery);
 
-					if (result.length == 1) {
-						console.log(result[0]);
-						resolve({ operation: "success", message: '', info: result[0].permissions });
-					} else {
-						reject({ operation: "error", message: 'Invalid user' });
-					}
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
+			const countResult = await pool
+				.request()
+				.query(`SELECT COUNT(*) AS val FROM [user] WHERE user_role != 'admin'`);
 
-	getEmployees = async (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
-
-			new Promise((resolve, reject) => {
-
-				let tsa = ""
-				if (req.body.search_value != "") {
-					tsa = `AND user_name LIKE "%${req.body.search_value}%" OR address LIKE "%${req.body.search_value}%" OR address LIKE "%${req.body.search_value}%"`
-				}
-
-				let tso = ""
-				if ((req.body.sort_column != "") && (req.body.sort_order != "")) {
-					tso = `ORDER BY ${req.body.sort_column} ${req.body.sort_order}`
-				}
-
-				let q = "SELECT user_id, user_name, address, email, permissions, timeStamp FROM [user] WHERE user_role != 'admin' " + tsa + tso + " LIMIT ?, 10"
-				db.query(q, [req.body.start_value], (err, result) => {
-					if (err) {
-						return reject(err);
-					}
-
-					if (req.body.search_value != "") {
-						return resolve({ operation: "success", message: 'search employees got', info: { employees: result, count: result.length } });
-					}
-
-					let q = "SELECT COUNT(*) AS val FROM [user] WHERE user_role != 'admin'"
-					db.query(q, (err, result2) => {
-						if (err) {
-							return reject(err);
-						}
-						// console.log(result2)
-						resolve({ operation: "success", message: '10 employees got', info: { employees: result, count: result2[0].val } });
-					})
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
-
-	addEmployee = async (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
-
-			new Promise((resolve, reject) => {
-				let q1 = "SELECT * FROM [user] WHERE email = ?"
-				db.query(q1, [req.body.email], (err1, result1) => {
-					if (err1) {
-						return reject(err1);
-					}
-
-					if (result1.length > 0) {
-						resolve({ operation: "error", message: 'Duplicate user email' });
-					}
-					else {
-						let q2 = "SELECT user_role_permissions, user_role_name FROM user_roles WHERE user_role_name = 'employee'"
-						db.query(q2, (err2, result2) => {
-							if (err2) {
-								return reject(err2);
-							}
-
-							let q3 = "INSERT INTO [user] (`user_id`, `user_name`, `address`, `email`, `password`, `permissions`, `user_role`) VALUES (?, ?, ?, ?, ?, ?, ?)"
-							db.query(q3, [uniqid(), req.body.name, req.body.address, req.body.email, req.body.password, result2[0].user_role_permissions, result2[0].user_role_name], (err3, result3) => {
-								if (err3) {
-									return reject(err3);
-								}
-								resolve({ operation: "success", message: 'Employee added successfully' });
-							})
-						})
-					}
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
-
-	deleteEmployee = async (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
-
-			new Promise((resolve, reject) => {
-				let q = "DELETE FROM [user] WHERE user_id = ?"
-				db.query(q, [req.body.employee_id], (err, result) => {
-					if (err) {
-						return reject(err);
-					}
-					resolve({ operation: "success", message: 'employee deleted successfully' });
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
-
-	updateEmployee = async (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
-	
-			new Promise((resolve, reject) => {
-				let q1 = "SELECT * FROM [user] WHERE email = ?";
-				db.query(q1, [req.body.email], (err1, result1) => {
-					if (err1) {
-						return reject(err1);
-					}
-	
-					if ((result1.length > 0) && (result1[0].user_id != req.body.user_id)) {
-						resolve({ operation: "error", message: 'Duplicate user email' });
-					} else {
-						let q2 = "UPDATE [user] SET user_name=?, address=?, email=? WHERE user_id=?";
-						db.query(q2, [req.body.name, req.body.address, req.body.email, req.body.user_id], (err2, result2) => {
-							if (err2) {
-								return reject(err2);
-							}
-							resolve({ operation: "success", message: 'Employee updated successfully' });
-						});
-					}
-				});
-			})
-			.then((value) => {
-				res.send(value);
-			})
-			.catch((err) => {
-				console.log(err);
-				res.send({ operation: "error", message: 'Something went wrong' });
+			res.send({
+				operation: "success",
+				message: search_value ? 'Search employees got' : '10 employees got',
+				info: { employees: result.recordset, count: countResult.recordset[0].val }
 			});
 		} catch (error) {
 			console.log(error);
 			res.send({ operation: "error", message: 'Something went wrong' });
 		}
-	}
-	
+	};
 
-	getProfile = async (req, res) => {
+	addEmployee = async (req, res) => {
+		const { name, address, email, password } = req.body;
+
 		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
+			const pool = await poolPromise;
 
-			new Promise((resolve, reject) => {
-				let q = "SELECT user_id, user_name, address, email, image FROM [user] WHERE email = ?"
-				db.query(q, [email], (err, result) => {
-					if (err) {
-						return reject(err);
-					}
+			const duplicateCheck = await pool
+				.request()
+				.input('email', sql.VarChar, email)
+				.query('SELECT * FROM [user] WHERE email = @email');
 
-					resolve({ operation: "success", message: 'Employee profile got successfully', info: { profile: result } });
-				})
-			})
-				.then((value) => {
-					res.send(value);
-				})
-				.catch((err) => {
-					console.log(err);
-					res.send({ operation: "error", message: 'Something went wrong' });
-				})
+			if (duplicateCheck.recordset.length > 0) {
+				return res.send({ operation: "error", message: 'Duplicate user email' });
+			}
+
+			const roleResult = await pool
+				.request()
+				.query("SELECT user_role_permissions, user_role_name FROM user_roles WHERE user_role_name = 'employee'");
+
+			const { user_role_permissions, user_role_name } = roleResult.recordset[0];
+
+			await pool
+				.request()
+				.input('user_id', sql.VarChar, uniqid())
+				.input('user_name', sql.VarChar, name)
+				.input('address', sql.VarChar, address)
+				.input('email', sql.VarChar, email)
+				.input('password', sql.VarChar, password)
+				.input('permissions', sql.VarChar, user_role_permissions)
+				.input('user_role', sql.VarChar, user_role_name)
+				.query(`INSERT INTO [user] (user_id, user_name, address, email, password, permissions, user_role)
+						VALUES (@user_id, @user_name, @address, @email, @password, @permissions, @user_role)`);
+
+			res.send({ operation: "success", message: 'Employee added successfully' });
 		} catch (error) {
 			console.log(error);
 			res.send({ operation: "error", message: 'Something went wrong' });
+		}
+	};
+
+	deleteEmployee = async (req, res) => {
+		const { employee_id } = req.body;
+
+		try {
+			const pool = await poolPromise;
+
+			await pool
+				.request()
+				.input('user_id', sql.VarChar, employee_id)
+				.query('DELETE FROM [user] WHERE user_id = @user_id');
+
+			res.send({ operation: "success", message: 'Employee deleted successfully' });
+		} catch (error) {
+			console.log(error);
+			res.send({ operation: "error", message: 'Something went wrong' });
+		}
+	};
+
+	updateEmployee = async (req, res) => {
+		const { user_id, name, address, email } = req.body;
+
+		try {
+			const pool = await poolPromise;
+
+			const existing = await pool
+				.request()
+				.input('email', sql.VarChar, email)
+				.query('SELECT * FROM [user] WHERE email = @email');
+
+			if (existing.recordset.length > 0 && existing.recordset[0].user_id !== user_id) {
+				return res.send({ operation: "error", message: 'Duplicate user email' });
+			}
+
+			await pool
+				.request()
+				.input('user_name', sql.VarChar, name)
+				.input('address', sql.VarChar, address)
+				.input('email', sql.VarChar, email)
+				.input('user_id', sql.VarChar, user_id)
+				.query(`UPDATE [user] SET user_name = @user_name, address = @address, email = @email WHERE user_id = @user_id`);
+
+			res.send({ operation: "success", message: 'Employee updated successfully' });
+		} catch (error) {
+			console.log(error);
+			res.send({ operation: "error", message: 'Something went wrong' });
+		}
+	};
+	
+	getProfile = async (req, res) => {
+		try {
+			const { email } = req.body;
+			console.log("Fetching Profile for userId:", email);
+
+			if(!email) { return res.status(400).json({message: 'Email is required '});}
+
+			const pool = await poolPromise;
+			const result = await pool.request()
+				.input('email', sql.VarChar, email)
+				.query('SELECT user_id, user_name, email, user_role FROM [user] WHERE email = @email');
+	
+			console.log("Profile result:", result.recordset[0]); 
+	
+			if (result.recordset.length === 0) {
+				return res.status(404).send({ operation: "error", message: "User not found" });
+			}
+	
+			return res.status(200).json({ operation: "success", data: result.recordset[0] });
+	
+		} catch (error) {
+			console.error("getProfile - error:", error); // 👈 log full error
+			res.status(500).send({ operation: "error", message: "Internal Server Error" });
 		}
 	}
 
@@ -432,5 +311,6 @@ class User {
 			res.send({ operation: "error", message: 'Something went wrong' });
 		}
 	}
+
 }
-module.exports = User;
+module.exports =  User;

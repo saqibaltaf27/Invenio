@@ -13,24 +13,7 @@ function Login() {
 	const [submitButtonState, setSubmitButtonState] = useState(false);
 	//let msg = 'Admin: email- testadmin@gmail.com, password- testadmin@12345\nEmployee: email- testemp@gmail.com, password- testemp@12345'
 
-	useEffect(() => {
-
-			fetch('http://localhost:5000/api/verify_token', {
-				method: 'POST',
-				credentials: 'include'
-			})
-			.then(async (response) => {
-				let body = await response.json()
-				//console.log(body)
-				if (body.operation === 'success') {
-					window.location.href = '/dashboard'
-				}
-			})
-			.catch((error) => {
-				console.log(error)
-			})	
-	}, [])
-
+	useEffect(() => {}, [])
 
 	const login = async () => {
 		if (email === "") {
@@ -69,7 +52,8 @@ function Login() {
 		setSubmitButtonState(false)
 
 		if (body.operation === 'success') {
-			window.location.href = '/dashboard'
+			localStorage.setItem('user', JSON.stringify(body.user || { email })); // Save user info
+			window.location.href = '/dashboard';
 		} else {
 			swal("Oops!", body.message, "error")
 		}

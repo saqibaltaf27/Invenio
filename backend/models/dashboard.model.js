@@ -1,6 +1,4 @@
-const db = require('../db/conn.js');
-const jwt = require('jsonwebtoken');
-
+const db = require('../db/conn');
 class Dashboard {
 	constructor() {
 		console.log('Dashboard object initialized');
@@ -10,7 +8,7 @@ class Dashboard {
 		try {
 			new Promise((resolve, reject) => {
 				let p1 = new Promise((rs, rj) => {
-					let q = 'SELECT (SELECT COUNT(*) FROM user WHERE user_role="employee") AS employee_count, (SELECT COUNT(*) FROM customers) AS customer_count, (SELECT COUNT(*) FROM suppliers) AS supplier_count FROM dual'
+					let q = 'SELECT (SELECT COUNT(*) FROM [user] WHERE user_role="employee") AS employee_count, (SELECT COUNT(*) FROM customers) AS customer_count, (SELECT COUNT(*) FROM suppliers) AS supplier_count FROM dual'
 					db.query(q, (err, result) => {
 						if (err) {
 							rj(err);
@@ -20,7 +18,7 @@ class Dashboard {
 				})
 
 				let p2 = new Promise((rs, rj) => {
-					let q = 'SELECT (SELECT SUM(grand_total) FROM orders WHERE MONTH(timeStamp) = MONTH(CURDATE()) AND YEAR(timeStamp) = YEAR(CURDATE())) AS "current_month", (SELECT SUM(grand_total) FROM orders WHERE MONTH(timeStamp) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH) AND YEAR(timeStamp) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)) AS "previous_month" FROM DUAL;'
+					let q = 'SELECT (SELECT SUM(grand_total) FROM orders WHERE MONTH(timeStamp) = MONTH(GETDATE())  AND YEAR(timeStamp) = YEAR(GETDATE())) AS current_month, (SELECT SUM(grand_total) FROM orders WHERE MONTH(timeStamp) = MONTH(DATEADD(MONTH, -1, GETDATE())) AND YEAR(timeStamp) = YEAR(DATEADD(MONTH, -1, GETDATE()))) AS previous_month;'
 					db.query(q, (err, result) => {
 						if (err) {
 							rj(err);
@@ -30,7 +28,7 @@ class Dashboard {
 				})
 
 				let p3 = new Promise((rs, rj) => {
-					let q = 'SELECT (SELECT SUM(grand_total) FROM expenses WHERE MONTH(timeStamp) = MONTH(CURDATE()) AND YEAR(timeStamp) = YEAR(CURDATE())) AS "current_month", (SELECT SUM(grand_total) FROM expenses WHERE MONTH(timeStamp) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH) AND YEAR(timeStamp) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)) AS "previous_month" FROM DUAL;'
+					let q = 'SELECT (SELECT SUM(grand_total) FROM expenses WHERE MONTH(timeStamp) = MONTH(GETDATE()) AND YEAR(timeStamp) = YEAR(GETDATE())) AS current_month,(SELECT SUM(grand_total) FROM expenses WHERE MONTH(timeStamp) = MONTH(DATEADD(MONTH, -1, GETDATE())) AND YEAR(timeStamp) = YEAR(DATEADD(MONTH, -1, GETDATE()))) AS previous_month;'
 					db.query(q, (err, result) => {
 						if (err) {
 							rj(err);

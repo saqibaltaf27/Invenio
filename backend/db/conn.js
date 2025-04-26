@@ -1,7 +1,5 @@
   const sql = require('mssql/msnodesqlv8');
   const config = require('./config');
-  //const dotenv = require('dotenv');
-  //const User = require('../models/user.model');
 
   const poolPromise = new sql.ConnectionPool(config)
     .connect()
@@ -11,6 +9,7 @@
     })
     .catch(err => {
       console.error('❌ Database Connection Failed:', err);
+      throw new Error('Database connection failed');
     });
 
   module.exports = {sql, poolPromise};

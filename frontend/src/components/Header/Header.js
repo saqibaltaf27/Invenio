@@ -13,26 +13,36 @@ import { Link } from "react-router-dom";
 
 const Header = () => {
 	const { dispatch } = useContext(DarkModeContext);
-	const [userName, setUserName] = useState('')
-	const [userImage, setUserImage] = useState(null)
-	const [userEmail, setUserEmail] = useState('')
-	const [fullscreen, setFullscreen] = useState(false)
-	const [darkMode, setDarkMode] = useState(false)
+	const [userName, setUserName] = useState('');
+	const [userImage, setUserImage] = useState(null);
+	const [userEmail, setUserEmail] = useState('');
+	const [fullscreen, setFullscreen] = useState(false);
+	const [darkMode, setDarkMode] = useState(false);
 
 	const getProfile = async () => {
-		let result = await fetch(`http://localhost:5000/api/get_profile`, {
-			method: 'POST',
-			headers: {
-				'Authorization': 'cfc3042fc6631c2106f65dfb810a9ecb5a91f1fa4d385a5c16a7796fe8bb5a5e',
-			},
-			credentials: 'include'
-		})
+		try{
+			const email = localStorage.getItem('email');
+			const result = await fetch('http://localhost:5000/api/get_profile', {
+				method: 'POST',
+				headers: {
+					'Content/Type': 'application/json'
+				},
+				credentials: 'include',
+				body: JSON.stringify({ email })
+			})
 
-		let body = await result.json()
-		setUserName(body.info.profile[0].user_name)
-		setUserImage(body.info.profile[0].image)
-		setUserEmail(body.info.profile[0].email)
+		const body = await result.json()
+		if(body?.info?.profile?.length){
+			setUserName(body.info.profile[0].user_name)
+			setUserImage(body.info.profile[0].image)
+			setUserEmail(body.info.profile[0].email)
+		} else {
+			console.error("Invalid profile structure", body);
+		}
+	}catch(error) {
+		console.error("❌ Failed to fetch profile:", error);
 	}
+};
 
 	useEffect(() => {
 		getProfile();

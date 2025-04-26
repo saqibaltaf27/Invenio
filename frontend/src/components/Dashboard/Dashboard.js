@@ -13,48 +13,41 @@ function Dashboard() {
 	const [reportStats, setReportStats] = useState(null)
 	const [productStats, setProductStats] = useState(null)
 	const [graphStats, setGraphStats] = useState(null)
+	
 
 	const [productGenderP, setProductGenderP] = useState([])
 
 	useEffect(() => {
-
-		fetch('http://localhost:5000/api/verify_token', {
-			method: 'POST',
-			credentials: 'include'
-		})
-			.then(async (response) => {
-				let body = await response.json()
-				if (body.operation === 'success') {
-					fetch('http://localhost:5000/api/get_permission', {
-						method: 'POST',
-						credentials: 'include'
-					})
-						.then(async (response) => {
-							let body = await response.json()
-
-							let p = JSON.parse(body.info).find(x => x.page === 'dashboard')
-							if (p.view && p.create) {
-								setPermission(p)
-							} else {
-								window.location.href = '/unauthorized';
-							}
-						})
-						.catch((error) => {
-							console.log(error)
-						})
-				} else {
-					window.location.href = '/login'
-
-				}
-			})
-			.catch((error) => {
-				console.log(error)
-			})
+		const checkAuth = async () => {
+			try {
+			  const result = await fetch('http://localhost:5000/api/dashboard/auth/check', {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include'
+			  });
+			  if (result.status === 200) {
+				const data = await result.json();
+				setPermission(true);
+			  } else {
+				// not logged in, redirect to login
+				window.location.href = "/login";
+			  }
+			} catch (err) {
+			  console.error(err);
+			  window.location.href = "/login";
+			}
+		  };
+		  checkAuth();
 	}, [])
 
 	const getReportStats = async () => {
 		let result = await fetch('http://localhost:5000/api/get_report_stats', {
 			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			  },
 			credentials: 'include'
 		})
 
@@ -65,6 +58,9 @@ function Dashboard() {
 	const getProductStats = async () => {
 		let result = await fetch('http://localhost:5000/api/get_product_stats', {
 			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			  },
 			credentials: 'include'
 		})
 
@@ -75,6 +71,9 @@ function Dashboard() {
 	const getGraphStats = async () => {
 		let result = await fetch('http://localhost:5000/api/get_graph_stats', {
 			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			  },
 			credentials: 'include'
 		})
 
@@ -146,7 +145,7 @@ function Dashboard() {
 												}
 											</div>
 											{
-												productGenderP.length > 0 &&
+												productGenderP.length >= 3 &&
 												<div className='d-flex justify-content-center align-items-center' style={{ flex: "1", position: "relative" }}>
 													<svg width="180px" height="180px" viewBox="0 0 42 42" className="donut">
 														<circle className="donut-segment" cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#516fc9" strokeWidth="5" strokeDasharray={`${productGenderP[1].percentage} ${100 - productGenderP[1].percentage}`} strokeDashoffset="0"></circle>
@@ -196,4 +195,4 @@ function Dashboard() {
 	)
 }
 
-export default Dashboard
+export default Dashboard;

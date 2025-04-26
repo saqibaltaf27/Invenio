@@ -2,7 +2,8 @@ const dotenv = require("dotenv");
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
 
 const port = process.env.PORT || 5000;
 
@@ -14,11 +15,16 @@ app.use(cookieParser())
 
 
 const corsOption = {
-    origin: ['http://localhost:3000'],
-	methods: ['GET', 'POST', 'DELETE'], 
+    origin: 'http://localhost:3000',
 	credentials: true,
 };
 app.use(cors(corsOption));
+app.use(session({
+	secret: 'cfc3042fc6631c2106f65dfb810a9ecb5a91f1fa4d385a5c16a7796fe8bb5a5e',
+	resave: false,
+	saveUninitialized: false,
+	cookie: { secure: false,  httpOnly: true }
+  }))
 app.use(express.static('public'));
 
 const userRoutes = require('./routes/user.routes');

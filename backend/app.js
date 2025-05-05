@@ -19,7 +19,7 @@ const corsOption = {
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 	credentials: true,
 };
-app.use('*' ,cors(corsOption));
+app.use(cors(corsOption));
 app.use(session({
 	secret: 'cfc3042fc6631c2106f65d',
 	resave: false,

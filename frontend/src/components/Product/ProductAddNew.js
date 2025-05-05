@@ -8,68 +8,30 @@ import Error from '../PageStates/Error';
 import Loader from '../PageStates/Loader';
 
 function ProductAddNew() {
-	const [pageState, setPageState] = useState(1)
-	const [permission, setPermission] = useState(null)
+	const [pageState, setPageState] = useState(1);
 
-	const [name, setName] = useState('')
-	const [gender, setGender] = useState("male")
-	const [size, setSize] = useState('')
-	const [material, setMaterial] = useState('')
-	const [category, setCategory] = useState('')
-	const [description, setDescription] = useState('')
-	const [stock, setStock] = useState('0')
-	const [image, setImage] = useState(null)
-	const [sellingPrice, setSellingPrice] = useState('0')
-	const [purchasePrice, setPurchasePrice] = useState('0')
+	const [name, setName] = useState('');
+	const [gender, setGender] = useState("male");
+	const [size, setSize] = useState('');
+	const [material, setMaterial] = useState('');
+	const [category, setCategory] = useState('');
+	const [description, setDescription] = useState('');
+	const [stock, setStock] = useState('0');
+	const [image, setImage] = useState(null);
+	const [sellingPrice, setSellingPrice] = useState('0');
+	const [purchasePrice, setPurchasePrice] = useState('0');
 
-	const [submitButtonState, setSubmitButtonState] = useState(false)
+	const [submitButtonState, setSubmitButtonState] = useState(false);
 
-	const fileInputRef = useRef(null)
-	const [imageData, setImageData] = useState(null)
-
-	useEffect(() => {
-
-		fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/verifiy_token`, {
-			method: 'POST',
-			credentials: 'include'
-		})
-			.then(async (response) => {
-				let body = await response.json()
-				// console.log(body)
-				if (body.operation === 'success') {
-
-					fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/get_permission`, {
-						method: 'POST',
-						credentials: 'include'
-					})
-						.then(async (response) => {
-							let body = await response.json()
-
-							//console.log(JSON.parse(body.info));
-							let p = JSON.parse(body.info).find(x => x.page === 'products')
-							if (p.view && p.create) {
-								setPermission(p)
-							} else {
-								window.location.href = '/unauthorized';
-							}
-						})
-						.catch((error) => {
-							console.log(error)
-						})
-				} else {
-					window.location.href = '/login'
-				}
-			})
-			.catch((error) => {
-				console.log(error)
-			})
-	}, [])
+	const fileInputRef = useRef(null);
+	const [imageData, setImageData] = useState(null);
 
 	useEffect(() => {
-		if (permission !== null) {
-			setPageState(2);
-		}
-	}, [permission])
+		
+		setTimeout(() => {
+		  setPageState(2); 
+		}, 1000); 
+	  }, []);
 
 	useEffect(() => {
 		if (image) {
@@ -117,7 +79,7 @@ function ProductAddNew() {
 		//console.log(Array.from(f.values()).map(x => x).join(", "))
 		setSubmitButtonState(true)
 
-		let response = await fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/add_product`, {
+		let response = await fetch(`http://localhost:5000/api/add_product`, {
 			method: 'POST',
 			body: f,
 			credentials: 'include'
@@ -238,14 +200,13 @@ function ProductAddNew() {
 									</div>
 								</div>
 
-								{
-									permission.create &&
+								
 									<div className='d-flex justify-content-center'>
 										<button className='btn success' style={{ alignSelf: "center", marginTop: "1rem" }} disabled={submitButtonState} onClick={() => { insertProduct() }} >
 											{!submitButtonState ? <span>Submit</span> : <span><div className="button-loader"></div></span>}
 										</button>
 									</div>
-								}
+								
 							</div>
 						</div>
 						:
@@ -255,4 +216,4 @@ function ProductAddNew() {
 	)
 }
 
-export default ProductAddNew
+export default ProductAddNew;

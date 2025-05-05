@@ -1,202 +1,133 @@
-const db = require('../db/conn.js');
-const jwt = require('jsonwebtoken');
-const uniqid = require("uniqid")
+const { sql, poolPromise } = require('../db/conn');
+const uniqid = require('uniqid');
 
 class Supplier {
-	constructor() {
-		//console.log('Customer object initialized');
-	}
+	constructor() {}
 
-	getSuppliers = (req, res) => {
+	// Get Suppliers (already shared previously)
+	getSuppliers = async (req, res) => {
 		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
+		  const pool = await poolPromise;
+		  let whereClause = '';
+		  if (req.body.search_value != '') {
+			whereClause = `WHERE name LIKE @search OR address LIKE @search`;
+		  }
+	  
+		  let orderByClause  = '';
+		  if (req.body.sort_column && req.body.sort_order) {
+			orderByClause  = `ORDER BY ${req.body.sort_column} ${req.body.sort_order}`;
+		  }
+	  
+		  const query = `
+			SELECT * FROM suppliers 
+			${whereClause} 
+			${orderByClause} 
+		  `;
+	  
+		  const request = pool.request()
+			.input('search', sql.NVarChar, `%${req.body.search_value}%`)
+			.input('start', sql.Int, req.body.start_value || 0);
+	  
+		  const result = await request.query(query);
+	  
+		  if (req.body.search_value != '') {
+			const countResult = await pool.request()
+                    .input('search', sql.NVarChar, `%${req.body.search_value}%`)
+                    .query(`SELECT COUNT(*) AS val FROM suppliers ${whereClause}`);
+			return res.send({
+			  operation: 'success',
+			  message: 'Search results',
+			  info: {
+				suppliers: result.recordset || [],  
+				count: countResult.recordset[0].val || 0 
+			  }
+			});
+		  }
+	  
 
-			new Promise((resolve, reject) => {
-
-				let tsa = ""
-				if(req.body.search_value!="")
-				{
-					tsa = `WHERE name LIKE "%${req.body.search_value}%" OR address LIKE "%${req.body.search_value}%"` 
-				}
-
-				let tso = ""
-				if((req.body.sort_column!="") && (req.body.sort_order!=""))
-				{
-					tso = `ORDER BY ${req.body.sort_column} ${req.body.sort_order}` 
-				}
-				
-				let q = "SELECT * FROM `suppliers` " + tsa + tso + " LIMIT ?, 10"
-				db.query(q, [req.body.start_value], (err, result) => {
-					if (err) {
-						return reject(err);
-					}
-
-					if(req.body.search_value!=""){
-						return resolve({ operation: "success", message: 'search suppliers got', info: {suppliers: result, count: result.length} });
-					}
-
-					let q = "SELECT COUNT(*) AS val FROM `suppliers`"
-					db.query(q, (err, result2) => {
-						if (err) {
-							return reject(err);							
-						}
-						// console.log(result2)
-						resolve({ operation: "success", message: '10 suppliers got', info: {suppliers: result, count: result2[0].val} });
-					})
-				})
-			})
-			.then((value) => {
-				res.send(value);
-			})
-			.catch((err) => {
-				console.log(err);
-				res.send({ operation: "error", message: 'Something went wrong' });
-			})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
+		  const countResult = await pool.request().query('SELECT COUNT(*) AS val FROM suppliers');
+	  
+		  res.send({
+			operation: 'success',
+			message: 'Suppliers fetched',
+			info: {
+			  suppliers: result.recordset || [], 
+			  count: countResult.recordset[0].val || 0 
+			}
+		  });
+		} catch (err) {
+		  console.error(err);
+		  res.send({ operation: 'error', message: 'Something went wrong' });
 		}
-	}
+	  };
 
-	addSupplier = (req, res) => {
+	addSupplier = async (req, res) => {
 		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
+			const pool = await poolPromise;
+			const uniqueSupplierId = uniqid('sup_');
 
-			new Promise((resolve, reject) => {
-				let q1 = "SELECT * FROM `suppliers` WHERE email = ?"
-				db.query(q1, [req.body.email], (err1, result1) => {
-					if(err1) {
-						return reject(err1);
-					}
+			const request = pool.request()
+				.input('supplier_id', sql.NVarChar, uniqueSupplierId)
+				.input('name', sql.NVarChar, req.body.name)
+				.input('email', sql.NVarChar, req.body.email)
+				.input('phone', sql.NVarChar, req.body.phone)
+				.input('address', sql.NVarChar, req.body.address);
 
-					if(result1.length>0){
-						resolve({ operation: "error", message: 'Duplicate supplier email' });
-					}
-					else{
-						let q2 = "INSERT INTO `suppliers`(`supplier_id`, `name`, `address`, `email`) VALUES (?, ?, ?, ?)"
-						db.query(q2, [uniqid(), req.body.name, req.body.address, req.body.email], (err2, result2) => {
-							if(err2) {
-								return reject(err2);
-							}
+			await request.query(`
+				INSERT INTO suppliers (supplier_id, name, email, phone, address)
+				VALUES (@supplier_id, @name, @email, @phone, @address)
+			`);
 
-							resolve({ operation: "success", message: 'Supplier added successfully' });
-						})
-					}
-				})
-			})
-			.then((value) => {
-				res.send(value);
-			})
-			.catch((err) => {
-				console.log(err);
-				res.send({ operation: "error", message: 'Something went wrong' });
-			})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
+			res.send({ operation: 'success', message: 'Supplier added' });
+		} catch (err) {
+			console.error(err);
+			res.send({ operation: 'error', message: 'Something went wrong' });
 		}
-	}
+	};
 
-	updateSupplier = (req, res) => {
+	updateSupplier = async (req, res) => {
 		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
-
-			new Promise((resolve, reject) => {
-				let q1 = "SELECT * FROM `suppliers` WHERE email = ?"
-				db.query(q1, [req.body.email], (err1, result1) => {
-					if (err1) {
-						return reject(err1);
-					}
-
-					if ((result1.length > 0) && (result1[0].supplier_id != req.body.supplier_id)) {
-						resolve({ operation: "error", message: 'Duplicate supplier email' });
-					}
-					else {
-						let q2 = "UPDATE `suppliers` SET `name`=?,`address`=?,`email`=? WHERE `supplier_id`=?"
-						db.query(q2, [req.body.name, req.body.address, req.body.email, req.body.supplier_id], (err2, result2) => {
-							if (err2) {
-								return reject(err2);
-							}
-							resolve({ operation: "success", message: 'Supplier updated successfully' });
-						})
-					}
-				})
-			})
-			.then((value) => {
-				res.send(value);
-			})
-			.catch((err) => {
-				console.log(err);
-				res.send({ operation: "error", message: 'Something went wrong' });
-			})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
+			console.log("Received update request body:", req.body);
+			const pool = await poolPromise;
+			const request = pool.request()
+				.input('supplier_id', sql.Int, parseInt(req.body.supplier_id))
+				.input('name', sql.NVarChar, req.body.name)
+				.input('email', sql.NVarChar, req.body.email)
+				.input('phone', sql.NVarChar, req.body.phone)
+				.input('address', sql.NVarChar, req.body.address);
+	
+			const query = `
+				UPDATE suppliers
+				SET name = @name, email = @email, phone = @phone, address = @address
+				WHERE supplier_id = @supplier_id
+			`;
+	
+			console.log("Executing SQL:", query);
+	
+			const result = await request.query(query);
+			console.log("Update result:", result);
+	
+			res.send({ operation: 'success', message: 'Supplier updated' });
+		} catch (err) {
+			console.error(err);
+			res.send({ operation: 'error', message: 'Something went wrong' });
 		}
-	}
+	};
 
-	getSuppiersSearch = (req, res) => {
+	
+	deleteSupplier = async (req, res) => {
 		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
+			const pool = await poolPromise;
+			const request = pool.request().input('Supplier_id', sql.NVarChar, req.body.supplier_id);
 
-			new Promise((resolve, reject) => {
-				let q = `SELECT * FROM suppliers WHERE name LIKE '${req.body.search_value}%' LIMIT 10`
-				db.query(q, (err, result) => {
-					if (err) {
-						return reject(err);
-					}
-					// console.log(result)
-					resolve({ operation: "success", message: '10 suppliers got', info: {suppliers: result} });
-				})
-			})
-			.then((value) => {
-				res.send(value);
-			})
-			.catch((err) => {
-				console.log(err);
-				res.send({ operation: "error", message: 'Something went wrong' });
-			})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
+			await request.query(`DELETE FROM suppliers WHERE supplier_id = @supplier_id`);
+
+			res.send({ operation: 'success', message: 'Supplier deleted' });
+		} catch (err) {
+			console.error(err);
+			res.send({ operation: 'error', message: 'Something went wrong' });
 		}
-	}
-
-	deleteSupplier = (req, res) => {
-		try {
-			let d = jwt.decode(req.cookies.accessToken, { complete: true });
-			let email = d.payload.email;
-			let role = d.payload.role;
-
-			new Promise((resolve, reject) => {
-				let q = "DELETE FROM `suppliers` WHERE supplier_id = ?"
-				db.query(q, [req.body.supplier_id], (err, result) => {
-					if (err) {
-						return reject(err);
-					}
-					resolve({ operation: "success", message: 'supplier deleted successfully'});
-				})
-			})
-			.then((value) => {
-				res.send(value);
-			})
-			.catch((err) => {
-				console.log(err);
-				res.send({ operation: "error", message: 'Something went wrong' });
-			})
-		} catch (error) {
-			console.log(error);
-			res.send({ operation: "error", message: 'Something went wrong' });
-		}
-	}
+	};
 }
 
 module.exports = Supplier;

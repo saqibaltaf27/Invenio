@@ -23,6 +23,7 @@ class User {
 				.query('SELECT * FROM [USER] WHERE email = @email');
 
 			console.log("Query Result:", result.recordset);
+			
 
 				if (result.recordset.length === 0) {
 					console.log("User not found");
@@ -40,6 +41,8 @@ class User {
 					password: user.password,
 					role: user.user_role
 				  };
+
+				  req.session.email = user.email;
 					return res.status(200).json({ message: 'Login successful', user: req.session.user });
 				} else {
 					return res.status(401).json({ operation: 'error', message: 'Incorrect password' });		

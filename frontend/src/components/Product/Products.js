@@ -1,4 +1,4 @@
-// src/pages/Products.js
+
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
@@ -9,7 +9,7 @@ import Modal from 'react-bootstrap/Modal';
 import Table from '../Table/Table';
 import Loader from '../PageStates/Loader';
 import ErrorComponent from '../PageStates/Error';
-import './Products.scss';
+import './Products.scss';  // Ensure your CSS is properly defined
 
 const initialProduct = {
   productId: null,
@@ -41,6 +41,28 @@ const Products = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
 
+  useEffect(() => {
+    fetchProducts();
+  }, [tablePage, sortColumn, sortOrder, searchInput]);
+
+  useEffect(() => {
+    const formattedData = products.map((p, i) => ({
+      sl: (tablePage - 1) * 10 + i + 1,
+      name: p.name,
+      gender: p.gender,
+      size: p.size,
+      stock: p.product_stock,
+      addedon: moment(p.timeStamp).format('MMM Do, YYYY'),
+      action: (
+        <>
+          <button className="btn warning" style={{ marginRight: '0.5rem' }}  onClick={() => openEditModal(p)}>Edit</button>
+          <button className="btn danger" onClick={() => deleteProduct(p.product_id)}>Delete</button>
+        </>
+      ),
+    }));
+    setTableData(formattedData);
+  }, [products]);
+
   const fetchProducts = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/get_products", {
@@ -66,28 +88,7 @@ const Products = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, [tablePage, sortColumn, sortOrder, searchInput]);
-
-  useEffect(() => {
-    setTableData(products.map((p, i) => ({
-      sl: (tablePage - 1) * 10 + i + 1,
-      name: p.name,
-      gender: p.gender,
-      size: p.size,
-      stock: p.product_stock,
-      addedon: moment(p.timeStamp).format('MMM Do, YYYY'),
-      action: (
-        <>
-          <button className="btn warning" onClick={() => openEditModal(p)}>Edit</button>
-          <button className="btn danger" onClick={() => deleteProduct(p.product_id)}>Delete</button>
-        </>
-      )
-    })));
-  }, [products]);
-
-  const openEditModal = (product) => {
+const openEditModal = (product) => {
     setEditProduct({
       productId: product.product_id,
       name: product.name,
@@ -102,6 +103,7 @@ const Products = () => {
       oldImage: product.image,
       image: '',
     });
+    setPreviewImage(null);
     setShowModal(true);
   };
 
@@ -109,6 +111,7 @@ const Products = () => {
     setShowModal(false);
     setEditProduct(initialProduct);
     setPreviewImage(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleFileChange = (e) => {
@@ -182,24 +185,31 @@ const Products = () => {
       <Modal.Header closeButton>
         <Modal.Title>Edit Product</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }} >
         <div className="modal-content">
-          {Object.entries(editProduct).map(([key, val]) =>
-            ['productId', 'oldImage', 'image'].includes(key) ? null : (
-              <div className="input-group" key={key}>
-                <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
-                <input type="text" value={val} onChange={(e) => setEditProduct(p => ({ ...p, [key]: e.target.value }))} />
-              </div>
-            )
-          )}
+          {[
+            'name', 'gender', 'size', 'material', 'category',
+            'description', 'stock', 'sellingPrice', 'purchasePrice',
+          ].map((field) => (
+            <div className="input-group" key={field}>
+              <label>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+              <input
+                type="text"
+                value={editProduct[field]}
+                onChange={(e) =>
+                  setEditProduct((prev) => ({ ...prev, [field]: e.target.value }))
+                }
+              />
+            </div>
+          ))}
           <div className="input-group">
             <label>Image</label>
             <input type="file" accept="image/*" onChange={handleFileChange} ref={fileInputRef} />
             {previewImage && <img src={previewImage} alt="Preview" />}
           </div>
           <div className="modal-footer">
-            <button className="btn cancel" onClick={closeModal}>Cancel</button>
-            <button className="btn submit" onClick={updateProduct} disabled={isUpdating}>
+            <button className="btn btn-danger" onClick={closeModal}>Cancel</button>
+            <button className="btn btn-success" onClick={updateProduct} disabled={isUpdating}>
               {isUpdating ? 'Updating...' : 'Update'}
             </button>
           </div>
@@ -209,28 +219,32 @@ const Products = () => {
   );
 
   return (
-    <div className="container">
-      <h2>Manage Products</h2>
+    
+
+      <div className='products'>
+            <div className='product-header'>
+              <div className='title'>Products</div>
+              <Link to="/products/addnew" className='btn success'>Add New</Link>
+            </div>
+
       {pageState === 1 && <Loader />}
       {pageState === 2 && (
-        <>
-          <div className="header">
-            <input type="text" placeholder="Search..." value={searchInput} onChange={e => setSearchInput(e.target.value)} />
-            <Link to="/add-product" className="add-btn">Add Product</Link>
-          </div>
+    
           <Table
-            columns={['#', 'Name', 'Gender', 'Size', 'Stock', 'Added On', 'Actions']}
+            title="Products"
+            headers={['Serial No', 'Name', 'Gender', 'Size', 'Stock', 'Added On', 'Action']}
             data={tableData}
-            page={tablePage}
-            setPage={setTablePage}
-            count={prodCount}
-            sortColumn={sortColumn}
-            sortOrder={sortOrder}
-            setSortColumn={setSortColumn}
-            setSortOrder={setSortOrder}
+            defaultPageSize={10}
+            totalRecords={prodCount}
+            currentPage={tablePage}
+            onSearch={setSearchInput}
+            onSort={(column, order) => {
+              setSortColumn(column);
+              setSortOrder(order);
+            }}
+            onPageChange={setTablePage}
           />
-        </>
-      )}
+     )}
       {pageState === 3 && <ErrorComponent />}
       {renderModal()}
     </div>

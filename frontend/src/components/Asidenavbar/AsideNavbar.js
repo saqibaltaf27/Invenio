@@ -11,8 +11,8 @@ import StoreIcon from "@mui/icons-material/Store";
 import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import SettingsSystemDaydreamOutlinedIcon from "@mui/icons-material/SettingsSystemDaydreamOutlined";
-import PsychologyOutlinedIcon from "@mui/icons-material/PsychologyOutlined";
+//import SettingsSystemDaydreamOutlinedIcon from "@mui/icons-material/SettingsSystemDaydreamOutlined";
+//import PsychologyOutlinedIcon from "@mui/icons-material/PsychologyOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import CloseOutlined from "@mui/icons-material/CloseOutlined";
 import Menu from "@mui/icons-material/Menu";
@@ -111,7 +111,7 @@ function AsideNavbar() {
 						
 
 						
-							<p className="title">SELLS</p>
+							{/*<p className="title">SELLS</p>
 						
 						
 							<Link to="/customers" style={{ textDecoration: "none" }}>
@@ -127,7 +127,7 @@ function AsideNavbar() {
 									<PsychologyOutlinedIcon className="icon" />
 									<span>Orders</span>
 								</li>
-							</Link>
+							</Link>*/}
 						
 
 						<p className="title">USER</p>
@@ -225,7 +225,7 @@ function AsideNavbar() {
 						
 
 					
-							<p className="title">SELLS</p>
+							{/*<p className="title">SELLS</p>
 						
 						
 							<Link to="/customers" style={{ textDecoration: "none" }}>
@@ -241,7 +241,7 @@ function AsideNavbar() {
 									<PsychologyOutlinedIcon className="icon" />
 									<span>Orders</span>
 								</li>
-							</Link>
+							</Link>*/}
 						
 
 						<p className="title">USER</p>

@@ -25,6 +25,7 @@
     "recharts": "^2.1.16",
     "sass": "^1.55.0",
     "sweetalert": "^2.1.2",
+    "vercel": "^41.7.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

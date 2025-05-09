@@ -38,7 +38,7 @@ function Login() {
 		setSubmitButtonState(true)
 
 		try {
-			const response = await fetch('http://localhost:5000/api/login', {
+			const response = await fetch('https://invenio-api-production.up.railway.app/api/login', {
 			  method: 'POST',
 			  headers: {
 				'Content-Type': 'application/json'
@@ -122,4 +122,4 @@ function Login() {
 	);
 }
 
-export default Login
+export default Login;

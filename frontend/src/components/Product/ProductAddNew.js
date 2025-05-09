@@ -11,7 +11,7 @@ function ProductAddNew() {
 	const [pageState, setPageState] = useState(1);
 
 	const [name, setName] = useState('');
-	const [gender, setGender] = useState("male");
+	const [type, setType] = useState('');
 	const [size, setSize] = useState('');
 	const [material, setMaterial] = useState('');
 	const [category, setCategory] = useState('');
@@ -66,7 +66,7 @@ function ProductAddNew() {
 
 		let f = new FormData();
 		f.append('name', name)
-		f.append('gender', gender)
+		f.append('Type', type)
 		f.append('size', size)
 		f.append('material', material)
 		f.append('category', category)
@@ -94,7 +94,7 @@ function ProductAddNew() {
 			swal("Success!", "Product created successfully", "success")
 
 			setName('')
-			setGender("male")
+			setType('')
 			setSize('')
 			setMaterial('')
 			setCategory('')
@@ -153,13 +153,20 @@ function ProductAddNew() {
 												<input className='my_input' type='text' value={name} onChange={(e) => { setName(e.target.value) }} />
 											</div>
 											<div className='col'>
-												<label className='fw-bold'>Gender</label>
-												<div className='d-flex gap-2'>
-													<div className="rounded-pill px-2 py-1" style={{ cursor: "pointer", backgroundColor: gender === "male" ? "#a6eda6" : "" }} onClick={() => { setGender("male") }} >Male</div>
-													<div className="rounded-pill px-2 py-1" style={{ cursor: "pointer", backgroundColor: gender === "female" ? "#a6eda6" : "" }} onClick={() => { setGender("female") }} >Female</div>
-													<div className="rounded-pill px-2 py-1" style={{ cursor: "pointer", backgroundColor: gender === "others" ? "#a6eda6" : "" }} onClick={() => { setGender("others") }} >Others</div>
-												</div>
-											</div>
+											<label className='fw-bold'>Type</label>
+											<select
+												className='form-select'
+												value={type}
+												onChange={(e) => setType(e.target.value)}
+											>
+												<option value="regular">Regular</option>
+												<option value="foc">Free of Cost</option>
+												<option value="discounted">Discounted</option>
+												<option value="wastage">Wastage</option>
+												<option value="staff">Staff</option>
+											</select>
+											
+									</div>	
 										</div>
 										<div className="row" style={{ display: 'flex', marginTop: "0.5rem" }}>
 											<div className='col'>

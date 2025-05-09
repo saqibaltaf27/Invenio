@@ -8,6 +8,7 @@ const { isAuthenticated } = require('../middlewares/authMiddleware');
 
 const product = new Product();
 
+
 router.post('/add_product', isAuthenticated, upload("/uploads").single("image"), (req, res) => product.addProduct(req, res));
 router.post('/delete_product', isAuthenticated, (req, res) => product.deleteProduct(req, res));
 router.post('/get_products', (req, res) => product.getProducts(req, res));

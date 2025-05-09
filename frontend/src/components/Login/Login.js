@@ -52,6 +52,7 @@ function Login() {
 	  
 			if (response.ok && body.user) {
 			  localStorage.setItem('user', JSON.stringify(body.user));
+			  localStorage.setItem('userEmail', email);
 			  navigate('/dashboard');
 			} else {
 			  swal("Oops!", body.message || 'Login failed', "error");

@@ -1,102 +1,115 @@
-import "./Feature.scss"
+import "./Feature.scss";
 import {
-	ArrowDownward,
-	ArrowUpward,
-	PersonOutlined,
-	ShoppingCartOutlined,
-	PaidOutlined,
-	AccountBalanceWalletOutlined,
+    PersonOutlined,
+    ShoppingCartOutlined,
+    AssignmentLateOutlined,
+    PlaylistAddCheckOutlined,
 } from "@mui/icons-material";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
-export default function Feature({ reportStats = [] }) {
-	// Safe fallback defaults
-	const empStats = reportStats[0] || { employee_count: 0, customer_count: 0, supplier_count: 0 };
-	const orderStats = reportStats[1] || { current_month: 0, previous_month: 0 };
-	const expenseStats = reportStats[2] || { current_month: 0, previous_month: 0 };
+export default function Feature({ reportStats = [], productStats = [] }) {
+    console.log("reportStats raw:", reportStats);
+    console.log("ProductStats raw:", productStats);
 
-	const o1 = orderStats.current_month ?? 0;
-	const o2 = orderStats.previous_month ?? 0;
-	const e1 = expenseStats.current_month ?? 0;
-	const e2 = expenseStats.previous_month ?? 0;
+    const {
+        employee_count = 0,
+        supplier_count = 0
+    } = reportStats[0] || {};
 
-	const porder = o2 === 0 ? 0 : ((o1 - o2) * 100) / o2;
-	const pexpense = e2 === 0 ? 0 : ((e1 - e2) * 100) / e2;
-	const curr_rev = o1 - e1;
-	const pre_rev = o2 - e2;
-	const prevenue = pre_rev === 0 ? 0 : ((curr_rev - pre_rev) * 100) / pre_rev;
+    const { total_products = 0, low_stock_items = [] } = productStats || {};
 
-	return (
-		<div className="featured">
-			<div className="featuredItem">
-				<span className="featuredTitle">Users</span>
-				<div className="featuredMoneyContainer flex-column flex-start" style={{ margin: "0px 0px" }}>
-					<div className="d-flex gap-2">
-						<div className="d-flex align-items-center"><PersonOutlined className="cardIcon" style={{ backgroundColor: "rgb(255,0,0,0.3)" }} /></div>
-						<Link to='/employees' className="link"><span className="text-hover-primary">Employees:</span></Link>
-						<span>{empStats.employee_count}</span>
-					</div>
-					<div className="d-flex gap-2 my-1">
-						<div className="d-flex align-items-center"><PersonOutlined className="cardIcon" style={{ backgroundColor: "rgb(0,255,0,0.3)" }} /></div>
-						<Link to='/customers' className="link"><span className="text-hover-primary">Customers:</span></Link>
-						<span>{empStats.customer_count}</span>
-					</div>
-					<div className="d-flex gap-2">
-						<div className="d-flex align-items-center"><PersonOutlined className="cardIcon" style={{ backgroundColor: "rgb(0,0,255,0.3)" }} /></div>
-						<Link to='/suppliers' className="link"><span className="text-hover-primary">Suppliers:</span></Link>
-						<span>{empStats.supplier_count}</span>
-					</div>
-				</div>
+    const infoCard = (title, icon, link, label, value, color) => (
+        <div className="d-flex gap-2">
+            <div className="d-flex align-items-center">
+                {icon}
+            </div>
+            {link ? (
+                <Link to={link} className="link">
+                    <span className="text-hover-primary">{label}</span>
+                </Link>
+            ) : (
+                <span className="text-hover-primary">{label}</span>
+            )}
+            <span style={{ color }}>{value}</span>
+        </div>
+    );
 
-				<div className="d-flex justify-content-end align-items-center">
-					<div style={{ backgroundColor: "rgb(255, 102, 0, 0.3)", borderRadius: "5px", color: "#5e5708", padding: "3px" }}><PersonOutlined /></div>
-				</div>
-			</div>
+    return (
+        <div className="featured">
 
-			<div className="featuredItem">
-				<span className="featuredTitle">Orders</span>
-				<div className="featuredMoneyContainer">
-					<span className="featuredMoney">Rs {Math.round(o1)}</span>
-					<div className="d-flex align-items-center" style={{ color: porder >= 0 ? "green" : "red" }}>
-						<span className="featuredMoneyRate"> {Math.round(porder * 100) / 100}%</span>
-						{porder >= 0 ? <ArrowUpward /> : <ArrowDownward />}
-					</div>
-				</div>
-				<div className="d-flex justify-content-between align-items-center">
-					<Link to='/orders' className="text-decoration-none"><span className="featuredSub">See all orders</span></Link>
-					<div style={{ backgroundColor: "#e8e190", borderRadius: "5px", color: "#5e5708", padding: "3px" }}><ShoppingCartOutlined /></div>
-				</div>
-			</div>
+            {/* USERS */}
+            <div className="featuredItem">
+                <span className="featuredTitle">Users</span>
+                <div className="featuredMoneyContainer flex-column flex-start">
+                    {infoCard(
+                        "Employees",
+                        <PersonOutlined className="cardIcon" style={{ backgroundColor: "rgba(255,0,0,0.3)" }} />,
+                        "/employees",
+                        "Employees:",
+                        employee_count
+                    )}
+                    {infoCard(
+                        "Suppliers",
+                        <PersonOutlined className="cardIcon" style={{ backgroundColor: "rgba(0,0,255,0.3)" }} />,
+                        "/suppliers",
+                        "Suppliers:",
+                        supplier_count
+                    )}
+                </div>
+                <div className="d-flex justify-content-end align-items-center">
+                    <div style={{ backgroundColor: "rgba(255,102,0,0.3)", borderRadius: 5, padding: 3, color: "#5e5708" }}>
+                        <PersonOutlined />
+                    </div>
+                </div>
+            </div>
 
-			<div className="featuredItem">
-				<span className="featuredTitle">Expense</span>
-				<div className="featuredMoneyContainer">
-					<span className="featuredMoney">Rs {Math.round(e1)}</span>
-					<div className="d-flex align-items-center" style={{ color: pexpense >= 0 ? "green" : "red" }}>
-						<span className="featuredMoneyRate"> {Math.round(pexpense * 100) / 100}%</span>
-						{pexpense >= 0 ? <ArrowUpward /> : <ArrowDownward />}
-					</div>
-				</div>
-				<div className="d-flex justify-content-between align-items-center">
-					<Link to='/expenses' className="text-decoration-none"><span className="featuredSub">See all expenses</span></Link>
-					<div style={{ backgroundColor: "#d9b6cb", borderRadius: "5px", color: "#a30b66", padding: "3px" }}><AccountBalanceWalletOutlined /></div>
-				</div>
-			</div>
+            {/* INVENTORY */}
+            <div className="featuredItem">
+                <span className="featuredTitle">Inventory</span>
+                <div className="featuredMoneyContainer flex-column flex-start">
+                    {infoCard(
+                        "Total Items",
+                        <PlaylistAddCheckOutlined className="cardIcon" style={{ backgroundColor: "rgba(70,130,180,0.3)" }} />,
+                        "/products",
+                        "Total Items:",
+                        total_products
+                    )}
+                    {infoCard(
+                        "Low Stock",
+                        <AssignmentLateOutlined className="cardIcon" style={{ backgroundColor: "rgba(255,165,0,0.3)" }} />,
+                        "/products",
+                        "Low Stock:",
+                        `${low_stock_items.length} item(s)`,
+                        "orange"
+                    )}
+                </div>
+                <div className="d-flex justify-content-end align-items-center">
+                    <div style={{ backgroundColor: "rgba(70,130,180,0.3)", borderRadius: 5, padding: 3, color: "#4682B4" }}>
+                        <ShoppingCartOutlined />
+                    </div>
+                </div>
+            </div>
 
-			<div className="featuredItem">
-				<span className="featuredTitle">Revenue</span>
-				<div className="featuredMoneyContainer">
-					<span className="featuredMoney">Rs {Math.round(curr_rev)}</span>
-					<div className="d-flex align-items-center" style={{ color: prevenue >= 0 ? "green" : "red" }}>
-						<span className="featuredMoneyRate"> {Math.round(prevenue * 100) / 100}%</span>
-						{prevenue >= 0 ? <ArrowUpward /> : <ArrowDownward />}
-					</div>
-				</div>
-				<div className="d-flex justify-content-between align-items-center">
-					<span className="featuredSub"></span>
-					<div style={{ backgroundColor: "#b3deaf", borderRadius: "5px", color: "#1db80f", padding: "3px" }}><PaidOutlined /></div>
-				</div>
-			</div>
-		</div>
-	);
+            {/* ALERTS */}
+            <div className="featuredItem">
+                <span className="featuredTitle">Alerts</span>
+                <div className="featuredMoneyContainer flex-column flex-start">
+                    {infoCard(
+                        "Pending Restock",
+                        <AssignmentLateOutlined className="cardIcon" style={{ backgroundColor: "rgba(255,99,71,0.3)" }} />,
+                        null,
+                        "Pending Restock:",
+                        low_stock_items.length,
+                        "tomato"
+                    )}
+                </div>
+                <div className="d-flex justify-content-end align-items-center">
+                    <div style={{ backgroundColor: "rgba(255,99,71,0.3)", borderRadius: 5, padding: 3, color: "#FF6347" }}>
+                        <AssignmentLateOutlined />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    );
 }

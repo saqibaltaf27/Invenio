@@ -1,76 +1,121 @@
 .dataTable {
+	color: #f8f8f2; /* Default bright white text */
+	background-color: rgba(15, 23, 42, 0.9); /* Opaque dark background */
+	border-radius: 0.3rem;
+	margin: 0.5rem;
+	overflow-x: auto;
+	overflow-y: auto;
+	max-height: 70vh;
+	backdrop-filter: blur(12px);
+  
 	.tableToolbar {
+	  display: flex;
+	  justify-content: space-between;
+	  align-items: center;
+	  margin: 0.5rem;
+	  padding: 0.7rem 1rem;
+	  height: auto;
+	  background-color: rgba(30, 41, 59, 0.8); /* Slightly lighter dark toolbar */
+	  border-radius: 0.3rem;
+	  border: 1px solid rgba(110, 231, 183, 0.2);
+	  backdrop-filter: blur(10px);
+  
+	  .flex-grow-1 {
 		display: flex;
-		justify-content: space-between;
 		align-items: center;
-		margin: 5px;
-
-		height: 50px;
-
-		.my__icon {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			width: 2.2rem;
-			height: 2.2rem;
-			border-radius: 50%;
-			background-color: #e9e4e4;
-			margin: 0rem 0.6rem;
-			cursor: pointer;
-
-			&:hover {
-				background-color: darkgray;
-			}
+  
+		svg { /* Style the Close icon */
+		  fill: #f8f8f2; /* White fill for the icon */
+		  color: #f8f8f2; /* Ensure color is also white */
+		  transition: all 0.3s ease-in-out;
+		  cursor: pointer;
+		  margin-right: 0.5rem; /* Add some spacing */
+  
+		  &:hover {
+			fill: #e0f2fe; /* Slightly lighter on hover */
+			color: #e0f2fe;
+		  }
 		}
-
-		.search__text {
-			border: none;
-			border-bottom: 1px solid rgb(46, 46, 46);
-			width: 0;
-			transition: all 0.3s ease-in-out;
-
-			&:focus {
-				width: 5rem;
-				outline: none;
-				border-bottom-width: 2px;
-			}
+	  }
+  
+	  .my__icon { /* You might not be using this in your current HTML */
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 2.2rem;
+		height: 2.2rem;
+		border-radius: 50%;
+		background-color: rgba(110, 231, 183, 0.2);
+		color: #0f172a;
+		margin: 0rem 0.6rem;
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+  
+		&:hover {
+		  background-color: rgba(110, 231, 183, 0.3);
 		}
+	  }
+  
+	  .search__text {
+		border: none;
+		border-bottom: 1.5px solid #6ee7b7;
+		background-color: transparent;
+		color: #f8f8f2; /* White search text */
+		padding: 0.3rem 0.5rem;
+		width: 0;
+		transition: all 0.3s ease-in-out;
+  
+		&::placeholder {
+		  color: #d4d4d4;
+		}
+  
+		&:focus {
+		  width: 10rem;
+		  outline: none;
+		  border-bottom-width: 2px;
+		  border-bottom-color: #6ee7b7;
+		}
+	  }
 	}
-
-	.mytable {
-		color: rgb(46, 46, 46);
-		width: 100%;
-		text-align: center;
-		border-collapse: collapse;
-
-		th,
-		td {
-			border-bottom: 1.5px rgba(180, 180, 180, 0.329) solid;
-			border-right: 1.5px rgba(180, 180, 180, 0.329) solid; 
-			border-left: 1.5px rgba(180, 180, 180, 0.329) solid;  
-			padding: 0.5rem 0;
-			font-size: 1rem;
-		}
-
+  
+	.tableContainer { /* Style the container around the table */
+	  width: 100%;
+	  overflow: auto; /* Enable horizontal scrolling if needed */
+	}
+  
+	.table { /* Target the actual table element */
+	  width: 100%;
+	  text-align: center;
+	  border-collapse: collapse;
+	  color: #f8f8f2; /* White text inside the table */
+  
+	  thead { /* Style the table header */
 		th {
-			width: 5rem;
-			font-size: medium;
-			padding: 0.7rem 0;
-			border-left: 1.5px rgba(180, 180, 180, 0.329) solid;
-			border-right: 1.5px rgba(180, 180, 180, 0.329) solid;
+		  color: #e0f2fe; /* Very light blue/white for header text */
+		  font-weight: bold;
+		  padding: 1rem 0.5rem;
+		  border-bottom: 1px solid rgba(110, 231, 183, 0.2); /* Cyan bottom border */
+		  text-align: left; /* Align header text to the left for better readability */
 		}
-
-		th:first-child,
-		th:last-child {
-			border-left: none;
+	  }
+  
+	  tbody { /* Style the table body */
+		tr {
+		  &:nth-child(even) { /* Add a subtle background to even rows for better readability */
+			background-color: rgba(255, 255, 255, 0.05);
+		  }
+		}
+  
+		td {
+		  padding: 0.8rem 0.5rem;
+		  border-bottom: 1px solid rgba(110, 231, 183, 0.1); /* Subtle cyan bottom border */
+		  text-align: left; /* Align data text to the left */
+		}
+	  }
 	}
-}
-
-	overflow-x: auto; 
-	overflow-y: auto; 
-	max-height: 70vh; 
-}
-
-.showColumnHover:hover{
-	box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);;	
-}
+  }
+  
+  .showColumnHover:hover {
+	background-color: rgba(110, 231, 183, 0.1);
+	box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+  }

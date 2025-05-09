@@ -1,7 +1,7 @@
-import React from 'react'
-import { Outlet } from 'react-router-dom'
-import Header from '../Header/Header'
-import AsideNavbar from '../Asidenavbar/AsideNavbar'
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Header from '../Header/Header';
+import AsideNavbar from '../Asidenavbar/AsideNavbar';
 
 const Layout = () => {
   return (
@@ -15,4 +15,4 @@ const Layout = () => {
   )
 }
 
-export default Layout
+export default Layout;

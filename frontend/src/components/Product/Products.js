@@ -14,7 +14,7 @@ import './Products.scss';  // Ensure your CSS is properly defined
 const initialProduct = {
   productId: null,
   name: '',
-  gender: '',
+  type: 'Regular', // Default for new products
   size: '',
   material: '',
   category: '',
@@ -49,7 +49,7 @@ const Products = () => {
     const formattedData = products.map((p, i) => ({
       sl: (tablePage - 1) * 10 + i + 1,
       name: p.name,
-      gender: p.gender,
+      type: p.type,
       size: p.size,
       stock: p.product_stock,
       addedon: moment(p.timeStamp).format('MMM Do, YYYY'),
@@ -92,7 +92,7 @@ const openEditModal = (product) => {
     setEditProduct({
       productId: product.product_id,
       name: product.name,
-      gender: product.gender,
+      type: product.type || 'Regular',
       size: product.size,
       material: product.material,
       category: product.category,
@@ -161,23 +161,39 @@ const openEditModal = (product) => {
   };
 
   const deleteProduct = async (id) => {
-    try {
-      const res = await fetch('http://localhost:5000/api/delete_product', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_id: id }),
-        credentials: 'include',
-      });
-      const data = await res.json();
-      if (data.operation === 'success') {
-        swal("Deleted!", data.message, "success");
-        fetchProducts();
+    swal({
+      title: "Are you sure?",
+      text: "Once deleted, you will not be able to recover this product!",
+      icon: "warning",
+      buttons: ["Cancel", "Delete"],
+      dangerMode: true,
+    })
+    .then((willDelete) => {
+      if (willDelete) {
+        fetch('http://localhost:5000/api/delete_product', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ product_id: id }),
+          credentials: 'include',
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.operation === 'success') {
+            swal("Deleted!", data.message, "success");
+            fetchProducts();
+          } else {
+            swal("Oops!", "Failed to delete", "error");
+          }
+        })
+        .catch(() => {
+          swal("Oops!", "Something went wrong", "error");
+        });
       } else {
-        swal("Oops!", "Failed to delete", "error");
+        swal("Your product is safe!", {
+          icon: "info",
+        });
       }
-    } catch {
-      swal("Oops!", "Something went wrong", "error");
-    }
+    });
   };
 
   const renderModal = () => (
@@ -188,8 +204,14 @@ const openEditModal = (product) => {
       <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }} >
         <div className="modal-content">
           {[
-            'name', 'gender', 'size', 'material', 'category',
-            'description', 'stock', 'sellingPrice', 'purchasePrice',
+            'name',
+            'size',
+            'material',
+            'category',
+            'description',
+            'stock',
+            'sellingPrice',
+            'purchasePrice',
           ].map((field) => (
             <div className="input-group" key={field}>
               <label>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
@@ -202,6 +224,20 @@ const openEditModal = (product) => {
               />
             </div>
           ))}
+          <div className='input-group'>
+            <label className='fw-bold'>Type</label>
+            <select
+              className='form-select'
+              value={editProduct.type}
+              onChange={(e) => setEditProduct((prev) => ({ ...prev, type: e.target.value }))}
+            >
+              <option value="regular">Regular</option>
+              <option value="foc">Free of Cost</option>
+              <option value="discounted">Discounted</option>
+              <option value="wastage">Wastage</option>
+              <option value="staff">Staff</option>
+            </select>
+          </div>
           <div className="input-group">
             <label>Image</label>
             <input type="file" accept="image/*" onChange={handleFileChange} ref={fileInputRef} />
@@ -232,7 +268,7 @@ const openEditModal = (product) => {
     
           <Table
             title="Products"
-            headers={['Serial No', 'Name', 'Gender', 'Size', 'Stock', 'Added On', 'Action']}
+            headers={['Serial No', 'Name', 'Type', 'Size', 'Stock', 'Added On', 'Action']}
             data={tableData}
             defaultPageSize={10}
             totalRecords={prodCount}

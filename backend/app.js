@@ -15,7 +15,7 @@ app.use(cookieParser())
 
 
 const corsOption = {
-    origin: 'http://localhost:3000',
+    origin: ['https://ims-green.vercel.app','http://localhost:3000'],
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 	credentials: true,
 };
@@ -35,6 +35,9 @@ const productsRoutes = require('./routes/products.routes');
 const customersRoutes = require('./routes/customers.routes');
 const suppliersRoutes = require('./routes/suppliers.routes');
 const ordersRoutes = require('./routes/orders.routes');
+const GRRoutes = require('./routes/gr.routes');
+const ChartRoutes = require('./routes/chart.routes');
+const StockOutRoute = require('./routes/stockOut.routes');
 const expensesRoutes = require('./routes/expenses.routes');
 
 app.get('/', (req, res) => {
@@ -47,6 +50,9 @@ app.use('/api', productsRoutes);
 app.use('/api', customersRoutes);
 app.use('/api', suppliersRoutes);
 app.use('/api', ordersRoutes);
+app.use('/api', GRRoutes);
+app.use('/api', ChartRoutes);
+app.use('/api', StockOutRoute);
 app.use('/api', expensesRoutes);
 
 app.listen(port, () => {

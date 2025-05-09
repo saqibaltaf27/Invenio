@@ -1,70 +1,72 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react';
 import './Profile.scss';
 import swal from 'sweetalert';
-
-
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
-
 import Loader from '../PageStates/Loader';
-import Error from '../PageStates/Error';
+import ErrorComponent from '../PageStates/Error';
 
 function Profile() {
-	const [pageState, setPageState] = useState(1);
-	const [profileData, setProfileData] = useState(null);
-	const [editMode, setEditMode] = useState(false);
+  const [pageState, setPageState] = useState(1);
+  const [profileData, setProfileData] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [profileImage, setProfileImage] = useState("");
+  const [imageEdited, setImageEdited] = useState(false);
+  const [file, setFile] = useState(null);
+  const fileInputRef = useRef(null);
+  const [submitButtonState, setSubmitButtonState] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [submitButtonState2, setSubmitButtonState2] = useState(false);
 
-	const [name, setName] = useState('');
-	const [email, setEmail] = useState("");
-	const [address, setAddress] = useState('');
-	const [profileImage, setProfileImage] = useState("");
-	const [imageEdited, setImageEdited] = useState(false);
-	const [file, setFile] = useState(null);
-	const fileInputRef = useRef(null);
-	const [submitButtonState, setSubmitButtonState] = useState(false);
-
-	const [oldPassword, setOldPassword] = useState('');
-	const [newPassword, setNewPassword] = useState('');
-	const [confirmPassword, setConfirmPassword] = useState('');
-	const [submitButtonState2, setSubmitButtonState2] = useState(false);
-
-	const getProfile = async (req, res) => {
-		const { email} = req.body;
-		let result = await fetch('http://localhost:5000/api/get_profile', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			credentials: 'include',
-			body: JSON.stringify({ email }),
-		});
-
-		let body = await result.json();
-		console.log('Profile Data: ', body);
-		setProfileData(body.info.profile[0]);
+  useEffect(() => {
+	const storedEmail = localStorage.getItem('userEmail');
+	if (storedEmail) {
+	  setEmail(storedEmail); // Set the email in state
+	  fetchProfile(storedEmail); // Fetch the profile
+	} else {
+	  console.warn('User email not found in local storage. Cannot fetch profile.');
+	  setPageState(3); // Show error state if no email
 	}
-
-	useEffect(() => {
-    const fetchProfileData = async () => {
-        try {
-            await getProfile();
-            setPageState(2);
-        } catch (err) {
-            console.log(err);
-            setPageState(3);
-        }
-    };
-    fetchProfileData();
-}, []);
-
-	useEffect(() => {
-		if ((profileData) && (!editMode)) {
-			setName(profileData.user_name);
-			setEmail(profileData.email);
-			setAddress(profileData.address);
-			setProfileImage(profileData.image);
-		}
-	}, [profileData, editMode])
+  }, []); // Runs only once on mount
+  
+  const fetchProfile = async (userEmail) => {
+	setPageState(1); // Set loading state
+	try {
+	  const result = await fetch('http://localhost:5000/api/get_profile', {
+		method: 'POST',
+		headers: {
+		  'Content-Type': 'application/json',
+		},
+		credentials: 'include',
+		body: JSON.stringify({ email: userEmail }),
+	  });
+  
+	  const body = await result.json();
+	  console.log('Profile Data (Frontend): ', body);
+  
+	  // Check if the response contains the expected profile data
+	  if (body && body.operation === 'success' && body.data) {
+		// Assuming body.data contains the profile info directly
+		setProfileData(body.data); // Update the profile data
+		setName(body.data.user_name); // Set the name from the response
+		setEmail(body.data.email); // Set the email from the response
+		setAddress(body.data.address || ''); // If address exists, set it
+		setProfileImage(body.data.profile_image || ''); // If profile image exists, set it
+		setPageState(2); // Set success state
+	  } else {
+		console.error('Invalid profile data received:', body);
+		setPageState(3); // Set error state
+	  }
+	} catch (err) {
+	  console.error('Error fetching profile:', err);
+	  setPageState(3); // Set error state
+	}
+  };
 
 	const updateProfile = async () => {
 		if (name === "") {
@@ -144,189 +146,125 @@ function Profile() {
 
 	return (
 		<div className="profile">
-		  {
-			profileData ? (
-			  profileData.pageState === 1 ? 
-			  <Loader /> :
-			  profileData.pageState === 2 ?
-				<>
-				  <div className="bottom">
-					<div className="left">
-					  <img 
-						src={(editMode && file) ? URL.createObjectURL(file) : (profileImage !== null ? `http://localhost:5000/api/profile_images/${profileImage}` : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg")} 
-						alt="" 
+		  {pageState === 1 && <Loader />}
+		  {pageState === 2 && profileData && (
+			<>
+			  <div className="bottom">
+				<div className="left">
+				  <img
+					src={(editMode && file) ? URL.createObjectURL(file) : (profileImage !== null ? `http://localhost:5000/api/profile_images/${profileImage}` : "https://icon-library.com/images/no-image-icon/no-image-icon-0.jpg")}
+					alt=""
+				  />
+				  {editMode && !profileImage && (
+					<>
+					  <DriveFolderUploadOutlinedIcon
+						className="utilityButtonSuccess"
+						onClick={() => { fileInputRef.current.click(); }}
 					  />
-					  {
-						editMode && !profileImage &&
-						<>
-						  <DriveFolderUploadOutlinedIcon 
-							className="utilityButtonSuccess" 
-							onClick={() => { fileInputRef.current.click(); }} 
-						  />
-						  <input 
-							ref={fileInputRef} 
-							type="file" 
-							style={{ display: 'none' }}
-							onChange={(e) => {
-							  if (e.target.files[0].type === "image/jpeg" || e.target.files[0].type === "image/png") {
-								setImageEdited(true);
-								setFile(e.target.files[0]);
-							  } else {
-								swal("Oops!!", "Unsupported File type, Please upload either .jpg,.jpeg,.png", "warning");
-							  }
-							}}
-						  />
-						</>
-					  }
-					  {
-						editMode && profileImage &&
-						<>
-						  <DeleteOutline 
-							className="utilityButtonDanger" 
-							onClick={() => { setImageEdited(true); setProfileImage(null); }} 
-						  />
-						</>
-					  }
-					</div>
-					<div className="right">
-					  <div style={{ display: "flex", margin: "0.5rem 0" }}>
-						<div className="formInput">
-						  <label>Name</label>
-						  <input 
-							type="text" 
-							value={name} 
-							onChange={(e) => { setName(e.target.value); }} 
-							placeholder="Name" 
-							readOnly={!editMode} 
-						  />
-						</div>
-					  </div>
-	
-					  <div style={{ display: "flex", margin: "0.5rem 0" }}>
-						<div className="formInput">
-						  <label>Email</label>
-						  <input 
-							type="email" 
-							value={email} 
-							onChange={(e) => { setEmail(e.target.value); }} 
-							placeholder="Email" 
-							readOnly={!editMode} 
-						  />
-						</div>
-					  </div>
-	
-					  <div style={{ display: "flex", margin: "0.5rem 0" }}>
-						<div className="formInput">
-						  <label>Address</label>
-						  <textarea 
-							rows={3} 
-							style={{ resize: "none" }} 
-							value={address} 
-							onChange={(e) => { setAddress(e.target.value); }} 
-							placeholder="Address" 
-							readOnly={!editMode}
-						  />
-						</div>
-					  </div>
-	
-					  {
-						!editMode ? 
-						<button style={{ margin: "0 2rem" }} onClick={(e) => { setEditMode(true); }}>Edit</button> :
-						<div style={{ display: "flex", justifyContent: "space-around", alignItems: "center" }}>
-						  <button style={{ margin: "0 2rem" }} onClick={(e) => { setEditMode(false); setFile(null); }}>Back</button>
-						  {
-							submitButtonState ? 
-							<button 
-							  disabled 
-							  style={{ margin: "0", display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "7px", paddingBottom: "7px", cursor: "not-allowed", opacity: "0.7" }}
-							>
-							  <svg width="25px" height="25px" viewBox="0 0 100 100">
-								<g transform="translate(50 50)">
-								  <g transform="translate(-19 -19) scale(0.6)">
-									<g>
-									  <animateTransform 
-										attributeName="transform" 
-										type="rotate" 
-										values="0;36" 
-										keyTimes="0;1" 
-										dur="0.2s" 
-										begin="0s" 
-										repeatCount="indefinite" 
-									  />
-									  <path d="M28.625011367592503 20.13972999335393 L37.81739952301762 29.33211814877905 L29.33211814877905 37.81739952301762 L20.13972999335393 28.625011367592503 A35 35 0 0 1 11.320284385312565 33.11874335532145 L11.320284385312565 33.11874335532145 L13.353932430835567 45.95869178305824 L1.5016723436939086 47.835905363541 L-0.5319757018290933 34.995956935804216 A35 35 0 0 1 -10.308406469842062 33.44752242024091 L-10.308406469842062 33.44752242024091 L-16.21028296645617 45.03060723468969 L-26.902361256716592 39.58272123781513 L-21.000484760102484 27.999636423366347 A35 35 0 0 1 -27.999636423366347 19.999636423366347 A35 35 0 0 1 -20 9.807017416285682"></path>
-									</g>
-								  </g>
-								</g>
-							  </svg>
-							  Updating...
-							</button> :
-							<button style={{ margin: "0 2rem" }} onClick={updateProfile}>Save</button>
+					  <input
+						ref={fileInputRef}
+						type="file"
+						style={{ display: 'none' }}
+						onChange={(e) => {
+						  if (e.target.files[0].type === "image/jpeg" || e.target.files[0].type === "image/png") {
+							setImageEdited(true);
+							setFile(e.target.files[0]);
+						  } else {
+							swal("Oops!!", "Unsupported File type, Please upload either .jpg,.jpeg,.png", "warning");
 						  }
-						</div>
-					  }
+						}}
+					  />
+					</>
+				  )}
+				  {editMode && profileImage && (
+					<>
+					  <DeleteOutline
+						className="utilityButtonDanger"
+						onClick={() => { setImageEdited(true); setProfileImage(null); }}
+					  />
+					</>
+				  )}
+				</div>
+				<div className="right">
+				  <div style={{ display: "flex", margin: "0.5rem 0" }}>
+					<div className="formInput">
+					  <label>Name</label>
+					  <input
+						type="text"
+						value={name}
+						onChange={(e) => { setName(e.target.value); }}
+						placeholder="Name"
+						readOnly={!editMode}
+					  />
 					</div>
 				  </div>
 	
-				  <div className="password-section">
-					<h3>Change Password</h3>
+				  <div style={{ display: "flex", margin: "0.5rem 0" }}>
 					<div className="formInput">
-					  <label>Old Password</label>
-					  <input 
-						type="password" 
-						value={oldPassword} 
-						onChange={(e) => setOldPassword(e.target.value)} 
+					  <label>Email</label>
+					  <input
+						type="email"
+						value={email}
+						onChange={(e) => { setEmail(e.target.value); }}
+						placeholder="Email"
+						readOnly={!editMode}
 					  />
 					</div>
-					<div className="formInput">
-					  <label>New Password</label>
-					  <input 
-						type="password" 
-						value={newPassword} 
-						onChange={(e) => setNewPassword(e.target.value)} 
-					  />
-					</div>
-					<div className="formInput">
-					  <label>Confirm New Password</label>
-					  <input 
-						type="password" 
-						value={confirmPassword} 
-						onChange={(e) => setConfirmPassword(e.target.value)} 
-					  />
-					</div>
-	
-					{
-					  submitButtonState2 ? 
-					  <button 
-						disabled 
-						style={{ margin: "0", display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "7px", paddingBottom: "7px", cursor: "not-allowed", opacity: "0.7" }}
-					  >
-						<svg width="25px" height="25px" viewBox="0 0 100 100">
-						  <g transform="translate(50 50)">
-							<g transform="translate(-19 -19) scale(0.6)">
-							  <g>
-								<animateTransform 
-								  attributeName="transform" 
-								  type="rotate" 
-								  values="0;36" 
-								  keyTimes="0;1" 
-								  dur="0.2s" 
-								  begin="0s" 
-								  repeatCount="indefinite" 
-								/>
-								<path d="M28.625011367592503 20.13972999335393 L37.81739952301762 29.33211814877905 L29.33211814877905 37.81739952301762 L20.13972999335393 28.625011367592503 A35 35 0 0 1 11.320284385312565 33.11874335532145 L11.320284385312565 33.11874335532145 L13.353932430835567 45.95869178305824 L1.5016723436939086 47.835905363541 L-0.5319757018290933 34.995956935804216 A35 35 0 0 1 -10.308406469842062 33.44752242024091 L-10.308406469842062 33.44752242024091 L-16.21028296645617 45.03060723468969 L-26.902361256716592 39.58272123781513 L-21.000484760102484 27.999636423366347 A35 35 0 0 1 -27.999636423366347 19.999636423366347 A35 35 0 0 1 -20 9.807017416285682"></path>
-							  </g>
-							</g>
-						  </g>
-						</svg>
-						Updating...
-					  </button> :
-					  <button style={{ margin: "0 2rem" }} onClick={updateProfilePassword}>Save</button>
-					}
 				  </div>
-				</> :
-				<Error />
-			) : null
-		  }
+	
+				  <div style={{ display: "flex", margin: "0.5rem 0" }}>
+					<div className="formInput">
+					  <label>Address</label>
+					  <textarea
+						rows={3}
+						style={{ resize: "none" }}
+						value={address}
+						onChange={(e) => { setAddress(e.target.value); }}
+						placeholder="Address"
+						readOnly={!editMode}
+					  />
+					</div>
+				  </div>
+	
+				  {!editMode ? (
+					<button style={{ margin: "0 2rem" }} onClick={(e) => { setEditMode(true); }}>Edit</button>
+				  ) : (
+					<div style={{ display: "flex", justifyContent: "space-around", alignItems: "center" }}>
+					  <button style={{ margin: "0 2rem" }} onClick={(e) => { setEditMode(false); setFile(null); }}>Back</button>
+					  {submitButtonState ? (
+						<button
+						  disabled
+						  style={{ margin: "0", display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "7px", paddingBottom: "7px", cursor: "not-allowed", opacity: "0.7" }}
+						>
+						  {/* ... your loading spinner ... */}
+						  Updating...
+						</button>
+					  ) : (
+						<button style={{ margin: "0 2rem" }} onClick={updateProfile}>Save</button>
+					  )}
+					</div>
+				  )}
+				</div>
+			  </div>
+	
+			  <div className="password-section">
+				<h3>Change Password</h3>
+				{/* ... password input fields ... */}
+				{submitButtonState2 ? (
+				  <button
+					disabled
+					style={{ margin: "0", display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: "7px", paddingBottom: "7px", cursor: "not-allowed", opacity: "0.7" }}
+				  >
+					{/* ... your loading spinner ... */}
+					Updating...
+				  </button>
+				) : (
+				  <button style={{ margin: "0 2rem" }} onClick={updateProfilePassword}>Save</button>
+				)}
+			  </div>
+			</>
+		  )}
+		  {pageState === 3 && <ErrorComponent />}
 		</div>
 	  );
 	};

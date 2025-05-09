@@ -2,23 +2,105 @@
 	margin: 1rem;
 	padding: 1.2rem 2rem;
 	border-radius: 1rem;
-	background-color: #ffffff;
+	background-color: rgba(15, 23, 42, 0.9); /* Dark background similar to the navbar */
 	box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
 	overflow-x: auto;
-
-	@media screen and (max-width: 480px)  {
-		margin: 2rem;
+	backdrop-filter: blur(12px); /* Glassmorphism effect for the chart */
+  
+	@media screen and (max-width: 480px) {
+	  margin: 2rem;
 	}
-
+  
 	.chartTitle {
-		margin-bottom: 20px;
-		color: #03c885;
-		font-weight: bold;
-		font-size: 17px;
+	  margin-bottom: 20px;
+	  color: #6ee7b7; /* Cyan title text */
+	  font-weight: bold;
+	  font-size: 17px;
+	  display: flex;
+	  justify-content: space-between;
+	  align-items: center;
+  
+	  .chartToggle {
+		button {
+		  margin-left: 10px;
+		  padding: 6px 12px;
+		  font-size: 13px;
+		  color: #e2e8f0; /* Light button text */
+		  background-color: rgba(255, 255, 255, 0.1); /* Glassmorphism background */
+		  border: 1px solid rgba(255, 255, 255, 0.1); /* Light border with transparency */
+		  border-radius: 5px;
+		  cursor: pointer;
+		  transition: background-color 0.3s ease, border-color 0.3s ease;
+  
+		  &:hover {
+			background-color: rgba(255, 255, 255, 0.2); /* Hover effect */
+		  }
+  
+		  &:active {
+			background-color: rgba(255, 255, 255, 0.3); /* Active effect */
+		  }
+		}
+	  }
 	}
-
+  
 	.chartContent {
-		min-width: 730px;
-		min-height: 100%;
+	  min-width: 730px;
+	  min-height: 100%;
+	  color: #e2e8f0; /* Light text for content */
+  
+	  ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+  
+		li {
+		  display: flex;
+		  align-items: center;
+		  padding: 0.7rem 1rem;
+		  cursor: pointer;
+		  border-radius: 0.3rem;
+		  transition: background-color 0.3s ease;
+		  border: 1px solid transparent;
+		  position: relative;
+  
+		  &:hover {
+			background-color: rgba(255, 255, 255, 0.08); /* Hover effect for list items */
+		  }
+  
+		  .icon {
+			font-size: 1.2rem;
+			color: #6ee7b7; /* Cyan icons */
+			margin-right: 0.8rem;
+		  }
+  
+		  span {
+			font-size: 1rem;
+			font-weight: 500;
+		  }
+		}
+	  }
 	}
-}
+  
+	hr {
+	  height: 0;
+	  border: 0.5px solid rgba(255, 255, 255, 0.1);
+	  margin: 0.5rem 0;
+	}
+  }
+  
+  .recharts-bar-rects rect {
+	transition: none !important;  /* Disable transitions */
+	&:hover {
+	  fill: #8884d8; /* Keep the fill color the same */
+	  box-shadow: none; /* Remove shadow if present */
+	}
+  }
+  
+  .custom-tooltip {
+	background-color: rgba(0, 0, 0, 0.7); /* Dark background for tooltip */
+	color: #fff; /* White text */
+	padding: 10px;
+	border-radius: 5px;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Optional: Add some shadow for better visibility */
+  }
+  

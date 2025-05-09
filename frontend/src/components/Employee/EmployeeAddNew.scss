@@ -1,139 +1,162 @@
 .employeeaddnew {
 	flex-grow: 1;
-	background-color: #fafafa;
-
+	background: linear-gradient(to bottom, #0f172a, #1e293b); /* Dark gradient background */
+	color: #e2e8f0; /* Light text color */
+  
 	.employee-header {
-		display: flex;
-		justify-content: space-between;
-		margin: 1rem;
+	  display: flex;
+	  justify-content: space-between;
+	  margin: 1rem;
+	  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle divider */
+	  padding-bottom: 0.5rem;
 	}
-
+  
 	.title {
-		color: #888;
-		font-size: x-large;
-		font-weight: bold;
-		margin-left: 0.5rem;
-		margin-right: 0.5rem;
+	  color: #6ee7b7; /* Cyan title, similar to logo */
+	  font-size: x-large;
+	  font-weight: bold;
+	  margin-left: 0.5rem;
+	  margin-right: 0.5rem;
+	  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle text shadow */
 	}
-
+  
 	.card {
-		-webkit-box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.47);
-		box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
-		transition: 0.3s;
-		margin: 20px;
-		border: 2px rgba(180, 180, 180, 0.329) solid;
-		border-radius: 5px;
+	  background-color: rgba(255, 255, 255, 0.08); /* Dark card background */
+	  transition: 0.3s;
+	  margin: 20px;
+	  border: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism border */
+	  border-radius: 5px;
+	  box-shadow: none; /* Remove existing shadow */
+	  backdrop-filter: blur(12px); /* Glassmorphism effect */
 	}
-
+  
 	.container {
-		padding: 1rem;
-		height: 100%;
+	  padding: 1rem;
+	  height: 100%;
 	}
-
+  
 	.btn {
-		border: 2px solid black;
-		background-color: white;
-		color: black;
-		padding: 5px 10px;
-		font-size: 16px;
-		font-weight: bold;
-		border-radius: 0.3rem;
-		cursor: pointer;
-		transition: color 0.4s, background-color 0.4s;
+	  border: 1px solid #6ee7b7; /* Cyan border */
+	  background-color: transparent; /* Transparent background */
+	  color: #6ee7b7; /* Cyan text */
+	  padding: 0.5rem 1rem;
+	  font-size: 16px;
+	  font-weight: bold;
+	  border-radius: 0.3rem;
+	  cursor: pointer;
+	  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+  
+	  &:hover {
+		background-color: rgba(110, 231, 183, 0.1); /* Light cyan hover */
+		color: #e2e8f0; /* Light text on hover */
+		border-color: #e2e8f0;
+	  }
 	}
-
-	.btn:disabled{
-		opacity: 0.5;
-		cursor: not-allowed;
+  
+	.btn:disabled {
+	  opacity: 0.5;
+	  cursor: not-allowed;
+	  color: #94a3b8;
+	  border-color: #94a3b8;
 	}
-
+  
 	/* Green */
 	.success {
-		border-color: #04AA6D;
-		color: #04AA6D;
+	  border-color: #04AA6D;
+	  color: #04AA6D;
+  
+	  &:hover {
+		background-color: rgba(4, 170, 109, 0.1);
+		color: #e2e8f0;
+		border-color: #e2e8f0;
+	  }
 	}
-
-	.success:hover {
-		background-color: #04AA6D;
-		color: white;
-	}
-
+  
 	/* Blue */
 	.info {
-		border-color: #2196F3;
-		color: dodgerblue;
+	  border-color: #2196F3;
+	  color: dodgerblue;
+  
+	  &:hover {
+		background: rgba(33, 150, 243, 0.1);
+		color: #e2e8f0;
+		border-color: #e2e8f0;
+	  }
 	}
-
-	.info:hover {
-		background: #2196F3;
-		color: white;
-	}
-
+  
 	/* Orange */
 	.warning {
-		border-color: #ff9800;
-		color: orange;
+	  border-color: #ff9800;
+	  color: orange;
+  
+	  &:hover {
+		background: rgba(255, 152, 0, 0.1);
+		color: #e2e8f0;
+		border-color: #e2e8f0;
+	  }
 	}
-
-	.warning:hover {
-		background: #ff9800;
-		color: white;
-	}
-
+  
 	/* Red */
 	.danger {
-		border-color: #f44336;
-		color: rgb(222, 72, 72);
+	  border-color: #f44336;
+	  color: rgb(222, 72, 72);
+  
+	  &:hover {
+		background: rgba(244, 67, 54, 0.1);
+		color: #e2e8f0;
+		border-color: #e2e8f0;
+	  }
 	}
-
-	.danger:hover {
-		background: #f44336;
-		color: white;
-	}
-
+  
 	.default {
-		border-color: #e7e7e7;
-		color: black;
+	  border-color: #94a3b8;
+	  color: #e2e8f0;
+  
+	  &:hover {
+		background: rgba(148, 163, 184, 0.1);
+		color: #e2e8f0;
+		border-color: #e2e8f0;
+	  }
 	}
-
-	.default:hover {
-		background: #e7e7e7;
-	}
-
+  
 	.button-loader {
-		width: 25px;
-		height: 25px;
-		margin: 0 1rem;
-		border: 3px solid transparent;
-		border-top-color: #ffffff;
-		border-radius: 50%;
-		animation: button-loading-spinner 1s ease infinite;
+	  width: 25px;
+	  height: 25px;
+	  margin: 0 1rem;
+	  border: 3px solid transparent;
+	  border-top-color: #6ee7b7; /* Cyan loader color */
+	  border-radius: 50%;
+	  animation: button-loading-spinner 1s ease infinite;
 	}
-
+  
 	@keyframes button-loading-spinner {
-		from {
-			transform: rotate(0turn);
-		}
-
-		to {
-			transform: rotate(1turn);
-		}
+	  from {
+		transform: rotate(0turn);
+	  }
+  
+	  to {
+		transform: rotate(1turn);
+	  }
 	}
-
-	.my_input{
-		margin-top: 5px;
-		padding: 6px 20px;
-		display: block;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		box-sizing: border-box;
-		width: 100%;
-
-		&:focus{			
-			box-shadow: 0 0 6px 0px darkgrey;
-		}
-		&:focus-visible{
-			outline: none;
-		}
+  
+	.my_input {
+	  margin-top: 5px;
+	  padding: 0.5rem 1rem; /* Adjust padding */
+	  display: block;
+	  border: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism border */
+	  border-radius: 4px;
+	  box-sizing: border-box;
+	  width: 100%;
+	  background-color: rgba(255, 255, 255, 0.05); /* Dark input background */
+	  color: #e2e8f0; /* Light input text */
+	  backdrop-filter: blur(12px); /* Apply blur to input background */
+  
+	  &:focus {
+		box-shadow: 0 0 6px 0px rgba(110, 231, 183, 0.5); /* Cyan focus shadow */
+	  }
+  
+	  &:focus-visible {
+		outline: none;
+	  }
 	}
-}
+  }

@@ -1,0 +1,212 @@
+$dark-bg: #0f172a;
+$dark-text: #f8fafc;
+$glass-bg: rgba(255, 255, 255, 0.06);
+$glass-border: 1px solid rgba(255, 255, 255, 0.1);
+$input-focus-border: #007bff;
+$scrollbar-width: 8px;
+$scrollbar-color: rgba(255, 255, 255, 0.1);
+$scrollbar-thumb-color: rgba(255, 255, 255, 0.3);
+$scrollbar-thumb-hover-color: rgba(255, 255, 255, 0.5);
+$success-color: #198754;
+$danger-color: #dc3545;
+$primary-color: #007bff;
+
+.stock-out {
+  padding-bottom: 20px;
+  background-color: $dark-bg;
+  color: $dark-text;
+  height: auto;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  
+
+  h2 {
+    color: #6ee7b7;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  &__alert {
+    margin-bottom: 20px;
+  }
+
+  &__card {
+    background-color: $glass-bg;
+    border: $glass-border;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+
+    .card-body {
+      padding: 20px;
+    }
+  }
+
+  &__form-group {
+    margin-bottom: 15px;
+
+    .form-label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: $dark-text;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: $glass-border;
+      border-radius: 4px;
+      box-sizing: border-box;
+      background-color: $glass-bg;
+      color: $dark-text;
+      backdrop-filter: blur(10px);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23fff' fill-opacity='0.5' d='M2 0L0 2h4z'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 8px;
+      padding-right: 24px;
+      max-height: 200px; /* Added max-height */
+      overflow-y: auto;  /* Added overflow-y */
+
+      &:focus {
+        outline: none;
+        border-color: $input-focus-border;
+        box-shadow: 0 0 0 0.2rem rgba($primary-color, 0.25);
+      }
+
+      &::placeholder {
+        color: rgba($dark-text, 0.6);
+      }
+    }
+  }
+
+  &__add-section {
+    h4 {
+      color: #6ee7b7;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+  }
+
+  &__item-row {
+    margin-bottom: 15px;
+
+    .form-group {
+      margin-bottom: 0; // Remove default margin for better layout in rows
+    }
+
+    .btn-danger {
+      // Inherit Bootstrap's btn-danger styles or customize further
+    }
+  }
+
+  &__add-button {
+    margin-top: 15px;
+    background-color: $primary-color;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: darken($primary-color, 10%);
+    }
+
+    &:disabled {
+      background-color: #cccccc;
+      color: #666666;
+      cursor: not-allowed;
+    }
+  }
+
+  &__table {
+    background-color: $glass-bg;
+    color: $dark-text;
+    border-collapse: collapse;
+    width: 100%;
+
+    th,
+    td {
+      border: $glass-border;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: rgba($glass-bg, 0.8);
+      color: black;
+      font-weight: bold;
+    }
+  }
+
+  &__total-row {
+    h5 {
+      font-weight: bold;
+      color: $dark-text;
+    }
+  }
+
+  &__submit-button {
+    background-color: $success-color;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    margin-left: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: darken($success-color, 10%);
+    }
+
+    &:disabled {
+      background-color: #cccccc;
+      color: #666666;
+      cursor: not-allowed;
+    }
+  }
+
+  // Scrollbar styles for the entire component
+  &::-webkit-scrollbar {
+    width: $scrollbar-width;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $scrollbar-thumb-color;
+    border-radius: 20px;
+    border: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: $scrollbar-thumb-hover-color;
+  }
+
+  // Scrollbar styles for the add items container (if needed separately)
+  &__add-section::-webkit-scrollbar {
+    width: $scrollbar-width;
+  }
+
+  &__add-section::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &__add-section::-webkit-scrollbar-thumb {
+    background-color: $scrollbar-thumb-color;
+    border-radius: 20px;
+    border: transparent;
+  }
+
+  &__add-section::-webkit-scrollbar-thumb:hover {
+    background-color: $scrollbar-thumb-hover-color;
+  }
+}

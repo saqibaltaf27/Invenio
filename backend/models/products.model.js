@@ -10,63 +10,72 @@ class Product {
   async queryDatabase(query, params = {}) {
     try {
       const pool = await poolPromise;
-      //console.log("Executing query:", query);
-      //console.log("With params:", params);
+      const request = pool.request();
   
-      const result = await pool.request()
-        .input('searchValue', sql.NVarChar, params.searchValue) 
-        .input('startValue', sql.Int, params.startValue)
-        .query(query);
-  
-      // If no result, throw error
-      if (!result.recordset || result.recordset.length === 0) {
-        throw new Error('No data returned from query');
+      for (const key in params) {
+        if (params.hasOwnProperty(key)) {
+          request.input(key, params[key].type, params[key].value);
+        }
       }
   
-      console.log("Query result:", result.recordset); // Log result
-      return result.recordset;  // Return the records
+      const lowerCaseQuery = query.trim().toLowerCase();
+      const result = await request.query(query);
+  
+      if (lowerCaseQuery.startsWith('select')) {
+        if (!result.recordset || result.recordset.length === 0) {
+          throw new Error('No data returned from query');
+        }
+        console.log("Query result (SELECT):", result.recordset);
+        return result.recordset;
+      } else if (lowerCaseQuery.startsWith('delete')) {
+        console.log("Result object (DELETE):", result); 
+        return result.rowsAffected[0];
+      } else if (lowerCaseQuery.startsWith('insert') || lowerCaseQuery.startsWith('update')) {
+        console.log("Rows affected (INSERT/UPDATE):", result.rowsAffected);
+        return result.rowsAffected[0];
+      } else {
+        console.warn("Unknown query type encountered in queryDatabase:", lowerCaseQuery);
+        return result; 
+      }
+  
+  
     } catch (err) {
       console.error("queryDatabase error:", err.message);
-      throw new Error("Database query failed: " + err.message); // Provide clear error message
+      throw new Error("Database query failed: " + err.message);
     }
   }
-  // Get products with optional search and sorting
+  
   getProducts = async (req, res) => {
-  try {
+    try {
       const { search_value = "", sort_column = "name", sort_order = "ASC", start_value = 0 } = req.body;
-
+  
       let whereClause = "";
-      const values = [];
-
-      // If there's a search value, filter products by name or description
+  
       if (search_value.trim() !== "") {
         whereClause = `WHERE name LIKE @searchValue OR description LIKE @searchValue`;
-        values.push(`%${search_value}%`);
       }
-
-      // Validate columns and order for sorting
+  
       const validColumns = ["name", "description", "gender", "size", "product_stock", "timeStamp"];
       const validOrders = ["ASC", "DESC"];
       let orderClause = "";
-
+  
       if (validColumns.includes(sort_column) && validOrders.includes(sort_order)) {
         orderClause = `ORDER BY ${sort_column} ${sort_order}`;
       }
-
-      // Define the limit for pagination
-      const limitClause = `OFFSET @startValue ROWS FETCH NEXT 10 ROWS ONLY`;
-      values.push(parseInt(start_value));
-
-      // Construct the query to fetch the products
-      const productQuery = `SELECT * FROM products ${whereClause} ${orderClause} ${limitClause}`;
-
-      // Query the database
-      const products = await this.queryDatabase(productQuery, {
-        searchValue: `%${search_value}%`,
-        startValue: parseInt(start_value),
-      });
-
-      // If there's a search term, return the filtered products with the count
+  
+      const productQuery = `SELECT * FROM products
+        ${whereClause}
+        ${orderClause}
+      `;
+  
+      const params = {};
+      if (search_value.trim() !== "") {
+        params.searchValue = { type: sql.NVarChar, value: `%${search_value}%` };
+      }
+      params.startValue = { type: sql.Int, value: parseInt(start_value) };
+  
+      const products = await this.queryDatabase(productQuery, params);
+  
       if (search_value.trim() !== "") {
         return res.send({
           operation: "success",
@@ -74,9 +83,9 @@ class Product {
           info: { products, count: products.length },
         });
       }
-
+  
       const countResult = await this.queryDatabase("SELECT COUNT(*) AS val FROM products");
-
+  
       res.send({
         operation: "success",
         message: "Products fetched",
@@ -125,130 +134,162 @@ class Product {
 
   addProduct = async (req, res) => {
     try {
-      const { name, gender, size, material, category, description, product_stock, f_name, selling_price, purchase_price } = req.body;
-
-    // Declare the SQL query with parameters
-    const query = `
-      DECLARE @productId VARCHAR(50) = @productIdValue;
-      DECLARE @name VARCHAR(255) = @nameValue;
-      DECLARE @gender VARCHAR(50) = @genderValue;
-      DECLARE @size VARCHAR(50) = @sizeValue;
-      DECLARE @material VARCHAR(100) = @materialValue;
-      DECLARE @category VARCHAR(100) = @categoryValue;
-      DECLARE @description TEXT = @descriptionValue;
-      DECLARE @productStock INT = @productStockValue;
-      DECLARE @image VARCHAR(255) = @imageValue;
-      DECLARE @sellingPrice DECIMAL(18,2) = @sellingPriceValue;
-      DECLARE @purchasePrice DECIMAL(18,2) = @purchasePriceValue;
-
-      -- The actual insert statement
-      INSERT INTO products (product_id, name, gender, size, material, category, description, product_stock, image, selling_price, purchase_price)
-      VALUES (@productId, @name, @gender, @size, @material, @category, @description, @productStock, @image, @sellingPrice, @purchasePrice);
+      const { name, type, size, material, category, description, product_stock, f_name, selling_price, purchase_price } = req.body;
+      if (!name || !type || !size || !material || !category || !description || !product_stock || !selling_price || !purchase_price) {
+        return res.status(400).send({ operation: "error", message: "All fields are required." });
+      }
+      const productId = uniqid();
+   
+      const query = `
+      INSERT INTO products (product_id, name, type, size, material, category, description, product_stock, image, selling_price, purchase_price)
+      VALUES (@productId, @name, @type, @size, @material, @category, @description, @productStock, @image, @sellingPrice, @purchasePrice);
     `;
 
-    // Generate the unique product ID
-    const productId = uniqid();
+    const params = {
+        productId: { type: sql.VarChar, value: productId },
+        name: { type: sql.VarChar, value: name },
+        type: { type: sql.VarChar, value: type }, 
+        size: { type: sql.VarChar, value: size },
+        material: { type: sql.VarChar, value: material },
+        category: { type: sql.VarChar, value: category },
+        description: { type: sql.Text, value: description },
+        productStock: { type: sql.Int, value: product_stock },
+        image: { type: sql.VarChar, value: f_name },
+        sellingPrice: { type: sql.Decimal, value: selling_price },
+        purchasePrice: { type: sql.Decimal, value: purchase_price },
+      };
 
-    // Execute the query with parameterized values
-    await this.queryDatabase(query, [
-      { name: 'productIdValue', value: productId },
-      { name: 'nameValue', value: name },
-      { name: 'genderValue', value: gender },
-      { name: 'sizeValue', value: size },
-      { name: 'materialValue', value: material },
-      { name: 'categoryValue', value: category },
-      { name: 'descriptionValue', value: description },
-      { name: 'productStockValue', value: product_stock },
-      { name: 'imageValue', value: f_name },
-      { name: 'sellingPriceValue', value: selling_price },
-      { name: 'purchasePriceValue', value: purchase_price }
-    ]);
+      await this.queryDatabase(query, params);
 
-      res.send({ operation: "success", message: 'Product added successfully' });
+      res.send({ operation: "success", message: 'Product added successfully', info: { productId } });
     } catch (err) {
-      console.log(err);
-      res.send({ operation: "error", message: 'Something went wrong' });
+      console.error("addProduct error", err);
+      res.status(500).send({ operation: "error", message: err.message || 'Something went wrong' });
     }
   };
 
   // Update product details
   updateProduct = async (req, res) => {
     try {
-      const { product_id, name, gender, size, material, category, description, product_stock, f_name, selling_price, purchase_price } = req.body;
-      let imageUpdate = f_name ? `image = @image` : '';
-      const query = `UPDATE products SET name = @name, gender = @gender, size = @size, material = @material, category = @category, 
-                     description = @description, product_stock = @productStock, ${imageUpdate} selling_price = @sellingPrice, 
-                     purchase_price = @purchasePrice WHERE product_id = @productId`;
+      const { product_id, name, type, size, material, category, description, product_stock, f_name, selling_price, purchase_price } = req.body; // Changed gender to type
 
-      const params = f_name ? [name, gender, size, material, category, description, product_stock, f_name, selling_price, purchase_price, product_id] :
-                              [name, gender, size, material, category, description, product_stock, selling_price, purchase_price, product_id];
+      if (!product_id) {
+        return res.status(400).send({ operation: "error", message: "Product ID is required." });
+      }
 
-      const result = await this.queryDatabase(query, params);
+      const params = {
+        product_id: { type: sql.VarChar, value: product_id },
+        name: { type: sql.VarChar, value: name },
+        type: { type: sql.VarChar, value: type },
+        size: { type: sql.VarChar, value: size },
+        material: { type: sql.VarChar, value: material },
+        category: { type: sql.VarChar, value: category },
+        description: { type: sql.Text, value: description },
+        productStock: { type: sql.Int, value: product_stock },
+        sellingPrice: { type: sql.Decimal, value: selling_price },
+        purchasePrice: { type: sql.Decimal, value: purchase_price },
+      };
+
+      let imageUpdate = '';
+      if (f_name) {
+        imageUpdate = 'image = @image, ';
+        params.image = { type: sql.VarChar, value: f_name };
+      }
+      const query = `
+        UPDATE products SET 
+          name = @name, 
+          type = @type, 
+          size = @size, 
+          material = @material, 
+          category = @category, 
+          description = @description, 
+          product_stock = @productStock, 
+          ${imageUpdate}
+          selling_price = @sellingPrice, 
+          purchase_price = @purchasePrice
+        WHERE product_id = @product_id
+      `;
+
+      await this.queryDatabase(query, params);
       res.send({ operation: "success", message: 'Product updated successfully' });
     } catch (err) {
-      console.log(err);
-      res.send({ operation: "error", message: 'Something went wrong' });
+      console.error("updateProduct error", err);
+      res.status(500).send({ operation: "error", message: err.message || 'Something went wrong' }); // Send the error message
     }
   };
 
   // Delete product and image
   deleteProduct = async (req, res) => {
     try {
-      const productId = req.body.product_id;
-  
-      // Query to fetch the product details using the provided product_id
-      const query = `
-        SELECT * FROM products WHERE product_id = @productId;
-      `;
-  
-      // Execute the query and pass the productId as a parameter
-      const result = await this.queryDatabase(query, [productId]);
-  
-      if (result[0]?.image) {
-        // If the product has an image, delete it from the filesystem
-        const imagePath = path.join(__dirname, 'public', 'uploads', result[0].image);
-        fs.unlinkSync(imagePath); // Synchronously delete the image
+      const { product_id } = req.body;
+
+      if (!product_id) {
+        return res.status(400).send({ operation: "error", message: "Product ID is required." });
       }
-  
-      // Now, delete the product from the database using the product_id
-      const deleteQuery = `
-        DELETE FROM products WHERE product_id = @productId;
-      `;
-      
-      // Execute the delete query with the productId
-      await this.queryDatabase(deleteQuery, [productId]);
-  
-      // Send success response
+      const params = {
+        product_id: {type: sql.VarChar, value: product_id}
+      }
+      const selectQuery = `SELECT image FROM products WHERE product_id = @product_id`;
+      const result = await this.queryDatabase(selectQuery, params);
+      const imageToDelete = result[0]?.image;
+
+      const deleteQuery = `DELETE FROM products WHERE product_id = @product_id`;
+      console.log("Delete Result (rows affected):", deleteQuery);
+      await this.queryDatabase(deleteQuery, params);
+
+      if (imageToDelete) {
+        const imagePath = path.join(__dirname, '..', 'public', 'uploads', imageToDelete); 
+        try {
+          fs.unlinkSync(imagePath);
+          console.log(`Deleted image: ${imagePath}`);
+        } catch (err) {
+          console.error(`Error deleting image: ${imagePath}`, err);
+        }
+      }
+
       res.send({ operation: "success", message: 'Product deleted successfully' });
     } catch (err) {
-      console.log(err);
-      // Send error response in case of failure
-      res.send({ operation: "error", message: 'Something went wrong' });
+      console.error("deleteProduct error", err);
+      res.status(500).send({ operation: "error", message: err.message || 'Something went wrong' }); // Send the error message
     }
   };
 
   // Delete product image
   deleteProductImage = async (req, res) => {
     try {
-      const productId = req.body.product_id;
-      const query = `SELECT * FROM products WHERE product_id = @productId`;
-      const result = await this.queryDatabase(query, [productId]);
+      const { product_id } = req.body;
+        if (!product_id) {
+        return res.status(400).send({ operation: "error", message: "Product ID is required." });
+      }
 
-      if (result[0]?.image) {
-        const imagePath = path.join(__dirname, 'public', 'uploads', result[0].image);
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath); // Use fs.unlinkSync for synchronous deletion
+      const params = {
+         productId: {type: sql.VarChar, value: product_id}
+      }
+      // 1. Fetch the image name
+      const selectQuery = `SELECT image FROM products WHERE product_id = @productId`;
+      const result = await this.queryDatabase(selectQuery, params);
+      const imageToDelete = result[0]?.image;
+
+      if (imageToDelete) {
+        const imagePath = path.join(__dirname, '..', 'public', 'uploads', imageToDelete);  // Corrected path
+        try {
+          fs.unlinkSync(imagePath);
+          console.log(`Deleted image: ${imagePath}`);
+        } catch (err) {
+          console.error(`Error deleting image: ${imagePath}`, err);
+           return res.status(500).send({ operation: "error", message: "Error deleting image" });
         }
 
         const updateQuery = `UPDATE products SET image = NULL WHERE product_id = @productId`;
-        await this.queryDatabase(updateQuery, [productId]);
+        await this.queryDatabase(updateQuery, params);
+
         res.send({ operation: "success", message: 'Product image deleted successfully' });
       } else {
         res.send({ operation: "error", message: 'Image not found' });
       }
     } catch (err) {
-      console.log(err);
-      res.send({ operation: "error", message: 'Something went wrong' });
+      console.error("deleteProductImage error", err);
+      res.status(500).send({ operation: "error", message: err.message || 'Something went wrong' }); 
     }
   };
 }

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const Supplier = require('../models/suppliers.model.js');
-const { isAuthenticated } = require('../middlewares/authMiddleware.js');
+
 
 const supplier = new Supplier();
 

@@ -1,6 +1,68 @@
 .settings {
-	flex-grow: 1;
-	background-color: #fafafa;
-	height: calc(100vh - 50px);
-	
-}
+	padding: 20px;
+	h3 {
+	  color: #fff;
+	  margin-bottom: 20px;
+	}
+	.card {
+	  background-color: rgba(255, 255, 255, 0.06); /* Glassmorphism background color */
+	  border: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism border */
+	  backdrop-filter: blur(10px); /* Glassmorphism blur */
+	  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Softer shadow */
+	  color: #fff;
+	  transition: background-color 0.3s ease, border-color 0.3s ease; /* Smooth transition */
+	  &:hover {
+		background-color: rgba(255, 255, 255, 0.1); /* Slightly lighter on hover */
+		border-color: rgba(255, 255, 255, 0.2); /* Slightly brighter border on hover */
+	  }
+	  .card-title {
+		color: #fff;
+		margin-bottom: 20px;
+	  }
+	  .mt-3 {
+		margin-top: 1rem;
+	  }
+	  label {
+		color: #eee;
+		margin-right: 10px;
+		display: inline-block;
+		width: 180px; /* Increased width of label */
+		text-align: left;  /* Align label text to the left */
+	  }
+	  input[type="text"],
+	  input[type="number"],
+	  select {
+		background-color: rgba(255, 255, 255, 0.03); /* Glassmorphism input background */
+		border: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism input border */
+		color: #fff;
+		padding: 8px;
+		border-radius: 5px;
+		width: calc(100% - 200px); /* Adjusted width to account for label */
+		max-width: 300px; /* Added max-width */
+		transition: background-color 0.3s ease, border-color 0.3s ease; /* Smooth transition */
+		display: inline-block;
+		&:focus {
+		  outline: none;
+		  background-color: rgba(255, 255, 255, 0.1); /* Slightly lighter on focus */
+		  border-color: rgba(255, 255, 255, 0.3); /* Brighter border on focus */
+		}
+	  }
+	  select {
+		width: calc(100% - 200px); /* Adjusted width to account for label */
+		max-width: 316px;
+	  }
+	  .text-muted {
+		color: #aaa;
+		font-size: 0.9em;
+		margin-top: 5px;
+		display: block;
+		width: calc(100% - 200px);
+	  }
+	}
+  }
+  
+  body {
+	background-color: #121212;
+	color: #fff;
+  }
+  

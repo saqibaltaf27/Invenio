@@ -90,7 +90,7 @@ class Supplier {
 			console.log("Received update request body:", req.body);
 			const pool = await poolPromise;
 			const request = pool.request()
-				.input('supplier_id', sql.Int, parseInt(req.body.supplier_id))
+				.input('supplier_id', sql.NVarChar, req.body.supplier_id)
 				.input('name', sql.NVarChar, req.body.name)
 				.input('email', sql.NVarChar, req.body.email)
 				.input('phone', sql.NVarChar, req.body.phone)

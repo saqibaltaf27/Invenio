@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
@@ -9,12 +7,12 @@ import Modal from 'react-bootstrap/Modal';
 import Table from '../Table/Table';
 import Loader from '../PageStates/Loader';
 import ErrorComponent from '../PageStates/Error';
-import './Products.scss';  // Ensure your CSS is properly defined
+import './Products.scss';
 
 const initialProduct = {
   productId: null,
   name: '',
-  type: 'Regular', // Default for new products
+  type: 'Regular',
   size: '',
   material: '',
   category: '',
@@ -55,8 +53,8 @@ const Products = () => {
       addedon: moment(p.timeStamp).format('MMM Do, YYYY'),
       action: (
         <>
-          <button className="btn warning" style={{ marginRight: '0.5rem' }}  onClick={() => openEditModal(p)}>Edit</button>
-          <button className="btn danger" onClick={() => deleteProduct(p.product_id)}>Delete</button>
+          {/* <button className="btn warning" style={{ marginRight: '0.5rem' }} onClick={() => openEditModal(p)}>Edit</button>
+          <button className="btn danger" onClick={() => deleteProduct(p.product_id)}>Delete</button> */}
         </>
       ),
     }));
@@ -88,7 +86,7 @@ const Products = () => {
     }
   };
 
-const openEditModal = (product) => {
+  const openEditModal = (product) => {
     setEditProduct({
       productId: product.product_id,
       name: product.name,
@@ -203,16 +201,7 @@ const openEditModal = (product) => {
       </Modal.Header>
       <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }} >
         <div className="modal-content">
-          {[
-            'name',
-            'size',
-            'material',
-            'category',
-            'description',
-            'stock',
-            'sellingPrice',
-            'purchasePrice',
-          ].map((field) => (
+          {[ 'name', 'size', 'material', 'category', 'description', 'stock', 'sellingPrice', 'purchasePrice' ].map((field) => (
             <div className="input-group" key={field}>
               <label>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
               <input
@@ -255,32 +244,29 @@ const openEditModal = (product) => {
   );
 
   return (
-    
-
-      <div className='products'>
-            <div className='product-header'>
-              <div className='title'>Products</div>
-              <Link to="/products/addnew" className='btn success'>Add New</Link>
-            </div>
+    <div className='products'>
+      <div className='product-header'>
+        <div className='title'>Products</div>
+        <Link to="/products/addnew" className='btn success'>Add New</Link>
+      </div>
 
       {pageState === 1 && <Loader />}
       {pageState === 2 && (
-    
-          <Table
-            title="Products"
-            headers={['Serial No', 'Name', 'Type', 'Size', 'Stock', 'Added On', 'Action']}
-            data={tableData}
-            defaultPageSize={10}
-            totalRecords={prodCount}
-            currentPage={tablePage}
-            onSearch={setSearchInput}
-            onSort={(column, order) => {
-              setSortColumn(column);
-              setSortOrder(order);
-            }}
-            onPageChange={setTablePage}
-          />
-     )}
+        <Table
+          title="Products"
+          headers={['Serial No', 'Name', 'Type', 'Size', 'Stock', 'Added On', 'Action']}
+          data={tableData}
+          defaultPageSize={10}
+          totalRecords={prodCount}
+          currentPage={tablePage}
+          onSearch={setSearchInput}
+          onSort={(column, order) => {
+            setSortColumn(column);
+            setSortOrder(order);
+          }}
+          onPageChange={setTablePage}
+        />
+      )}
       {pageState === 3 && <ErrorComponent />}
       {renderModal()}
     </div>

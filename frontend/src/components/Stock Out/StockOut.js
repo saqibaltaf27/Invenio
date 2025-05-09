@@ -12,6 +12,7 @@ import {
   Modal,
   Pagination,
 } from 'react-bootstrap';
+import Loader from '../PageStates/Loader';
 import './StockOut.scss';
 
 const StockOutItem = ({ item, index, products, onProductChange, onQuantityChange, onRemoveItem }) => {

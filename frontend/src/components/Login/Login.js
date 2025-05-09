@@ -52,7 +52,7 @@ function Login() {
 	  
 			if (response.ok && body.user) {
 			  localStorage.setItem('user', JSON.stringify(body.user));
-			  localStorage.setItem('userEmail', email);
+			  localStorage.setItem('userEmail', JSON.stringify(body.user));
 			  navigate('/dashboard');
 			} else {
 			  swal("Oops!", body.message || 'Login failed', "error");
@@ -92,7 +92,7 @@ function Login() {
 								<EmailOutlined/>
 							</div>
 							<div className="div">
-								<input type="email" placeholder='Email Id' name="email" value={email} onClick={() => enqueueSnackbar({style: {variant: 'error', whiteSpace: 'pre-line' }})} onChange={e => setEmail(e.target.value.trim())} />
+								<input type="email" placeholder='Email Id' name="email" value={email} onChange={e => setEmail(e.target.value.trim())} />
 							</div>
 						</div>
 						<div className="input-div pass">

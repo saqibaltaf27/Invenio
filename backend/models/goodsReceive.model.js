@@ -1,6 +1,5 @@
 const sql = require('mssql');
 const { poolPromise } = require('../db/conn.js');
-const PDFDocument = require('pdfkit');
 
 // --- Utility: Calculate total amount of items ---
 const calculateTotalAmount = (items) => {
@@ -13,6 +12,8 @@ const calculateTotalAmount = (items) => {
 // --- Controller: Create Goods Receive ---
 const createGoodsReceive = async (req, res) => {
     const { supplier_id, items, invoice_number, notes } = req.body;
+
+    console.log("Received data:", { supplier_id, items, invoice_number, notes }); // Add this line
 
     if (!supplier_id || !Array.isArray(items) || items.length === 0) {
         return res.status(400).json({
@@ -29,8 +30,8 @@ const createGoodsReceive = async (req, res) => {
         try {
             const sanitizedSupplierId = supplier_id ? String(supplier_id).trim() : null;
 
-        if (!sanitizedSupplierId || sanitizedSupplierId.length === 0) {
-            throw new Error('Invalid supplier_id: must be a non-empty string.');
+            if (!sanitizedSupplierId || sanitizedSupplierId.length === 0) {
+                throw new Error('Invalid supplier_id: must be a non-empty string.');
             }
             // 1. Insert into goods_receives
             const grResult = await transaction.request()
@@ -43,21 +44,37 @@ const createGoodsReceive = async (req, res) => {
                     VALUES (@supplier_id, @invoice_number, @notes)
                 `);
 
-                if (!grResult.recordset || grResult.recordset.length === 0) {
-                    throw new Error('Failed to insert into goods_receives – no gr_id returned.');
-                }                
-
+            if (!grResult.recordset || grResult.recordset.length === 0) {
+                throw new Error('Failed to insert into goods_receives – no gr_id returned.');
+            }
             const gr_id = grResult.recordset[0].gr_id;
             const totalAmount = calculateTotalAmount(items);
 
             // 2. Insert each item and update inventory
             for (const item of items) {
+                console.log("Processing item:", item); // Add this line
                 const { product_id, quantity, purchase_price, tax_rate, expiry_date } = item;
                 const itemTotal = quantity * purchase_price * (1 + (tax_rate || 0) / 100);
 
+                // Add validation for each item field.
+                if (!product_id || typeof product_id !== 'string') {
+                    throw new Error('Invalid product_id: must be a non-empty string.');
+                }
+                if (typeof quantity !== 'number' || quantity <= 0) {
+                    throw new Error('Invalid quantity: must be a positive number.');
+                }
+                if (typeof purchase_price !== 'number' || purchase_price <= 0) {
+                    throw new Error('Invalid purchase_price: must be a positive number.');
+                }
+                if (tax_rate && typeof tax_rate !== 'number') {
+                    throw new Error('Invalid tax_rate: must be a number.');
+                }
+                if (expiry_date && typeof expiry_date !== 'string') {
+                    throw new Error('Invalid expiry_date: must be a string.');
+                }
                 await transaction.request()
                     .input('gr_id', sql.Int, gr_id)
-                    .input('product_id', sql.NVarChar, product_id)  // Change to NVarChar
+                    .input('product_id', sql.NVarChar, product_id)    // Change to NVarChar
                     .input('quantity', sql.Int, quantity)
                     .input('purchase_price', sql.Decimal(18, 2), purchase_price)
                     .input('tax_rate', sql.Decimal(5, 2), tax_rate || 0)
@@ -69,7 +86,7 @@ const createGoodsReceive = async (req, res) => {
                     `);
 
                 await transaction.request()
-                    .input('product_id', sql.NVarChar, product_id)  // Change to NVarChar
+                    .input('product_id', sql.NVarChar, product_id)    // Change to NVarChar
                     .input('quantity', sql.Int, quantity)
                     .query(`
                         UPDATE products
@@ -217,64 +234,135 @@ const generateGRInvoice = async (req, res) => {
 
 const getAllGoodsReceives = async (req, res) => {
     try {
-      const pool = await poolPromise;
-      const result = await pool.request().query(`
-        SELECT gr.gr_id, gr.po_id, gr.supplier_id, s.supplier_name,
-               gr.gr_date, gr.total_amount, gr.created_by
-        FROM goods_receives gr
-        JOIN suppliers s ON gr.supplier_id = s.supplier_id
-        ORDER BY gr.gr_date DESC
-      `);
-  
-      res.status(200).json({ success: true, data: result.recordset });
-    } catch (error) {
-      console.error('Error fetching goods receives:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch goods receives' });
-    }
-  };
+        const pool = await poolPromise;
+        const result = await pool.request().query(`
+            SELECT gr.gr_id, gr.po_id, gr.supplier_id, s.name as supplier_name,
+                   gr.gr_date, gr.total_amount, gr.created_by
+            FROM goods_receives gr
+            JOIN suppliers s ON gr.supplier_id = s.supplier_id
+            ORDER BY gr.gr_date DESC
+        `);
 
-  const getGoodsReceiveDetails = async (req, res) => {
-    const { gr_id } = req.body;
-  
-    if (!gr_id) {
-      return res.status(400).json({ success: false, message: 'Missing gr_id' });
-    }
-  
-    try {
-      const pool = await poolPromise;
-  
-      const headerQuery = await pool.request()
-        .input('gr_id', sql.Int, gr_id)
-        .query(`
-          SELECT gr.*, s.supplier_name
-          FROM goods_receives gr
-          JOIN suppliers s ON gr.supplier_id = s.supplier_id
-          WHERE gr.gr_id = @gr_id
-        `);
-  
-      const detailQuery = await pool.request()
-        .input('gr_id', sql.Int, gr_id)
-        .query(`
-          SELECT grd.*, p.product_name
-          FROM goods_receive_items grd
-          JOIN products p ON grd.product_id = p.product_id
-          WHERE grd.gr_id = @gr_id
-        `);
-  
-      res.status(200).json({
-        success: true,
-        header: headerQuery.recordset[0],
-        items: detailQuery.recordset
-      });
+        res.status(200).json({ success: true, data: result.recordset });
     } catch (error) {
-      console.error('Error fetching GR details:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch GR details' });
+        console.error('Error fetching goods receives:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch goods receives' });
     }
-  };
+};
+
+const getGoodsReceiveDetails = async (req, res) => {
+    const { gr_id } = req.body;
+
+    if (!gr_id) {
+        return res.status(400).json({ success: false, message: 'Missing gr_id' });
+    }
+
+    try {
+        const pool = await poolPromise;
+
+        // --- Fetch GR Header Info ---
+        const headerQuery = await pool.request()
+            .input('gr_id', sql.Int, gr_id)
+            .query(`
+                SELECT gr.*, s.name AS supplier_name
+                FROM goods_receives gr
+                JOIN suppliers s ON gr.supplier_id = s.supplier_id
+                WHERE gr.gr_id = @gr_id
+            `);
+
+        if (!headerQuery.recordset || headerQuery.recordset.length === 0) {
+            return res.status(404).json({ success: false, message: 'Goods Receive not found' });
+        }
+
+        const grHeader = headerQuery.recordset[0];
+
+        // --- Fetch GR Item Details ---
+        const detailQuery = await pool.request()
+            .input('gr_id', sql.Int, gr_id)
+            .query(`
+                SELECT gri.*, p.name AS product_name
+                FROM goods_receive_items gri
+                JOIN products p ON gri.product_id = p.product_id
+                WHERE gri.gr_id = @gr_id
+            `);
+
+        res.status(200).json({
+            success: true,
+            data: {
+                header: grHeader,
+                items: detailQuery.recordset
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching GR details:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch GR details' });
+    }
+};
+
+const getGoodsReceiveLogs = async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query(`
+            SELECT
+                gr.gr_id,
+                gr.gr_date AS created_at,
+                s.name AS supplier_info,
+                gr.invoice_number,
+                gri.product_id,
+                p.name AS product_name,
+                gri.quantity,
+                gri.purchase_price,
+                gri.tax_rate,
+                cast(gri.expiry_date as date) as expiry_date
+            FROM goods_receives gr
+            JOIN suppliers s ON gr.supplier_id = s.supplier_id
+            JOIN goods_receive_items gri ON gr.gr_id = gri.gr_id
+            JOIN products p ON gri.product_id = p.product_id
+            ORDER BY gr.gr_date DESC
+        `);
+
+        // Format the data into the structure expected by the React component
+        const formattedLogs = [];
+        const logMap = new Map();
+
+        for (const row of result.recordset) {
+            const logId = row.gr_id;
+            if (!logMap.has(logId)) {
+                logMap.set(logId, {
+                    gr_id: logId,
+                    created_at: row.created_at,
+                    supplier_info: row.supplier_info,
+                    invoice_number: row.invoice_number,
+                    items: []
+                });
+            }
+            const log = logMap.get(logId);
+            log.items.push({
+                product_id: row.product_id,
+                product_name: row.product_name,
+                quantity: row.quantity,
+                purchase_price: row.purchase_price,
+                tax_rate: row.tax_rate,
+                expiry_date: row.expiry_date
+            });
+        }
+
+        formattedLogs.push(...logMap.values());
+        res.status(200).json(formattedLogs);
+    } catch (error) {
+        console.error('Error fetching goods receive logs:', error);
+        res.status(500).json({
+            operation: 'error',
+            message: 'Failed to fetch goods receive logs',
+            error: error.message,
+        });
+    }
+};
 
 module.exports = {
     createGoodsReceive,
     generateGRInvoice,
     getAllGoodsReceives,
-    getGoodsReceiveDetails
+    getGoodsReceiveDetails,
+    getGoodsReceiveLogs
 };

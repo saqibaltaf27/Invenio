@@ -22,13 +22,13 @@ import {
   Profile, 
   Settings, 
 } from './components'; //  You might need to adjust these paths
-import Layout from './components/Layout/Layout'; //  Make sure this path is correct.
-import Products from './components/Product/Products'; //  And this one.
-import GoodsReceiveCreate from './components/Goods Receive/GoodsReceive'; // And this
-import StockOut from './components/Stock Out/StockOut';     // And this
-import ProtectedRoute from './ProtectedRoute';  // And this
-import "./style/dark.scss"; //  And this
-import { DarkModeContext } from './context/darkModeContext'; // And this
+import Layout from './components/Layout/Layout'; 
+import Products from './components/Product/Products'; 
+import GoodsReceiveCreate from './components/Goods Receive/GoodsReceive'; 
+import StockOut from './components/Stock Out/StockOut';     
+import ProtectedRoute from './ProtectedRoute'; 
+import "./style/dark.scss"; 
+import { DarkModeContext } from './context/darkModeContext'; 
 
 function App() {
   const { darkMode } = useContext(DarkModeContext);

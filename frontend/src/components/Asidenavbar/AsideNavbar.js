@@ -118,12 +118,12 @@ function AsideNavbar() {
                                 <span>Profile</span>
                             </li>
                         </Link>*/}
-                        <Link to="/settings" style={{ textDecoration: "none" }}>
+                       {/* <Link to="/settings" style={{ textDecoration: "none" }}>
                             <li>
                                 <SettingsApplicationsIcon className="icon" />
                                 <span>Settings</span>
                             </li>
-                        </Link>
+                        </Link>*/}
                         <li onClick={() => { logout() }}>
                             <ExitToAppIcon className="icon" />
                             <span>Logout</span>

@@ -59,10 +59,16 @@
 
 	.myform {
 		width: 360px;
+		padding: 2rem;
+		border: 2px solid #38d39f;
+		border-radius: 15px;
+		background-color: #333;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 
 		.title {
 			font-size: xx-large;
 			margin: 1rem 0rem;
+			color: white;
 		}
 	}
 
@@ -72,6 +78,7 @@
 		grid-template-columns: 7% 93%;
 		margin: 25px 0;
 		padding: 5px 0;
+		background: transparent;
 		border-bottom: 2px solid #d9d9d9;
 	}
 
@@ -149,7 +156,8 @@
 		height: 100%;
 		border: none;
 		outline: none;
-		background: none;
+		color: #fff;
+		background: transparent !important;
 		padding: 0.5rem 0.7rem;
 		font-size: 1.2rem;
 	}
@@ -213,7 +221,6 @@
 		background-position: right;
 	}
 
-
 	@media screen and (max-width: 1050px) {
 		.container {
 			grid-gap: 5rem;
@@ -267,9 +274,20 @@
 		from {
 			transform: rotate(0turn);
 		}
-
 		to {
 			transform: rotate(1turn);
 		}
 	}
+}
+
+// Autofill fix
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+	box-shadow: 0 0 0px 1000px #2e2e2e inset !important; // match your background
+	-webkit-box-shadow: 0 0 0px 1000px #2e2e2e inset !important;
+	-webkit-text-fill-color: white !important;
+	background-color: transparent !important;
+	transition: background-color 9999s ease-out 0s !important;
 }

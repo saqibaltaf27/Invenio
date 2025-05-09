@@ -39,6 +39,7 @@ function App() {
         <Routes>
 
           {/* Public Routes (No authentication required) */}
+          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgetpassword" element={<Forgetpassword />} />
           <Route path="/unauthorized" element={<Unauthorized />} />

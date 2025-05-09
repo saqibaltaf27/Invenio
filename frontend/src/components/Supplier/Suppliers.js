@@ -33,7 +33,7 @@ const Suppliers = () => {
 
   const fetchSuppliers = async (start = 0, column = "", order = "", search = "") => {
     try {
-      const res = await fetch(`http://localhost:5000/api/get_suppliers`, {
+      const res = await fetch(`https://invenio-api-production.up.railway.app/api/get_suppliers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -95,7 +95,7 @@ const Suppliers = () => {
 
   const deleteSupplier = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/delete_supplier`, {
+      const res = await fetch(`https://invenio-api-production.up.railway.app/api/delete_supplier`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ supplier_id: id }),
@@ -152,7 +152,7 @@ const Suppliers = () => {
     setEditModalSubmitButton(true);
 
     try {
-      const res = await fetch(`http://localhost:5000/api/update_supplier`, {
+      const res = await fetch(`https://invenio-api-production.up.railway.app/api/update_supplier`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ supplier_id, name, address, email, phone }), // Include phone in the body

@@ -29,7 +29,7 @@ function Employees() {
 
 	const getEmployees = async (sv, sc, so, scv) => {
 		try {
-			let result = await fetch('http://localhost:5000/api/get_employees', {
+			let result = await fetch('https://invenio-api-production.up.railway.app/api/get_employees', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -89,7 +89,7 @@ function Employees() {
 	};
 
 	const deleteEmployee = async (id) => {
-		let result = await fetch('http://localhost:5000/api/delete_employee', {
+		let result = await fetch('https://invenio-api-production.up.railway.app/api/delete_employee', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ user_id: id }),
@@ -125,7 +125,7 @@ function Employees() {
 		}
 
 		setEditModalSubmitButton(true);
-		let res = await fetch('http://localhost:5000/api/update_employee', {
+		let res = await fetch('https://invenio-api-production.up.railway.app/api/update_employee', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({

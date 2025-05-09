@@ -27,7 +27,7 @@ function AsideNavbar() {
         })
             .then(async (willDelete) => {
                 if (willDelete) {
-                    let result = await fetch('http://localhost:5000/api/logout', {
+                    let result = await fetch('https://invenio-api-production.up.railway.app/api/logout', {
                         method: 'GET',
                         credentials: 'include'
                     });

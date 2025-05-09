@@ -39,7 +39,7 @@ const Header = () => {
 			console.error("Email missing in localStorage");
 			return;
 		}
-			const result = await fetch('http://localhost:5000/api/get_profile', {
+			const result = await fetch('https://invenio-api-production.up.railway.app/api/get_profile', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

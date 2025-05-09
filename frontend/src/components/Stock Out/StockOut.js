@@ -130,7 +130,7 @@ const StockOut = () => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const res = await axios.get('http://localhost:5000/api/products-with-stock');
+        const res = await axios.get('https://invenio-api-production.up.railway.app/api/products-with-stock');
         setProducts(res.data);
       } catch (err) {
         setError(err.message || 'Error fetching products');
@@ -142,14 +142,14 @@ const StockOut = () => {
     const fetchStockOutLogs = async () => {
       setLoading(true);
       try {
-        const url = 'http://localhost:5000/api/stock-out-logs';
+        const url = 'https://invenio-api-production.up.railway.app/api/stock-out-logs';
         console.log("Fetching logs from:", url);
         const response = await axios.get(url);
         console.log("Logs response:", response);
         setStockOutLogs(response.data);
       } catch (error) {
         console.error("Failed to fetch stock out logs:", error);
-        setError(`Failed to fetch stock out logs.  Error: ${error.message}.  URL: http://localhost:5000/api/stock-out-logs`);
+        setError(`Failed to fetch stock out logs.  Error: ${error.message}.  URL: https://invenio-api-production.up.railway.app/api/stock-out-logs`);
       } finally {
         setLoading(false);
       }
@@ -200,12 +200,12 @@ const StockOut = () => {
 
     setIsSubmitting(true);
     try {
-      await axios.post('http://localhost:5000/api/stock-out', data);
+      await axios.post('https://invenio-api-production.up.railway.app/api/stock-out', data);
       setSuccessModalVisible(true);
       setItems([{ product_id: '', name: '', quantity: '', stock: 0 }]);
       setCustomerInfo('');
 
-      const logsResponse = await axios.get('http://localhost:5000/api/stock-out-logs');
+      const logsResponse = await axios.get('https://invenio-api-production.up.railway.app/api/stock-out-logs');
       setStockOutLogs(logsResponse.data);
 
     } catch (err) {

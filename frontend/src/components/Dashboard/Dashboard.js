@@ -15,7 +15,7 @@ function Dashboard() {
 
     const getReportStats = async () => {
         try {
-            let result = await fetch('http://localhost:5000/api/get_report_stats', {
+            let result = await fetch('https://invenio-api-production.up.railway.app/api/get_report_stats', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ function Dashboard() {
 
     const getProductStats = async () => {
         try {
-            let result = await fetch('http://localhost:5000/api/get_product_stats', {
+            let result = await fetch('https://invenio-api-production.up.railway.app/api/get_product_stats', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include'

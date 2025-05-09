@@ -57,7 +57,7 @@ function ProductAddNew() {
 
 		setSubmitButtonState(true)
 
-		let response = await fetch(`http://localhost:5000/api/add_product`, {
+		let response = await fetch(`https://invenio-api-production.up.railway.app/api/add_product`, {
 			method: 'POST',
 			body: f,
 			credentials: 'include'

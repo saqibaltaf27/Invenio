@@ -50,14 +50,14 @@ const GoodsReceiveCreate = () => {
         setLoading(true);
         try {
             const [suppliersRes, productsRes, logsRes] = await Promise.all([
-                axios.post('http://localhost:5000/api/get_suppliers', {
+                axios.post('https://invenio-api-production.up.railway.app/api/get_suppliers', {
                     start_value: 0,
                     sort_column: 'name',
                     sort_order: 'ASC',
                     search_value: '',
                 }),
-                axios.post('http://localhost:5000/api/get_products'),
-                axios.get('http://localhost:5000/api/goods-receive-logs') 
+                axios.post('https://invenio-api-production.up.railway.app/api/get_products'),
+                axios.get('https://invenio-api-production.up.railway.app/api/goods-receive-logs') 
             ]);
 
             const suppliersData = suppliersRes?.data?.info?.suppliers || [];
@@ -175,7 +175,7 @@ const GoodsReceiveCreate = () => {
 
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/goods_receives', payload);
+            await axios.post('https://invenio-api-production.up.railway.app/api/goods_receives', payload);
             setItems([]);
             setInvoiceNumber('');
             setNotes('');
@@ -184,7 +184,7 @@ const GoodsReceiveCreate = () => {
             showUserAlert('Goods Receive created!', 'success');
 
             // Fetch the updated goods receive logs after successfully creating a new one
-            const logsResponse = await axios.get('http://localhost:5000/api/goods-receive-logs');
+            const logsResponse = await axios.get('https://invenio-api-production.up.railway.app/api/goods-receive-logs');
             setGoodsReceiveLogs(logsResponse.data);
 
         } catch (err) {

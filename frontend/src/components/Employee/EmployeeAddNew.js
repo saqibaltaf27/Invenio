@@ -60,7 +60,7 @@ function EmployeeAddNew() {
 		};
 		setSubmitButtonState(true)
 
-		let response = await fetch(`http://localhost:5000/api/add_employee`, {
+		let response = await fetch(`https://invenio-api-production.up.railway.app/api/add_employee`, {
 			method: 'POST',
 			headers: {
 				'Content-type': 'application/json'

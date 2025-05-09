@@ -60,7 +60,7 @@ function SupplierAddNew() {
         setSubmitButtonState(true);
 
         try {
-            const response = await fetch(`http://localhost:5000/api/add_supplier`, {
+            const response = await fetch(`https://invenio-api-production.up.railway.app/api/add_supplier`, {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/json',

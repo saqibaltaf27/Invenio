@@ -63,7 +63,7 @@ const Products = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/get_products", {
+      const res = await fetch("https://invenio-api-production.up.railway.app/api/get_products", {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -137,7 +137,7 @@ const Products = () => {
 
     setIsUpdating(true);
     try {
-      const res = await fetch('http://localhost:5000/api/update_product', {
+      const res = await fetch('https://invenio-api-production.up.railway.app/api/update_product', {
         method: 'POST',
         body: formData,
         credentials: 'include',
@@ -168,7 +168,7 @@ const Products = () => {
     })
     .then((willDelete) => {
       if (willDelete) {
-        fetch('http://localhost:5000/api/delete_product', {
+        fetch('https://invenio-api-production.up.railway.app/api/delete_product', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ product_id: id }),

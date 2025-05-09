@@ -16,7 +16,7 @@ export default function Chart() {
   const fetchProductData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/productsChart');
+      const response = await axios.get('https://invenio-api-production.up.railway.app/api/productsChart');
       setProductStats(response.data.data || []);
       setLoading(false);
     } catch (error) {
@@ -29,7 +29,7 @@ export default function Chart() {
   const fetchSupplierData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/suppliersChart');
+      const response = await axios.get('https://invenio-api-production.up.railway.app/api/suppliersChart');
       setSupplierStats(response.data.data || []);
       setLoading(false);
     } catch (error) {

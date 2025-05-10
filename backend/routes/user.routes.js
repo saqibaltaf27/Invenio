@@ -3,7 +3,7 @@ const router = express.Router();
 
 const upload = require("../middlewares/upload.js");
 const User = require('../models/user.model.js');
-const { isAuthenticated } = require('../middlewares/authMiddleware');
+const { isAuthenticated } = require('../middlewares/authMiddleware.js');
 
 const user = new User();
 

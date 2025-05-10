@@ -15,7 +15,10 @@ app.use(cookieParser())
 
 
 const corsOption = {
-    origin: ['https://ims-green.vercel.app','http://localhost:3000'],
+    origin: ['https://invenio-three.vercel.app',
+  			'https://invenio-git-main-saqib27.vercel.app',
+  			'https://invenio-bfd5swfbb-saqib27.vercel.app',
+			'http://localhost:3000'],
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 	credentials: true,
 };

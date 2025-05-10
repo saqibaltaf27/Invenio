@@ -1,182 +1,201 @@
 .asideNavbar {
+  .toggelDiv {
+    display: none;
+    height: 2.5rem;
+    width: 2.5rem;
+    margin: 0.3rem 0.8rem;
+    background-color: rgba(255, 255, 255, 0.1); /* Glassmorphism */
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #e2e8f0; /* Light text */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    @media screen and (max-width: 768px) {
+      position: fixed; // Changed to fixed for better visibility during scroll
+      top: 0.5rem; // Adjust position as needed
+      left: 0.5rem; // Adjust position as needed
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000; // Ensure it's above other elements
+      background-color: rgba(15, 23, 42, 0.9); /* Darker background for better contrast */
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+    }
+  }
+
+  &__panel {
+    height: 100vh;
+    min-width: 220px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism border */
+    background: linear-gradient(to bottom, #0f172a, #1e293b);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    backdrop-filter: blur(12px);
+
+    @media screen and (max-width: 768px) {
+      display: none; /* Hide the default panel on mobile */
+    }
+
+    @media screen and (min-width: 769px) and (max-width: 1024px) {
+      /* Optional: Styles for tablets if you want a different behavior */
+      min-width: 180px; /* Example: Slightly narrower on tablets */
+    }
+  }
+
+  &__menu {
+    height: 100vh;
+    min-width: 250px;
+    background: rgba(15, 23, 42, 0.95); /* Slightly more opaque mobile menu */
+    backdrop-filter: blur(15px);
+    position: fixed;
+    top: 0;
+    left: -25rem; /* Initially hidden off-screen */
+    z-index: 99999999;
+    transition: all 0.3s ease-in-out;
+
+    /* Class to trigger the slide-in animation (to be added/removed in your React component) */
+    &.active {
+      left: 0;
+    }
+
     .toggelDiv {
-      display: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       height: 2.5rem;
       width: 2.5rem;
-      margin: 0.3rem 0.8rem;
+      padding: 0.5rem;
       background-color: rgba(255, 255, 255, 0.1); /* Glassmorphism */
       border-radius: 50%;
       cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #e2e8f0; /* Light text */
+      color: #e2e8f0;
+      margin: 1rem 1rem 0 auto; /* Move to the top right of the mobile menu */
       border: 1px solid rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(12px);
       transition: background-color 0.2s ease;
-  
+
       &:hover {
         background-color: rgba(255, 255, 255, 0.2);
       }
-  
-      @media screen and (max-width: 768px) {
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 99999;
-        background-color: rgba(255, 255, 255, 0.1); /* Glassmorphism */
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(12px);
+
+      @media screen and (min-width: 769px) {
+        display: none; /* Hide the mobile menu toggle on larger screens */
       }
-    }
-  
-    &__panel {
-      height: 100vh;
-      min-width: 220px;
-      border-right: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism border */
-      background: linear-gradient(to bottom, #0f172a, #1e293b);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      backdrop-filter: blur(12px);
-    }
-  
-    &__menu {
-      height: 100vh;
-      min-width: 250px;
-      background: rgba(15, 23, 42, 0.9); /* Darker, more opaque mobile menu */
-      backdrop-filter: blur(15px);
-      position: fixed;
-      top: 0;
-      left: -25rem;
-      z-index: 99999999;
-      transition: all 0.3s ease-in-out;
-  
-      .toggelDiv {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 2.5rem;
-        width: 2.5rem;
-        padding: 0.5rem;
-        background-color: rgba(255, 255, 255, 0.1); /* Glassmorphism */
-        border-radius: 50%;
-        cursor: pointer;
-        color: #e2e8f0;
-        margin-left: 1rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(12px);
-        transition: background-color 0.2s ease;
-  
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.2);
-        }
-      }
-    }
-  
-    .top {
-      padding: 1rem 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      height: 50px;
-  
-      .logo {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #6ee7b7; /* Cyan logo */
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-      }
-    }
-  
-    hr {
-      height: 0;
-      border: 0.5px solid rgba(255, 255, 255, 0.1);
-      margin: 0.5rem 0;
-    }
-  
-    .center {
-      padding: 1rem;
-      flex-grow: 1;
-      overflow-y: auto;
-  
-      ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-  
-        .title {
-          font-size: 0.8rem;
-          font-weight: bold;
-          color: #94a3b8; /* Lighter text */
-          margin-top: 1rem;
-          margin-bottom: 0.5rem;
-          text-transform: uppercase;
-        }
-  
-        li {
-          display: flex;
-          align-items: center;
-          padding: 0.7rem 1rem;
-          cursor: pointer;
-          border-radius: 0.3rem;
-          transition: background-color 0.3s ease;
-          border: 1px solid transparent;
-  
-          &:hover {
-            background-color: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.1);
-          }
-  
-          .icon {
-            font-size: 1.2rem;
-            color: #6ee7b7; /* Cyan icon */
-            margin-right: 0.8rem;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-          }
-  
-          span {
-            font-size: 1rem;
-            font-weight: 500;
-            color: #e2e8f0;
-          }
-        }
-      }
-    }
-  
-    .bottom {
-      display: flex;
-      align-items: center;
-      padding: 1rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-  
-      .theme-toggle-label {
-        font-size: 0.9rem;
-        color: #94a3b8;
-        margin-right: 0.5rem;
-      }
-  
-      .colorOption {
-        width: 1.2rem;
-        height: 1.2rem;
-        border-radius: 50%;
-        border: 1px solid #4a5568;
-        cursor: pointer;
-        margin-left: 0.5rem;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        background-color: #fff;
-  
-        &.active {
-          border-color: #6ee7b7;
-          box-shadow: 0 0 0 0.2rem rgba(110, 231, 183, 0.5);
-        }
-      }
-    }
-  
-    @media screen and (max-width: 768px) {
-      display: none;
     }
   }
-  
+
+  .top {
+    padding: 1rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    height: 50px;
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #6ee7b7; /* Cyan logo */
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  hr {
+    height: 0;
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+    margin: 0.5rem 0;
+  }
+
+  .center {
+    padding: 1rem;
+    flex-grow: 1;
+    overflow-y: auto;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      .title {
+        font-size: 0.8rem;
+        font-weight: bold;
+        color: #94a3b8; /* Lighter text */
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+      }
+
+      li {
+        display: flex;
+        align-items: center;
+        padding: 0.7rem 1rem;
+        cursor: pointer;
+        border-radius: 0.3rem;
+        transition: background-color 0.3s ease;
+        border: 1px solid transparent;
+
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.08);
+          border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .icon {
+          font-size: 1.2rem;
+          color: #6ee7b7; /* Cyan icon */
+          margin-right: 0.8rem;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        span {
+          font-size: 1rem;
+          font-weight: 500;
+          color: #e2e8f0;
+        }
+      }
+    }
+  }
+
+  .bottom {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    .theme-toggle-label {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-right: 0.5rem;
+    }
+
+    .colorOption {
+      width: 1.2rem;
+      height: 1.2rem;
+      border-radius: 50%;
+      border: 1px solid #4a5568;
+      cursor: pointer;
+      margin-left: 0.5rem;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      background-color: #fff;
+
+      &.active {
+        border-color: #6ee7b7;
+        box-shadow: 0 0 0 0.2rem rgba(110, 231, 183, 0.5);
+      }
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    display: none; /* Hide the default panel on mobile */
+  }
+}

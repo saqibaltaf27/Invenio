@@ -1,126 +1,143 @@
 .employees {
-	flex-grow: 1;
-	background: linear-gradient(to bottom, #0f172a, #1e293b); /* Dark gradient background */
-	height: calc(100vh - 50px);
-	color: #e2e8f0; /* Light text color */
-  
-	.employee-header {
-	  display: flex;
-	  justify-content: space-between;
-	  margin: 1rem;
-	  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle divider */
-	  padding-bottom: 0.5rem;
-	}
-  
-	.title {
-	  color: #6ee7b7; /* Cyan title, similar to logo */
-	  font-size: x-large;
-	  font-weight: bold;
-	  margin-left: 0.5rem;
-	  margin-right: 0.5rem;
-	  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle text shadow */
-	}
-  
-	.card {
-	  background-color: rgba(255, 255, 255, 0.08); /* Dark card background */
-	  transition: 0.3s;
-	  margin: 20px;
-	  border: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism border */
-	  border-radius: 5px;
-	  backdrop-filter: blur(12px); /* Glassmorphism effect */
-	}
-  
-	.container {
-	  box-shadow: none; /* Remove the existing shadow */
-	  padding: 1rem; /* Adjust padding for better spacing */
-	  height: 100%;
-	}
-  
-	.btn {
-	  border: 1px solid #6ee7b7; /* Cyan border */
-	  background-color: transparent; /* Transparent background */
-	  color: #6ee7b7; /* Cyan text */
-	  padding: 0.5rem 1rem;
-	  font-size: 16px;
-	  font-weight: bold;
-	  border-radius: 0.3rem;
-	  cursor: pointer;
-	  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
-  
-	  &:hover {
-		background-color: rgba(110, 231, 183, 0.1); /* Light cyan hover */
-		color: #e2e8f0; /* Light text on hover */
-		border-color: #e2e8f0;
-	  }
-	}
-  
-	.btn:disabled {
-	  opacity: 0.5;
-	  cursor: not-allowed;
-	  color: #94a3b8;
-	  border-color: #94a3b8;
-	}
-  
-	/* Green */
-	.success {
-	  border-color: #04AA6D;
-	  color: #04AA6D;
-  
-	  &:hover {
-		background-color: rgba(4, 170, 109, 0.1);
-		color: #e2e8f0;
-		border-color: #e2e8f0;
-	  }
-	}
-  
-	/* Blue */
-	.info {
-	  border-color: #2196F3;
-	  color: dodgerblue;
-  
-	  &:hover {
-		background: rgba(33, 150, 243, 0.1);
-		color: #e2e8f0;
-		border-color: #e2e8f0;
-	  }
-	}
-  
-	/* Orange */
-	.warning {
-	  border-color: #ff9800;
-	  color: orange;
-  
-	  &:hover {
-		background: rgba(255, 152, 0, 0.1);
-		color: #e2e8f0;
-		border-color: #e2e8f0;
-	  }
-	}
-  
-	/* Red */
-	.danger {
-	  border-color: #f44336;
-	  color: rgb(222, 72, 72);
-  
-	  &:hover {
-		background: rgba(244, 67, 54, 0.1);
-		color: #e2e8f0;
-		border-color: #e2e8f0;
-	  }
-	}
-  
-	.default {
-	  border-color: #94a3b8;
-	  color: #e2e8f0;
-  
-	  &:hover {
-		background: rgba(148, 163, 184, 0.1);
-		color: #e2e8f0;
-		border-color: #e2e8f0;
-	  }
-	}
-  
-	@media screen and (max-width: 768px) {
-	  height: auto; /* Adjust height for mobile */
-	}
+  flex-grow: 1;
+  background: linear-gradient(to bottom, #0f172a, #1e293b); /* Dark gradient background */
+  height: calc(100vh - 50px);
+  color: #e2e8f0; /* Light text color */
+
+  .employee-header {
+    display: flex;
+    justify-content: space-between;
+    margin: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Subtle divider */
+    padding-bottom: 0.5rem;
   }
+
+  .title {
+    color: #6ee7b7; /* Cyan title, similar to logo */
+    font-size: x-large;
+    font-weight: bold;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle text shadow */
+  }
+
+  .container {
+    padding: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem; /* Spacing between cards */
+    height: auto; /* Adjust height for content */
+  }
+
+  .card {
+    background-color: rgba(255, 255, 255, 0.08); /* Dark card background */
+    transition: 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism border */
+    border-radius: 5px;
+    backdrop-filter: blur(12px); /* Glassmorphism effect */
+    flex-basis: calc(33% - 1rem); /* Roughly three cards per row on larger screens */
+    min-width: 200px; /* Ensure cards don't get too narrow */
+    margin: 0; /* Remove fixed margin */
+  }
+
+  .btn {
+    border: 1px solid #6ee7b7; /* Cyan border */
+    background-color: transparent; /* Transparent background */
+    color: #6ee7b7; /* Cyan text */
+    padding: 0.5rem 1rem;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+
+    &:hover {
+      background-color: rgba(110, 231, 183, 0.1); /* Light cyan hover */
+      color: #e2e8f0; /* Light text on hover */
+      border-color: #e2e8f0;
+    }
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    color: #94a3b8;
+    border-color: #94a3b8;
+  }
+
+  /* Green */
+  .success {
+    border-color: #04AA6D;
+    color: #04AA6D;
+
+    &:hover {
+      background-color: rgba(4, 170, 109, 0.1);
+      color: #e2e8f0;
+      border-color: #e2e8f0;
+    }
+  }
+
+  /* Blue */
+  .info {
+    border-color: #2196F3;
+    color: dodgerblue;
+
+    &:hover {
+      background: rgba(33, 150, 243, 0.1);
+      color: #e2e8f0;
+      border-color: #e2e8f0;
+    }
+  }
+
+  /* Orange */
+  .warning {
+    border-color: #ff9800;
+    color: orange;
+
+    &:hover {
+      background: rgba(255, 152, 0, 0.1);
+      color: #e2e8f0;
+      border-color: #e2e8f0;
+    }
+  }
+
+  /* Red */
+  .danger {
+    border-color: #f44336;
+    color: rgb(222, 72, 72);
+
+    &:hover {
+      background: rgba(244, 67, 54, 0.1);
+      color: #e2e8f0;
+      border-color: #e2e8f0;
+    }
+  }
+
+  .default {
+    border-color: #94a3b8;
+    color: #e2e8f0;
+
+    &:hover {
+      background: rgba(148, 163, 184, 0.1);
+      color: #e2e8f0;
+      border-color: #e2e8f0;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    height: auto; /* Adjust height for mobile */
+  }
+
+  /* Responsive adjustments for the card layout */
+  @media screen and (max-width: 768px) {
+    .card {
+      flex-basis: calc(50% - 1rem); /* Two cards per row on tablets */
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .card {
+      flex-basis: 100%; /* One card per row on mobile */
+    }
+  }
+}

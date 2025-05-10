@@ -57,7 +57,7 @@ const GoodsReceiveCreate = () => {
                     search_value: '',
                 }),
                 axios.post('https://invenio-api-production.up.railway.app/api/get_products'),
-                axios.get('https://invenio-api-production.up.railway.app/api/goods-receive-logs') 
+                axios.get('https://invenio-api-production.up.railway.app/api/goods-receive-logs')
             ]);
 
             const suppliersData = suppliersRes?.data?.info?.suppliers || [];
@@ -260,7 +260,7 @@ const GoodsReceiveCreate = () => {
             </Card>
 
             {items.length > 0 && (
-                <Card className="mb-4 goods-receive-create-page">
+                <Card className="mb-4"> {/* Removed goods-receive-create-page class here */}
                     <Card.Body>
                         <h4>Items List</h4>
                         <Table bordered className='item-table'>
@@ -365,11 +365,11 @@ const GoodsReceiveCreate = () => {
                                             {log.items.map(item => {
                                                const expiryDate = item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : 'N/A';
                                                return (
-                                                <div key={item.product_id}>
-                                                    {expiryDate}
-                                                </div>)
-                                                
-                                              })}
+                                                   <div key={item.product_id}>
+                                                       {expiryDate}
+                                                   </div>)
+
+                                            })}
                                         </td>
                                     </tr>
                                 ))}

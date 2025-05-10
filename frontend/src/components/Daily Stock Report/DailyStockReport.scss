@@ -1,0 +1,135 @@
+.daily-stock-report {
+  /* Glassmorphism and dark theme are applied by default */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  color: #e2e8f0; /* Default text color is white-ish */
+
+  .card-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.75rem 1.25rem;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+
+    .card-title {
+      margin-bottom: 0;
+      color: #6ee7b7;
+      font-weight: 600;
+      font-size: 1.3rem;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .dropdown-toggle {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+    }
+
+    .dropdown-menu {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+
+      .dropdown-item {
+        color: #e2e8f0;
+
+        &:hover {
+          background-color: rgba(100, 100, 100, 0.2);
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  .card-body {
+    padding: 1.25rem;
+
+    h4 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: #6ee7b7;
+      font-weight: 600;
+      font-size: 1.2rem;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    table {
+      margin-bottom: 1rem;
+      color: #e2e8f0; /* Ensure table text is white-ish */
+
+      thead {
+        th {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.1);
+          color: #e2e8f0;
+          backdrop-filter: blur(12px);
+        }
+      }
+
+      tbody {
+        tr {
+          &:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.03);
+          }
+
+          td {
+            border-color: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0; /* Explicitly set td color to white-ish */
+          }
+        }
+      }
+    }
+
+    p {
+      color: #94a3b8;
+    }
+
+    .pagination {
+      .page-item {
+        .page-link {
+          color: #e2e8f0;
+          background-color: rgba(255, 255, 255, 0.08);
+          border-color: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(12px);
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.2);
+          }
+        }
+
+        &.active .page-link {
+          background-color: #6ee7b7;
+          border-color: #6ee7b7;
+          color: #0f172a;
+        }
+      }
+    }
+  }
+
+  &.dark-mode {
+    /* Redundant in this version, but kept for clarity */
+    .card-body {
+      table {
+        tbody {
+          td{
+             color: #e2e8f0; /* Ensure white-ish text in dark mode too */
+          }
+          tr {
+            &:nth-child(even) {
+              background-color: rgba(255, 255, 255, 0.03);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.text-light {
+  color: #e2e8f0;
+}

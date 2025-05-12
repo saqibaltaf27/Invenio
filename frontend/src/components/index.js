@@ -22,3 +22,4 @@ export { default as  OrderAddNew} from './Order/OrderAddNew';
 export { default as  Profile} from './Profile/Profile';
 export { default as  Settings} from './Settings/Settings';
 export { default as  Layout} from './Layout/Layout';
+export { default as  GoodsReceive} from './Goods Receive/GoodsReceive';

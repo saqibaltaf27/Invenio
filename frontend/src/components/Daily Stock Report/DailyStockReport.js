@@ -1,196 +1,142 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Card, Table, Button, Pagination, Dropdown } from 'react-bootstrap';
-import './DailyStockReport.scss'; // You can create this CSS file
+import { Card, Table, Button, Pagination, Spinner, Form } from 'react-bootstrap';
+import './DailyStockReport.scss';
+import { debounce } from 'lodash'; // Import debounce
 
-const DailyStockReport = ({ credentials }) => {
-    const [stockOutLogs, setStockOutLogs] = useState([]);
-    const [goodsReceiveLogs, setGoodsReceiveLogs] = useState([]);
-    const [loading, setLoading] = useState(true);
+const DailyStockReport = () => {
+    const [reportData, setReportData] = useState([]);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [currentPageStockOut, setCurrentPageStockOut] = useState(1);
-    const [logsPerPage] = useState(5);
-    const [currentPageGoodsReceive, setCurrentPageGoodsReceive] = useState(1);
-    const [showStockIn, setShowStockIn] = useState(false);
-    const [showStockOut, setShowStockOut] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const recordsPerPage = 8;
 
-    useEffect(() => {
-        const fetchDailyStockReportData = async () => {
+    // Debounced fetch function
+    const debouncedFetchInventoryReport = useCallback(
+        debounce(async () => {
             setLoading(true);
             setError('');
+            
             try {
-                const stockOutResponse = await axios.get('https://invenio-api-production.up.railway.app/api/stock-out-logs');
-                setStockOutLogs(stockOutResponse.data);
-                const goodsReceiveResponse = await axios.get('https://invenio-api-production.up.railway.app/api/goods-receive-logs');
-                setGoodsReceiveLogs(goodsReceiveResponse.data);
+                const params = {
+                    page: currentPage,
+                    limit: recordsPerPage,
+                };
+
+                if (startDate) params.startDate = startDate;
+                if (endDate) params.endDate = endDate;
+
+                const response = await axios.get('https://invenio-api-production.up.railway.app/api/stock-report', { params });
+
+                const data = response.data;
+
+                setReportData(data.data || []);
+                const count = data.totalCount || data.count || 0;
+                const total = Math.ceil(count / recordsPerPage);
+                setTotalPages(total);
             } catch (err) {
-                setError(err.message || 'Failed to fetch daily stock report data.');
+                setError(err.message || 'Failed to fetch inventory report.');
             } finally {
                 setLoading(false);
             }
-        };
+        }, 500), [currentPage, startDate, endDate] // Adjust debounce delay (500ms)
+    );
 
-        fetchDailyStockReportData();
-    }, [credentials]);
+    useEffect(() => {
+        debouncedFetchInventoryReport();
+    }, [debouncedFetchInventoryReport]);
 
-    // Pagination for Stock Out Logs
-    const indexOfLastStockOutLog = currentPageStockOut * logsPerPage;
-    const indexOfFirstStockOutLog = indexOfLastStockOutLog - logsPerPage;
-    const currentStockOutLogs = stockOutLogs.slice(indexOfFirstStockOutLog, indexOfLastStockOutLog);
-    const paginateStockOut = (pageNumber) => setCurrentPageStockOut(pageNumber);
-    const pageNumbersStockOut = [];
-    for (let i = 1; i <= Math.ceil(stockOutLogs.length / logsPerPage); i++) {
-        pageNumbersStockOut.push(i);
-    }
-
-    // Pagination for Goods Receive Logs
-    const indexOfLastGoodsReceiveLog = currentPageGoodsReceive * logsPerPage;
-    const indexOfFirstGoodsReceiveLog = indexOfLastGoodsReceiveLog - logsPerPage;
-    const currentGoodsReceiveLogs = goodsReceiveLogs.slice(indexOfFirstGoodsReceiveLog, indexOfLastGoodsReceiveLog);
-    const paginateGoodsReceive = (pageNumber) => setCurrentPageGoodsReceive(pageNumber);
-    const pageNumbersGoodsReceive = [];
-    for (let i = 1; i <= Math.ceil(goodsReceiveLogs.length / logsPerPage); i++) {
-        pageNumbersGoodsReceive.push(i);
-    }
-
-    const handleShowStockIn = () => {
-        setShowStockIn(true);
-        setShowStockOut(false);
-    };
-
-    const handleShowStockOut = () => {
-        setShowStockIn(false);
-        setShowStockOut(true);
-    };
-
-    if (loading) {
-        return <p>Loading Daily Stock Report...</p>;
-    }
-
-    if (error) {
-        return <p className="text-danger">Error loading Daily Stock Report: {error}</p>;
-    }
+    const handleStartDateChange = (e) => setStartDate(e.target.value);
+    const handleEndDateChange = (e) => setEndDate(e.target.value);
+    const handlePageChange = (page) => setCurrentPage(page);
 
     return (
-        <Card className="daily-stock-report">
-            <Card.Header>
-                <div className="d-flex justify-content-between align-items-center">
-                    <Card.Title>Daily Stock Report</Card.Title>
-                    <div>
-                        <Dropdown>
-                            <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
-                                View Transactions
-                            </Dropdown.Toggle>
-
-                            <Dropdown.Menu>
-                                <Dropdown.Item onClick={handleShowStockOut}>Stock Out</Dropdown.Item>
-                                <Dropdown.Item onClick={handleShowStockIn}>Stock In (Goods Receive)</Dropdown.Item>
-                            </Dropdown.Menu>
-                        </Dropdown>
-                    </div>
+        <Card className="daily-stock-report" style={{ maxWidth: '90%', margin: '0 auto', padding: '10px' }}>
+            <Card.Header className="d-flex justify-content-between align-items-center">
+                <Card.Title>Stock Report</Card.Title>
+                <div className="d-flex gap-2 align-items-center">
+                    <Form.Label className="mb-0">From:</Form.Label>
+                    <Form.Control
+                        type="date"
+                        value={startDate}
+                        onChange={handleStartDateChange}
+                        className="form-control"
+                        aria-label="Start Date"
+                    />
+                    <Form.Label className="mb-0">To:</Form.Label>
+                    <Form.Control
+                        type="date"
+                        value={endDate}
+                        onChange={handleEndDateChange}
+                        className="form-control"
+                        aria-label="End Date"
+                    />
+                    <Button
+                        variant="secondary"
+                        onClick={debouncedFetchInventoryReport}
+                        disabled={loading}
+                        aria-label="Apply date filter"
+                    >
+                        {loading ? 'Applying...' : 'Filter'}
+                    </Button>
                 </div>
             </Card.Header>
-            <Card.Body>
-                {showStockOut && (
-                    <div>
-                        <h4>Stock Out Transactions</h4>
-                        {stockOutLogs.length > 0 ? (
-                            <Table striped bordered hover responsive>
-                                <thead>
-                                    <tr>
-                                        <th>Time</th>
-                                        <th>Customer</th>
-                                        <th>Product</th>
-                                        <th>Quantity</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {currentStockOutLogs.map((log) => (
-                                        <tr key={log.id}>
-                                            <td>{new Date(log.created_at).toLocaleString()}</td>
-                                            <td>{log.customer_info}</td>
-                                            <td>
-                                                {log.items.map(item => (
-                                                    <div key={item.product_id}>{item.product_name}</div>
-                                                ))}
-                                            </td>
-                                            <td>
-                                                {log.items.map(item => (
-                                                    <div key={item.product_id}>{item.quantity}</div>
-                                                ))}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </Table>
-                        ) : (
-                            <p>No stock out transactions found.</p>
-                        )}
-                        {stockOutLogs.length > logsPerPage && (
-                            <Pagination className="mt-3 justify-content-center">
-                                {pageNumbersStockOut.map(number => (
-                                    <Pagination.Item key={number} active={number === currentPageStockOut} onClick={() => paginateStockOut(number)}>
-                                        {number}
-                                    </Pagination.Item>
-                                ))}
-                            </Pagination>
-                        )}
+            <Card.Body style={{ padding: '15px' }}>
+                {loading ? (
+                    <div className="text-center">
+                        <Spinner animation="border" />
+                        <p>Loading report...</p>
                     </div>
-                )}
+                ) : error ? (
+                    <p className="text-danger">{error}</p>
+                ) : (
+                    <>
+                        <Table striped bordered hover responsive>
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Purchase Price</th>
+                                    <th>Stock In Qty</th>
+                                    <th>Stock In Value</th>
+                                    <th>Stock Out Qty</th>
+                                    <th>Stock Out Value</th>
+                                    <th>Remaining Stock</th>
+                                    <th>Stock Value</th>
+                                    <th>Last Transaction</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {reportData.map((item) => (
+                                    <tr key={item.product_id}>
+                                        <td>{item.product_name}</td>
+                                        <td>{item.purchase_price}</td>
+                                        <td>{item.stock_in_qty}</td>
+                                        <td>{item.stock_in_value}</td>
+                                        <td>{item.stock_out_qty}</td>
+                                        <td>{item.stock_out_value}</td>
+                                        <td>{item.current_remaining_stock}</td>
+                                        <td>{item.stock_value}</td>
+                                        <td>{new Date(item.latest_transaction_date).toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </Table>
 
-                {showStockIn && (
-                    <div>
-                        <h4>Goods Receive Transactions</h4>
-                        {goodsReceiveLogs.length > 0 ? (
-                            <Table striped bordered hover responsive>
-                                <thead>
-                                    <tr>
-                                        <th>Time</th>
-                                        <th>Supplier</th>
-                                        <th>Invoice #</th>
-                                        <th>Product</th>
-                                        <th>Quantity</th>
-                                        <th>Purchase Price</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {currentGoodsReceiveLogs.map((log) => (
-                                        <tr key={log.id}>
-                                            <td>{new Date(log.created_at).toLocaleString()}</td>
-                                            <td>{log.supplier_info}</td>
-                                            <td>{log.invoice_number}</td>
-                                            <td>
-                                                {log.items.map(item => (
-                                                    <div key={item.product_id}>{item.product_name}</div>
-                                                ))}
-                                            </td>
-                                            <td>
-                                                {log.items.map(item => (
-                                                    <div key={item.product_id}>{item.quantity}</div>
-                                                ))}
-                                            </td>
-                                            <td>
-                                                {log.items.map(item => (
-                                                    <div key={item.product_id}>{item.purchase_price}</div>
-                                                ))}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </Table>
-                        ) : (
-                            <p>No goods receive transactions found.</p>
-                        )}
-                        {goodsReceiveLogs.length > logsPerPage && (
-                            <Pagination className="mt-3 justify-content-center">
-                                {pageNumbersGoodsReceive.map(number => (
-                                    <Pagination.Item key={number} active={number === currentPageGoodsReceive} onClick={() => paginateGoodsReceive(number)}>
-                                        {number}
-                                    </Pagination.Item>
-                                ))}
-                            </Pagination>
-                        )}
-                    </div>
+                        <Pagination className="justify-content-center mt-3">
+                            {[...Array(totalPages)].map((_, i) => (
+                                <Pagination.Item
+                                    key={i + 1}
+                                    active={currentPage === i + 1}
+                                    onClick={() => handlePageChange(i + 1)}
+                                >
+                                    {i + 1}
+                                </Pagination.Item>
+                            ))}
+                        </Pagination>
+                    </>
                 )}
             </Card.Body>
         </Card>

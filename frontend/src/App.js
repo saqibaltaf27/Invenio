@@ -58,9 +58,9 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="employees" element={
-              <ProtectedRoute>
+             
                 <Employee />
-              </ProtectedRoute>
+       
             } />
             <Route path="employees/addnew" element={
               <ProtectedRoute>

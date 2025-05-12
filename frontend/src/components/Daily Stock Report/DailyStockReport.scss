@@ -6,6 +6,9 @@
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
   color: #e2e8f0; /* Default text color is white-ish */
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
 
   .card-header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -55,6 +58,56 @@
       font-weight: 600;
       font-size: 1.2rem;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Style the date filter inputs */
+    .date-filter {
+      background: rgba(255, 255, 255, 0.1); /* Add background to improve visibility */
+      border: 1px solid rgba(255, 255, 255, 0.2); /* Slightly visible border */
+      border-radius: 0.5rem;
+      color: #e2e8f0;
+      padding: 0.5rem;
+      font-size: 1rem;
+      transition: border 0.3s ease;
+
+      &:focus {
+        border-color: #6ee7b7; /* Highlight border on focus */
+        outline: none;
+        background: rgba(255, 255, 255, 0.15); /* Slight change in background on focus */
+      }
+
+      &.disabled {
+        background: rgba(255, 255, 255, 0.06); /* Slightly faded background when disabled */
+        cursor: not-allowed;
+      }
+
+      .react-datepicker-wrapper {
+        display: block;
+        width: 100%;
+      }
+
+      .react-datepicker__input-container {
+        width: 100%;
+      }
+    }
+
+    .date-filter-btn {
+      background: #6ee7b7; /* Button color */
+      color: #0f172a; /* Button text color */
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background: #4ac79b; /* Darker button color on hover */
+      }
+
+      &:disabled {
+        background: #94a3b8; /* Disabled button background */
+        cursor: not-allowed;
+      }
     }
 
     table {

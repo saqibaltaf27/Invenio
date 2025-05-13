@@ -34,16 +34,19 @@ const GoodsReceiveCreate = () => {
     const [alertMessage, setAlertMessage] = useState('');
     const [alertVariant, setAlertVariant] = useState('danger');
     const [showAlert, setShowAlert] = useState(false);
+    const [alertTitle, setAlertTitle] = useState(''); // Added for conditional rendering
     const [totalTaxRate, setTotalTaxRate] = useState(0);
-    const [goodsReceiveLogs, setGoodsReceiveLogs] = useState([]);  // State for goods receive logs
+    const [goodsReceiveLogs, setGoodsReceiveLogs] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [logsPerPage] = useState(5); // Number of logs per page
+    const [logsPerPage] = useState(5);
+    const [downloadUrl, setDownloadUrl] = useState(''); // To store the download URL
 
 
-    const showUserAlert = (message, variant = 'danger') => {
+    const showUserAlert = (message, variant = 'danger', title = '') => { // Added title
         setAlertMessage(message);
         setAlertVariant(variant);
         setShowAlert(true);
+        setAlertTitle(title); // Set title
     };
 
     const fetchInitialData = useCallback(async () => {
@@ -66,7 +69,7 @@ const GoodsReceiveCreate = () => {
 
             setSuppliers(suppliersData);
             setProducts(productsData);
-            setGoodsReceiveLogs(logsData); //set logs
+            setGoodsReceiveLogs(logsData);
         } catch (err) {
             showUserAlert(err.message || 'Error fetching data');
         } finally {
@@ -84,21 +87,17 @@ const GoodsReceiveCreate = () => {
     };
 
     const handleAddItem = () => {
-        const { product_id, quantity, purchase_price, tax_rate } = newItem;
+        const { product_id, quantity, purchase_price } = newItem;
         const parsedQty = parseInt(quantity, 10);
         const parsedPrice = parseFloat(purchase_price);
-        const parsedTax = parseFloat(tax_rate) || 0;
 
-        // Validate inputs
         if (!product_id || !parsedQty || !parsedPrice) {
             showUserAlert('Please provide valid product, quantity, and price.');
             return;
         }
 
         const existing = items.find((item) => item.product_id === product_id);
-        const itemTotal = (parsedQty * parsedPrice * (1 + parsedTax/100)).toFixed(2);
 
-        // Check if the product already exists
         if (existing) {
             setItems((prev) =>
                 prev.map((item) =>
@@ -106,37 +105,32 @@ const GoodsReceiveCreate = () => {
                         ? {
                             ...item,
                             quantity: item.quantity + parsedQty,
-                            item_total: ((item.quantity + parsedQty) * item.purchase_price * (1 + parsedTax/100)).toFixed(2),
+                            item_total: ((item.quantity + parsedQty) * item.purchase_price * (1 + (item.tax_rate || 0) / 100)).toFixed(2),
                         }
                         : item
                 )
             );
         } else {
-            // Find the selected product from the products list
             const selectedProduct = products.find((p) => p.product_id === product_id.toString());
 
-            // Check if product exists in the products list, otherwise show error
             if (!selectedProduct) {
                 showUserAlert('Product not found.');
                 return;
             }
 
-            // Add the new item to the items list
             setItems((prev) => [
                 ...prev,
                 {
                     ...newItem,
                     quantity: parsedQty,
                     purchase_price: parsedPrice,
-                    tax_rate: parsedTax,
-                    item_total: itemTotal,
+                    item_total: (parsedQty * parsedPrice * (1 + (newItem.tax_rate || 0) / 100)).toFixed(2),
                     tempId: Date.now(),
-                    name: selectedProduct.name,  // Use the product name from selectedProduct
+                    product_name: selectedProduct.name,
                 },
             ]);
         }
 
-        // Reset the new item state and hide alert
         setNewItem(initialItem);
         setShowAlert(false);
     };
@@ -145,8 +139,9 @@ const GoodsReceiveCreate = () => {
         setItems((prev) => prev.filter((item) => item.tempId !== tempId));
     };
 
-    const calculateTotal = () =>
-        items.reduce((sum, item) => sum + parseFloat(item.item_total || 0), 0).toFixed(2);
+    const calculateTotal = () => {
+        return items.reduce((sum, item) => sum + parseFloat(item.item_total || 0), 0).toFixed(2);
+    };
 
     const calculateGrandTotal = () => {
         const total = parseFloat(calculateTotal());
@@ -159,33 +154,43 @@ const GoodsReceiveCreate = () => {
         if (items.length === 0) return showUserAlert('Please add at least one item.');
 
         const payload = {
-            supplier_id: parseInt(selectedSupplierId),
-            invoice_number: invoiceNumber,
+            supplier_id: selectedSupplierId,
+            invoice_number: invoiceNumber, // Include invoice number
             notes,
-            total_amount: parseFloat(calculateTotal()),
-            total_tax_rate: totalTaxRate,
-            items: items.map(({ product_id, quantity, purchase_price, tax_rate, expiry_date }) => ({
-                product_id,
-                quantity,
-                purchase_price,
-                tax_rate,
-                expiry_date,
+            items: items.map(item => ({
+                product_id: item.product_id,
+                quantity: item.quantity,
+                purchase_price: item.purchase_price,
+                tax_rate: item.tax_rate,
+                expiry_date: item.expiry_date,
             })),
         };
 
         setLoading(true);
         try {
-            await axios.post('https://invenio-api-production.up.railway.app/api/goods_receives', payload);
-            setItems([]);
-            setInvoiceNumber('');
-            setNotes('');
-            setSelectedSupplierId('');
-            setTotalTaxRate(0);
-            showUserAlert('Goods Receive created!', 'success');
+            const response = await axios.post('https://invenio-api-production.up.railway.app/api/goods_receives', payload);
 
-            // Fetch the updated goods receive logs after successfully creating a new one
-            const logsResponse = await axios.get('https://invenio-api-production.up.railway.app/api/goods-receive-logs');
-            setGoodsReceiveLogs(logsResponse.data);
+            if (response.data && response.data.gr_id) {
+                // Set the download URL
+                setDownloadUrl(`https://invenio-api-production.up.railway.app/api/goods_receives/${response.data.gr_id}/invoice`);
+                showUserAlert(
+                    'Goods Receive created successfully!  Click the button to download the invoice.',
+                    'success',
+                    'Invoice Ready' 
+                );
+
+
+                setItems([]);
+                setInvoiceNumber('');
+                setNotes('');
+                setSelectedSupplierId('');
+                setTotalTaxRate(0);
+
+                const logsResponse = await axios.get('https://invenio-api-production.up.railway.app/api/goods-receive-logs');
+                setGoodsReceiveLogs(logsResponse.data);
+            } else {
+                showUserAlert('Goods Receive created, but invoice generation failed.', 'warning');
+            }
 
         } catch (err) {
             showUserAlert(err.message || 'Submission failed');
@@ -194,12 +199,40 @@ const GoodsReceiveCreate = () => {
         }
     };
 
-    // Get current logs for pagination
+    const handleDownloadInvoice = async () => {
+        if (!downloadUrl) {
+            showUserAlert("Download URL is not available.", "danger");
+            return;
+        }
+        setLoading(true);
+        try {
+            const pdfResponse = await axios.get(downloadUrl, {
+                responseType: 'blob', // Expect binary data
+            });
+
+            // Handle the PDF file
+            const blob = new Blob([pdfResponse.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Purchase_Invoice_${invoiceNumber || Date.now()}.pdf`; // Use a fallback filename
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            setDownloadUrl(''); 
+        } catch (pdfError) {
+            console.error("Error downloading PDF:", pdfError);
+            showUserAlert(`Error downloading invoice: ${pdfError.message}`, 'error');
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const indexOfLastLog = currentPage * logsPerPage;
     const indexOfFirstLog = indexOfLastLog - logsPerPage;
     const currentLogs = goodsReceiveLogs.slice(indexOfFirstLog, indexOfLastLog);
 
-    // Change page
     const paginate = (pageNumber) => {
         setCurrentPage(pageNumber);
     };
@@ -216,7 +249,15 @@ const GoodsReceiveCreate = () => {
             {loading && <p>Loading...</p>}
 
             <Alert variant={alertVariant} show={showAlert} onClose={() => setShowAlert(false)} dismissible>
+                <Alert.Heading>{alertTitle}</Alert.Heading> {/* Display the title */}
                 {alertMessage}
+                {downloadUrl && ( // Show button only when downloadUrl is available
+                    <div className="d-flex justify-content-end">
+                        <Button variant="primary" onClick={handleDownloadInvoice} className="mt-2">
+                            Download Invoice
+                        </Button>
+                    </div>
+                )}
             </Alert>
 
             <Card className="mb-4">
@@ -260,7 +301,7 @@ const GoodsReceiveCreate = () => {
             </Card>
 
             {items.length > 0 && (
-                <Card className="mb-4"> {/* Removed goods-receive-create-page class here */}
+                <Card className="mb-4">
                     <Card.Body>
                         <h4>Items List</h4>
                         <Table bordered className='item-table'>
@@ -272,7 +313,7 @@ const GoodsReceiveCreate = () => {
                             <tbody>
                                 {items.map((item) => (
                                     <tr key={item.tempId}>
-                                        <td>{item.name}</td>
+                                        <td>{item.product_name}</td>
                                         <td>{item.quantity}</td>
                                         <td>{item.purchase_price}</td>
                                         <td>{item.tax_rate}%</td>
@@ -363,11 +404,11 @@ const GoodsReceiveCreate = () => {
                                         </td>
                                         <td>
                                             {log.items.map(item => {
-                                               const expiryDate = item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : 'N/A';
-                                               return (
-                                                   <div key={item.product_id}>
-                                                       {expiryDate}
-                                                   </div>)
+                                                const expiryDate = item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : 'N/A';
+                                                return (
+                                                    <div key={item.product_id}>
+                                                        {expiryDate}
+                                                    </div>)
 
                                             })}
                                         </td>

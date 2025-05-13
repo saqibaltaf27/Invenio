@@ -53,7 +53,14 @@ function Login() {
 			if (response.ok && body.user) {
 			  localStorage.setItem('user', JSON.stringify(body.user));
 			  localStorage.setItem('userEmail', JSON.stringify(body.user));
-			  navigate('/dashboard');
+
+
+			  if (body.user.role === 'Admin') {
+					navigate('/dashboard');
+			  } else if (body.user.role === 'employee'){
+				navigate('/products');
+			  }
+			  
 			} else {
 			  swal("Oops!", body.message || 'Login failed', "error");
 			}

@@ -1,12 +1,12 @@
 .daily-stock-report {
-  /* Glassmorphism and dark theme are applied by default */
+  // Base styles with glassmorphism + dark theme
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
-  color: #e2e8f0; /* Default text color is white-ish */
-  width: 90%;
+  color: #6ee7b7;
+  width: 100%;
   max-width: 800px;
   margin: 0 auto;
 
@@ -26,15 +26,15 @@
 
     .dropdown-toggle {
       background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
       color: #e2e8f0;
     }
 
     .dropdown-menu {
       background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
       color: #e2e8f0;
 
       .dropdown-item {
@@ -52,18 +52,16 @@
     padding: 1.25rem;
 
     h4 {
-      margin-top: 0;
-      margin-bottom: 1rem;
+      margin: 0 0 1rem;
       color: #6ee7b7;
       font-weight: 600;
       font-size: 1.2rem;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
 
-    /* Style the date filter inputs */
     .date-filter {
-      background: rgba(255, 255, 255, 0.1); /* Add background to improve visibility */
-      border: 1px solid rgba(255, 255, 255, 0.2); /* Slightly visible border */
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 0.5rem;
       color: #e2e8f0;
       padding: 0.5rem;
@@ -71,29 +69,26 @@
       transition: border 0.3s ease;
 
       &:focus {
-        border-color: #6ee7b7; /* Highlight border on focus */
+        border-color: #6ee7b7;
         outline: none;
-        background: rgba(255, 255, 255, 0.15); /* Slight change in background on focus */
+        background: rgba(255, 255, 255, 0.15);
       }
 
       &.disabled {
-        background: rgba(255, 255, 255, 0.06); /* Slightly faded background when disabled */
+        background: rgba(255, 255, 255, 0.06);
         cursor: not-allowed;
       }
 
-      .react-datepicker-wrapper {
-        display: block;
-        width: 100%;
-      }
-
+      .react-datepicker-wrapper,
       .react-datepicker__input-container {
         width: 100%;
+        display: block;
       }
     }
 
     .date-filter-btn {
-      background: #6ee7b7; /* Button color */
-      color: #0f172a; /* Button text color */
+      background: #6ee7b7;
+      color: #0f172a;
       padding: 0.5rem 1rem;
       border-radius: 0.5rem;
       border: none;
@@ -101,26 +96,24 @@
       transition: background-color 0.3s ease;
 
       &:hover {
-        background: #4ac79b; /* Darker button color on hover */
+        background: #4ac79b;
       }
 
       &:disabled {
-        background: #94a3b8; /* Disabled button background */
+        background: #94a3b8;
         cursor: not-allowed;
       }
     }
 
     table {
       margin-bottom: 1rem;
-      color: #e2e8f0; /* Ensure table text is white-ish */
+      color: #e2e8f0;
 
-      thead {
-        th {
-          background: rgba(255, 255, 255, 0.1);
-          border-color: rgba(255, 255, 255, 0.1);
-          color: #e2e8f0;
-          backdrop-filter: blur(12px);
-        }
+      thead th {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #6ee7b7;
+        backdrop-filter: blur(12px);
       }
 
       tbody {
@@ -131,7 +124,7 @@
 
           td {
             border-color: rgba(255, 255, 255, 0.1);
-            color: #e2e8f0; /* Explicitly set td color to white-ish */
+            color: #e2e8f0;
           }
         }
       }
@@ -165,24 +158,74 @@
   }
 
   &.dark-mode {
-    /* Redundant in this version, but kept for clarity */
-    .card-body {
-      table {
-        tbody {
-          td{
-             color: #e2e8f0; /* Ensure white-ish text in dark mode too */
-          }
-          tr {
-            &:nth-child(even) {
-              background-color: rgba(255, 255, 255, 0.03);
-            }
-          }
-        }
-      }
+    // Explicit override if needed
+    .card-body table tbody td {
+      color: #e2e8f0;
     }
   }
 }
 
 .text-light {
   color: #e2e8f0;
+}
+
+@media (max-width: 768px) {
+  .daily-stock-report {
+    width: 95%;
+    padding: 1rem;
+
+    .card-header {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .card-title {
+        font-size: 1.1rem;
+        text-align: left;
+      }
+
+      .dropdown-toggle {
+        margin-top: 0.5rem;
+        width: 100%;
+      }
+    }
+
+    .card-body {
+      padding: 1rem;
+
+      h4 {
+        font-size: 1.1rem;
+      }
+
+      .date-filter,
+      .date-filter-btn {
+        width: 100%;
+        margin-bottom: 0.75rem;
+      }
+
+      table {
+        font-size: 0.85rem;
+
+        thead {
+          th {
+            font-size: 0.9rem;
+          }
+        }
+
+        tbody {
+          td {
+            font-size: 0.85rem;
+          }
+        }
+      }
+
+      .pagination {
+        .page-item {
+          .page-link {
+            font-size: 0.85rem;
+            padding: 0.4rem 0.6rem;
+          }
+        }
+      }
+    }
+  }
 }

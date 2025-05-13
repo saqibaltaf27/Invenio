@@ -47,11 +47,7 @@ function App() {
 
           {/* Protected Routes (Authentication required) */}
           <Route path="/" element={<Layout />}>
-            <Route index element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
+            
             <Route path="dashboard" element={
               <ProtectedRoute>
                 <Dashboard />

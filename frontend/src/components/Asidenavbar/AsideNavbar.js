@@ -18,8 +18,8 @@ function AsideNavbar() {
 
     useEffect(() => {
         const userData = JSON.parse(localStorage.getItem('user')) || {}; 
-        if (userData.user_role) {
-            setUserRole(userData.user_role); 
+        if (userData.role) {
+            setUserRole(userData.role); 
         }
     }, []);
 

@@ -1,4 +1,4 @@
-<h1> Inventio </h1>
+<h1> Invenio </h1>
 
 <h2> ⭐Project Overview </h2>
 It is a comprehensive and extensible software solution designed to function as a core platform for enterprise resource planning (ERP).  It helps organizations efficiently manage their product stock, customers, suppliers, and orders. The system also provides valuable insights through robust statistics and reports, enabling data-driven decision-making.  It caters to both the organization-wide perspective and the needs of individual employees within the organization. This system includes Goods Receive and Goods Out functionalities, and is built with future expansion in mind.
@@ -6,10 +6,38 @@ It is a comprehensive and extensible software solution designed to function as a
 
 <h2> 💡Key Features </h2>
 
-- *Multiorganization system*
-- *Strong authentication*
-- *Shows statistics for business requirements* 
+- *Multi-Organization System: *The system is designed to be scalable and adaptable to the needs of multiple organizations, allowing for centralized management of inventory across different business entities.
+- *Robust Authentication:* Implements a strong authentication system to secure access to sensitive data and system functionalities. This includes user login, session management, and potentially role-based access control.
+- *Business Intelligence:*  Provides statistical reports and data visualizations to support business decision-making. These reports may include:
+    * Inventory levels and stock valuation
+    * Sales trends and customer behavior analysis
+    * Supplier performance metrics
+    * Expense tracking and profitability analysis
+
+- *User-Friendly Interface:* Offers a pleasant and intuitive user interface (UI) to enhance user experience and minimize the learning curve.
+- *Mobile Responsiveness:* The application is designed to be fully mobile-responsive, ensuring accessibility and usability across various devices (desktops, tablets, and smartphones).
 - *Plesant UI & Mobile responsive*
+- *Plesant UI & Mobile responsive*
+
+* **Core Modules:**
+    * **Customer Management:** Maintain a database of customers, including their contact information, addresses, and purchase history.
+    * **Supplier Management:** Track supplier information, including contact details, addresses, and performance.
+    * **Order Management:** Create, track, and manage customer orders, including order details, due dates, and order status.
+    * **Expense Management:** Record and track business-related expenses, categorize them, and generate expense reports.
+    * **Product Management:**
+        * Maintain a catalog of products, including details such as name, description, category, size, material, and images.
+        * Track product stock levels, manage inventory, and receive low-stock alerts.
+        * Manage product pricing (both selling and purchase prices).
+    * **Goods Receive:** Manage the process of receiving goods from suppliers, including recording received quantities, supplier information, and delivery dates.
+    * **Goods Out:** Manage the process of goods leaving the inventory, including recording quantities, destination, and purpose of the goods issue.
+* **User Roles and Permissions:** Implement a system of user roles and permissions to control access to different parts of the application based on user responsibilities.
+* **Extensibility:** The system is designed to be extensible, allowing for the addition of new modules and functionalities. Potential future modules include:
+    * Payroll Management
+    * Human Resources Management
+    * Financial Accounting
+    * Advanced Data Reporting and Analytics
+    * Customer Relationship Management (CRM)
+    * Manufacturing Resource Planning (MRP)
 
 <h2> 🌐 Tech Stack </h2>
 

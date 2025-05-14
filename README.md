@@ -263,12 +263,14 @@ Ensure that the following software is installed on your system:
 
 The application is deployed to the following platforms:
 
-* **Frontend:** ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
-* **Backend:** ![Railway](https://img.shields.io/badge/Railway-111827?style=for-the-badge&logo=railway&logoColor=white)
+* **Frontend:** Vercel 
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+* **Backend:** Railway
+![Railway](https://img.shields.io/badge/Railway-111827?style=for-the-badge&logo=railway&logoColor=white)
 
 ## Version Control
 
-* <img src="https://unpkg.com/lucide-static@latest/icons/github.svg" width="16" height="16"> **GitHub:** The project's source code is hosted on GitHub, enabling version control, collaboration, and issue tracking. You can find the repository here: [GitHub Repository Link](https://github.com/your-username/your-repo-name) (Replace with your actual repository URL)
+* <img src="https://unpkg.com/lucide-static@latest/icons/github.svg" width="16" height="16"> **GitHub:** The project's source code is hosted on GitHub, enabling version control, collaboration, and issue tracking. You can find the repository here: [GitHub Repository Link](https://github.com/saqibaltaf27/Invenio)
 
 ## Contribution
 

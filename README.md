@@ -1,24 +1,20 @@
-<h1> Invenio </h1>
+# Invenio
 
-<h2> ⭐Project Overview </h2>
-It is a comprehensive and extensible software solution designed to function as a core platform for enterprise resource planning (ERP).  It helps organizations efficiently manage their product stock, customers, suppliers, and orders. The system also provides valuable insights through robust statistics and reports, enabling data-driven decision-making.  It caters to both the organization-wide perspective and the needs of individual employees within the organization. This system includes Goods Receive and Goods Out functionalities, and is built with future expansion in mind.
-<br></br>
+## Project Overview
 
-<h2> 💡Key Features </h2>
+This Inventory Management System is a comprehensive and extensible software solution designed to function as a core platform for enterprise resource planning (ERP). It helps organizations efficiently manage their product stock, customers, suppliers, and orders. The system also provides valuable insights through robust statistics and reports, enabling data-driven decision-making. It caters to both the organization-wide perspective and the needs of individual employees within the organization. This system includes Goods Receive and Goods Out functionalities, and is built with future expansion in mind.
 
-- *Multi-Organization System: *The system is designed to be scalable and adaptable to the needs of multiple organizations, allowing for centralized management of inventory across different business entities.
-- *Robust Authentication:* Implements a strong authentication system to secure access to sensitive data and system functionalities. This includes user login, session management, and potentially role-based access control.
-- *Business Intelligence:*  Provides statistical reports and data visualizations to support business decision-making. These reports may include:
+## Key Features
+
+* **Multi-Organization System:** The system is designed to be scalable and adaptable to the needs of multiple organizations, allowing for centralized management of inventory across different business entities (if needed).
+* **Robust Authentication:** Implements a strong authentication system to secure access to sensitive data and system functionalities. This includes user login, session management, and potentially role-based access control.
+* **Business Intelligence:** Provides statistical reports and data visualizations to support business decision-making. These reports may include:
     * Inventory levels and stock valuation
     * Sales trends and customer behavior analysis
     * Supplier performance metrics
     * Expense tracking and profitability analysis
-
-- *User-Friendly Interface:* Offers a pleasant and intuitive user interface (UI) to enhance user experience and minimize the learning curve.
-- *Mobile Responsiveness:* The application is designed to be fully mobile-responsive, ensuring accessibility and usability across various devices (desktops, tablets, and smartphones).
-- *Plesant UI & Mobile responsive*
-- *Plesant UI & Mobile responsive*
-
+* **User-Friendly Interface:** Offers a pleasant and intuitive user interface (UI) to enhance user experience and minimize the learning curve.
+* **Mobile Responsiveness:** The application is designed to be fully mobile-responsive, ensuring accessibility and usability across various devices (desktops, tablets, and smartphones).
 * **Core Modules:**
     * **Customer Management:** Maintain a database of customers, including their contact information, addresses, and purchase history.
     * **Supplier Management:** Track supplier information, including contact details, addresses, and performance.
@@ -39,164 +35,255 @@ It is a comprehensive and extensible software solution designed to function as a
     * Customer Relationship Management (CRM)
     * Manufacturing Resource Planning (MRP)
 
-<h2> 🌐 Tech Stack </h2>
+## Tech Stack
 
-<div align="left">
-  
-![REACT](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![SASS](https://img.shields.io/badge/Sass-CC6699?style=for-the-badge&logo=sass&logoColor=white)
-![](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![EXPRESS](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-![MYSQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
-![](https://img.shields.io/badge/Xampp-F37623?style=for-the-badge&logo=xampp&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)
-  
-</div>
+The Inventory Management System is built using a combination of modern web technologies, chosen for their scalability and maintainability, supporting an ERP-like architecture:
 
-Installation: Please follow the below links to download/install the software.
+* **Frontend:**
+    * **React:** A JavaScript library for building dynamic and interactive user interfaces.
+    * **Sass:** A CSS preprocessor that extends the capabilities of CSS, enabling more organized and maintainable stylesheets.
+    * **Recharts:** For creating visually appealing charts and graphs for data visualization.
+* **Backend:**
+    * **Node.js:** A JavaScript runtime environment for building server-side applications.
+    * **Express.js:** A popular Node.js web application framework that provides a robust set of features for building web applications and APIs.
+* **Database:**
+    * **SQL Server:** A relational database management system (RDBMS) for storing application data.
+* **Authentication:**
+    * **JSON Web Tokens (JWT):** A standard for securely transmitting information between parties as a JSON object. Used for user authentication and authorization.
+* **Deployment:**
+    * **Vercel:** A cloud platform for static sites and frontend applications.
+    * **Railway:** A cloud platform for deploying backend applications.
 
-- [VS Code](https://code.visualstudio.com/download)
-- [Node JS](https://nodejs.org/)
-- [XAMPP](https://www.apachefriends.org/download.html)
+## System Architecture (Conceptual)
 
-Setup Database : Create a new database `inventory`. Then execute the below script to create tables.
+The system follows a modular, multi-tiered architecture, typical of ERP systems:
 
-```bash
-CREATE TABLE `customers` (
-  `customer_id` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `address` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `timeStamp` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+1.  **Presentation Tier (Frontend):** The React-based UI, enhanced with Recharts for data visualization. Users interact with this tier, which sends requests to the backend API and displays data. This tier is designed for a rich and interactive user experience.
+2.  **Application Tier (Backend):** The Node.js/Express.js application server handles business logic, processes requests from the frontend, interacts with the SQL Server database, and enforces security. This tier is structured to support the core modules and future extensions of the ERP.
+3.  **Data Tier:** The SQL Server database stores all application data, designed for efficient data retrieval and management required by an ERP system.
 
-CREATE TABLE `expenses` (
-  `expense_id` varchar(255) NOT NULL,
-  `expense_ref` varchar(255) NOT NULL,
-  `supplier_id` varchar(255) NOT NULL,
-  `due_date` date NOT NULL,
-  `items` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`items`)),
-  `tax` float DEFAULT NULL,
-  `grand_total` float NOT NULL,
-  `timeStamp` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+## Installation and Setup
 
-CREATE TABLE `orders` (
-  `order_id` varchar(255) NOT NULL,
-  `order_ref` varchar(255) NOT NULL,
-  `customer_id` varchar(255) NOT NULL,
-  `due_date` date NOT NULL,
-  `items` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`items`)),
-  `tax` float DEFAULT NULL,
-  `grand_total` float NOT NULL,
-  `timeStamp` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+To set up the Inventory Management System, follow these steps:
 
-CREATE TABLE `products` (
-  `product_id` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `gender` varchar(255) NOT NULL,
-  `size` varchar(255) DEFAULT NULL,
-  `material` varchar(255) DEFAULT NULL,
-  `category` varchar(255) DEFAULT NULL,
-  `description` text DEFAULT NULL,
-  `product_stock` int(11) NOT NULL,
-  `timeStamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `image` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `selling_price` float NOT NULL,
-  `purchase_price` float NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+### Prerequisites
 
-CREATE TABLE `suppliers` (
-  `supplier_id` varchar(255) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `address` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `timeStamp` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+Ensure that the following software is installed on your system:
 
-CREATE TABLE `user` (
-  `user_id` varchar(255) NOT NULL,
-  `user_name` varchar(255) NOT NULL,
-  `address` varchar(255) DEFAULT NULL,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `permissions` text NOT NULL,
-  `user_role` varchar(255) NOT NULL,
-  `image` longtext DEFAULT NULL,
-  `timeStamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+* [VS Code](https://code.visualstudio.com/download)
+* [Node.js](https://nodejs.org/)
+* [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+* [Git](https://git-scm.com/downloads)
 
-CREATE TABLE `user_roles` (
-  `user_role_id` varchar(255) NOT NULL,
-  `user_role_name` varchar(255) NOT NULL,
-  `user_role_permissions` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+### Database Setup
 
-INSERT INTO `user_roles` (`user_role_id`, `user_role_name`, `user_role_permissions`) VALUES
-('123232', 'admin', '[\n  { \"page\": \"dashboard\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"employees\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"products\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"suppliers\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"expenses\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"customers\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"orders\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"profile\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"settings\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true }\n]'),
-('341242', 'employee', '[\n  { \"page\": \"dashboard\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"employees\", \"view\": false, \"create\": false, \"edit\": false, \"delete\": false },\n  { \"page\": \"products\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"suppliers\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"expenses\", \"view\": true, \"create\": false, \"edit\": false, \"delete\": false },\n  { \"page\": \"customers\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"orders\", \"view\": true, \"create\": false, \"edit\": false, \"delete\": false },\n  { \"page\": \"profile\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },\n  { \"page\": \"settings\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true }\n]');
+1.  **Create Database:** Open SQL Server Management Studio (SSMS) and connect to your SQL Server instance.
+2.  Create a new database named `inventory`.
+3.  **Create Tables:** Execute the following SQL script in a new query window to create the necessary tables:
 
-ALTER TABLE `customers`
-  ADD PRIMARY KEY (`customer_id`);
---
--- Indexes for table `expenses`
---
-ALTER TABLE `expenses`
-  ADD PRIMARY KEY (`expense_id`);
+    ```sql
+    CREATE TABLE customers (
+      customer_id VARCHAR(255) NOT NULL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      address VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      timeStamp DATETIME NOT NULL DEFAULT GETDATE()
+    );
+    
+    CREATE TABLE expenses (
+      expense_id VARCHAR(255) NOT NULL PRIMARY KEY,
+      expense_ref VARCHAR(255) NOT NULL,
+      supplier_id VARCHAR(255) NOT NULL,
+      due_date DATE NOT NULL,
+      items NVARCHAR(MAX) NOT NULL, -- Use NVARCHAR(MAX) for JSON data in SQL Server
+      tax FLOAT DEFAULT NULL,
+      grand_total FLOAT NOT NULL,
+      timeStamp DATETIME NOT NULL DEFAULT GETDATE()
+    );
+    
+    CREATE TABLE goods_receives (
+      gr_id VARCHAR(255) NOT NULL PRIMARY KEY,
+      gr_ref VARCHAR(255) NOT NULL,
+      supplier_id VARCHAR(255) NOT NULL,
+      gr_date DATE NOT NULL,
+      invoice_number VARCHAR(255),
+      items NVARCHAR(MAX) NOT NULL,  -- Use NVARCHAR(MAX) for JSON
+      notes TEXT,
+      total_amount FLOAT NOT NULL,
+      timeStamp DATETIME NOT NULL DEFAULT GETDATE()
+    );
+    
+    CREATE TABLE goods_receive_items (
+      id INT IDENTITY(1,1) PRIMARY KEY,
+      gr_id VARCHAR(255) NOT NULL,
+      product_id VARCHAR(255) NOT NULL,
+      quantity INT NOT NULL,
+      purchase_price FLOAT NOT NULL,
+      FOREIGN KEY (gr_id) REFERENCES goods_receives(gr_id),
+      FOREIGN KEY (product_id) REFERENCES products(product_id)
+    );
+    
+    CREATE TABLE goods_out (
+      go_id VARCHAR(255) NOT NULL PRIMARY KEY,
+      go_ref VARCHAR(255) NOT NULL,
+      receiver_name VARCHAR(255) NOT NULL,
+      go_date DATE NOT NULL,
+      items NVARCHAR(MAX) NOT NULL, -- Use NVARCHAR(MAX) for JSON
+      notes TEXT,
+      total_amount FLOAT NOT NULL,
+      timeStamp DATETIME NOT NULL DEFAULT GETDATE()
+    );
+    
+    CREATE TABLE goods_out_items (
+      id INT IDENTITY(1,1) PRIMARY KEY,
+      go_id VARCHAR(255) NOT NULL,
+      product_id VARCHAR(255) NOT NULL,
+      quantity INT NOT NULL,
+      selling_price FLOAT NOT NULL,
+      FOREIGN KEY (go_id) REFERENCES goods_out(go_id),
+      FOREIGN KEY (product_id) REFERENCES products(product_id)
+    );
+    
+    CREATE TABLE orders (
+      order_id VARCHAR(255) NOT NULL PRIMARY KEY,
+      order_ref VARCHAR(255) NOT NULL,
+      customer_id VARCHAR(255) NOT NULL,
+      due_date DATE NOT NULL,
+      items NVARCHAR(MAX) NOT NULL, -- Use NVARCHAR(MAX) for JSON
+      tax FLOAT DEFAULT NULL,
+      grand_total FLOAT NOT NULL,
+      timeStamp DATETIME NOT NULL DEFAULT GETDATE()
+    );
+    
+    CREATE TABLE products (
+      product_id VARCHAR(255) NOT NULL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      unit VARCHAR(255) DEFAULT NULL,
+      gender VARCHAR(255) NOT NULL,
+      size VARCHAR(255) DEFAULT NULL,
+      material VARCHAR(255) DEFAULT NULL,
+      category VARCHAR(255) DEFAULT NULL,
+      description TEXT DEFAULT NULL,
+      product_stock INT NOT NULL,
+      timeStamp DATETIME NOT NULL DEFAULT GETDATE(),
+      image NVARCHAR(MAX) DEFAULT NULL,
+      selling_price FLOAT NOT NULL,
+      purchase_price FLOAT NOT NULL
+    );
+    
+    CREATE TABLE suppliers (
+      supplier_id VARCHAR(255) NOT NULL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      address VARCHAR(255) NOT NULL,
+      email VARCHAR(255) NOT NULL,
+      phone VARCHAR(20) DEFAULT NULL,
+      timeStamp DATETIME NOT NULL DEFAULT GETDATE()
+    );
+    
+    CREATE TABLE users (
+      user_id VARCHAR(255) NOT NULL PRIMARY KEY,
+      user_name VARCHAR(255) NOT NULL,
+      address VARCHAR(255) DEFAULT NULL,
+      email VARCHAR(255) NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      permissions TEXT NOT NULL,
+      user_role VARCHAR(255) NOT NULL,
+      image NVARCHAR(MAX) DEFAULT NULL,
+      timeStamp DATETIME NOT NULL DEFAULT GETDATE()
+    );
+    
+    CREATE TABLE user_roles (
+      user_role_id VARCHAR(255) NOT NULL PRIMARY KEY,
+      user_role_name VARCHAR(255) NOT NULL,
+      user_role_permissions TEXT NOT NULL
+    );
+    
+    INSERT INTO user_roles (user_role_id, user_role_name, user_role_permissions) VALUES
+    ('123232', 'admin', '[
+      { \"page\": \"dashboard\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"employees\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"products\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"suppliers\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"expenses\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"customers\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"orders\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"profile\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"settings\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"goods_receives\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"goods_out\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true }
+    ]'),
+    ('341242', 'employee', '[
+      { \"page\": \"dashboard\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"employees\", \"view\": false, \"create\": false, \"edit\": false, \"delete\": false },
+      { \"page\": \"products\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"suppliers\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"expenses\", \"view\": true, \"create\": false, \"edit\": false, \"delete\": false },
+      { \"page\": \"customers\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"orders\", \"view\": true, \"create\": false, \"edit\": false, \"delete\": false },
+      { \"page\": \"profile\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"settings\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"goods_receives\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true },
+      { \"page\": \"goods_out\", \"view\": true, \"create\": true, \"edit\": true, \"delete\": true }
+    ]');
+    ```
 
---
--- Indexes for table `orders`
---
-ALTER TABLE `orders`
-  ADD PRIMARY KEY (`order_id`);
+5.  **Clone Repository:** Clone the project repository from GitHub to your local machine using Git:
 
---
--- Indexes for table `products`
---
-ALTER TABLE `products`
-  ADD PRIMARY KEY (`product_id`);
+    ```
+    git clone <repository_url>
+    
+    
+    ```
 
---
--- Indexes for table `suppliers`
---
-ALTER TABLE `suppliers`
-  ADD PRIMARY KEY (`supplier_id`);
+6.  **Install Dependencies:** Navigate to the project directory in your terminal and install the required Node.js packages using npm:
 
---
--- Indexes for table `user`
---
-ALTER TABLE `user`
-  ADD PRIMARY KEY (`user_id`);
+    ```
+    npm install
+    
+    
+    ```
 
---
--- Indexes for table `user_roles`
---
-ALTER TABLE `user_roles`
-  ADD PRIMARY KEY (`user_role_id`);
-```
-Install dependencies
+7.  **Configuration:**
 
-```bash
-npm install
-```
-Make all the necessary changes to the project and follow the given commands.
+    * Create a `.env` file in the project root directory.
+    * Copy the contents of `.env.example` to `.env` and modify the values to match your environment, especially the database connection details for SQL Server.  You'll need to provide the connection string.
 
-```bash
-git status
-```
+8.  **Run the Application:**
+    * For the backend, deploy to Railway:
+        * Follow the instructions on [Railway's documentation](https://docs.railway.app/) to deploy your Node.js/Express.js application.  Make sure to configure the environment variables on Railway to match your SQL Server connection string.
+    * For the frontend, deploy to Vercel:
+        * Follow the instructions on [Vercel's documentation](https://vercel.com/docs) to deploy your React application.
 
-```bash
-git add .
-```
+9.  **Access the Application:**
+    * Once the frontend and backend are deployed, you can access the application through the URL provided by Vercel.
 
-```bash
-git commit -m "Add a message"
-```
-Push the changes to github.
+## Deployment
 
-```bash
-git push origin -u your-branch-name
-```
+The application is deployed to the following platforms:
 
-<h2 align="center"> Thank you 😊 </h2>
+* **Frontend:** [Vercel](https://vercel.com/)
+* **Backend:** [Railway](https://railway.app/)
+
+## Version Control
+
+* **GitHub:** The project's source code is hosted on GitHub, enabling version control, collaboration, and issue tracking. You can find the repository here: [GitHub Repository Link](https://github.com/your-username/your-repo-name) (Replace with your actual repository URL)
+
+## Contribution
+
+(Optional) If you want to allow other developers to contribute to your project, you can add a section like this:
+
+Contributions are welcome! If you'd like to contribute to this project, please follow these steps:
+
+1.  Fork the repository.
+2.  Create a new branch for your feature or bug fix.
+3.  Make your changes and commit them.
+4.  Push your changes to your fork.
+5.  Submit a pull request.
+
+## License
+
+\[Specify the license under which your project is released (e.g., MIT, GPL, Apache 2.0). This is important for open-source projects.\]
+
+## Thank you!
+
+Thank you for using the Inventory Management System! We hope it helps you streamline your inventory management processes.

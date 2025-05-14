@@ -51,8 +51,8 @@ The Inventory Management System is built using a combination of modern web techn
 * **Authentication:**
     * ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20Web%20tokens&logoColor=white)
 * **Deployment:**
-    * <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" width="20" style="vertical-align: middle;"> Vercel
-    * <img src="https://avatars.githubusercontent.com/u/57484289?s=200&v=4" width="20" style="vertical-align: middle;"> Railway
+    * ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+    * ![Railway](https://img.shields.io/badge/Railway-111827?style=for-the-badge&logo=railway&logoColor=white)
 
 ## System Architecture (Conceptual)
 

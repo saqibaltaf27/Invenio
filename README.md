@@ -1,10 +1,10 @@
-<h1> Inventory Management System </h1>
+<h1> Inventio </h1>
 
-<h2> ⭐Project Info </h2>
-It is a software where an organization can manage their product stock, customers, suppliers, orders and view different statistics of the inventory. Also an individual employee of that organization can work here for the organization.
+<h2> ⭐Project Overview </h2>
+It is a comprehensive and extensible software solution designed to function as a core platform for enterprise resource planning (ERP).  It helps organizations efficiently manage their product stock, customers, suppliers, and orders. The system also provides valuable insights through robust statistics and reports, enabling data-driven decision-making.  It caters to both the organization-wide perspective and the needs of individual employees within the organization. This system includes Goods Receive and Goods Out functionalities, and is built with future expansion in mind.
 <br></br>
 
-<h2> 💡 Features </h2>
+<h2> 💡Key Features </h2>
 
 - *Multiorganization system*
 - *Strong authentication*

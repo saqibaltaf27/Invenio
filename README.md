@@ -16,43 +16,43 @@ This Inventory Management System is a comprehensive and extensible software solu
 * **User-Friendly Interface:** Offers a pleasant and intuitive user interface (UI) to enhance user experience and minimize the learning curve.
 * **Mobile Responsiveness:** The application is designed to be fully mobile-responsive, ensuring accessibility and usability across various devices (desktops, tablets, and smartphones).
 * **Core Modules:**
-    * **Customer Management:** Maintain a database of customers, including their contact information, addresses, and purchase history.
-    * **Supplier Management:** Track supplier information, including contact details, addresses, and performance.
-    * **Order Management:** Create, track, and manage customer orders, including order details, due dates, and order status.
-    * **Expense Management:** Record and track business-related expenses, categorize them, and generate expense reports.
-    * **Product Management:**
+    * <img src="https://unpkg.com/lucide-static@latest/icons/users.svg" width="16" height="16"> **Customer Management:** Maintain a database of customers, including their contact information, addresses, and purchase history.
+    * <img src="https://unpkg.com/lucide-static@latest/icons/truck.svg" width="16" height="16"> **Supplier Management:** Track supplier information, including contact details, addresses, and performance.
+    * <img src="https://unpkg.com/lucide-static@latest/icons/shopping-cart.svg" width="16" height="16"> **Order Management:** Create, track, and manage customer orders, including order details, due dates, and order status.
+    * <img src="https://unpkg.com/lucide-static@latest/icons/tag.svg" width="16" height="16"> **Expense Management:** Record and track business-related expenses, categorize them, and generate expense reports.
+    * <img src="https://unpkg.com/lucide-static@latest/icons/boxes.svg" width="16" height="16"> **Product Management:**
         * Maintain a catalog of products, including details such as name, description, category, size, material, and images.
         * Track product stock levels, manage inventory, and receive low-stock alerts.
         * Manage product pricing (both selling and purchase prices).
-    * **Goods Receive:** Manage the process of receiving goods from suppliers, including recording received quantities, supplier information, and delivery dates.
-    * **Goods Out:** Manage the process of goods leaving the inventory, including recording quantities, destination, and purpose of the goods issue.
+    * <img src="https://unpkg.com/lucide-static@latest/icons/arrow-down-circle.svg" width="16" height="16"> **Goods Receive:** Manage the process of receiving goods from suppliers, including recording received quantities, supplier information, and delivery dates.
+    * <img src="https://unpkg.com/lucide-static@latest/icons/arrow-up-circle.svg" width="16" height="16"> **Goods Out:** Manage the process of goods leaving the inventory, including recording quantities, destination, and purpose of the goods issue.
 * **User Roles and Permissions:** Implement a system of user roles and permissions to control access to different parts of the application based on user responsibilities.
 * **Extensibility:** The system is designed to be extensible, allowing for the addition of new modules and functionalities. Potential future modules include:
-    * Payroll Management
-    * Human Resources Management
-    * Financial Accounting
-    * Advanced Data Reporting and Analytics
-    * Customer Relationship Management (CRM)
-    * Manufacturing Resource Planning (MRP)
+    * <img src="https://unpkg.com/lucide-static@latest/icons/briefcase.svg" width="16" height="16"> Payroll Management
+    * <img src="https://unpkg.com/lucide-static@latest/icons/users-2.svg" width="16" height="16"> Human Resources Management
+    * <img src="https://unpkg.com/lucide-static@latest/icons/banknote.svg" width="16" height="16"> Financial Accounting
+    * <img src="https://unpkg.com/lucide-static@latest/icons/activity.svg" width="16" height="16"> Advanced Data Reporting and Analytics
+    * <img src="https://unpkg.com/lucide-static@latest/icons/heart.svg" width="16" height="16"> Customer Relationship Management (CRM)
+    * <img src="https://unpkg.com/lucide-static@latest/icons/factory.svg" width="16" height="16"> Manufacturing Resource Planning (MRP)
 
 ## Tech Stack
 
 The Inventory Management System is built using a combination of modern web technologies, chosen for their scalability and maintainability, supporting an ERP-like architecture:
 
 * **Frontend:**
-    * **React:** A JavaScript library for building dynamic and interactive user interfaces.
-    * **Sass:** A CSS preprocessor that extends the capabilities of CSS, enabling more organized and maintainable stylesheets.
-    * **Recharts:** For creating visually appealing charts and graphs for data visualization.
+    * ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+    * ![Sass](https://img.shields.io/badge/Sass-CC6699?style=for-the-badge&logo=sass&logoColor=white)
+    * ![Recharts](https://img.shields.io/badge/Recharts-1C8E78?style=for-the-badge&logo=recharts&logoColor=white)
 * **Backend:**
-    * **Node.js:** A JavaScript runtime environment for building server-side applications.
-    * **Express.js:** A popular Node.js web application framework that provides a robust set of features for building web applications and APIs.
+    * ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+    * ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
 * **Database:**
-    * **SQL Server:** A relational database management system (RDBMS) for storing application data.
+    * ![SQL Server](https://img.shields.io/badge/SQLServer-CC290B?style=for-the-badge&logo=sqlserver&logoColor=white)
 * **Authentication:**
-    * **JSON Web Tokens (JWT):** A standard for securely transmitting information between parties as a JSON object. Used for user authentication and authorization.
+    * ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20Web%20tokens&logoColor=white)
 * **Deployment:**
-    * **Vercel:** A cloud platform for static sites and frontend applications.
-    * **Railway:** A cloud platform for deploying backend applications.
+    * ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+    * ![Railway](https://img.shields.io/badge/Railway-111827?style=for-the-badge&logo=railway&logoColor=white)
 
 ## System Architecture (Conceptual)
 
@@ -70,10 +70,10 @@ To set up the Inventory Management System, follow these steps:
 
 Ensure that the following software is installed on your system:
 
-* [VS Code](https://code.visualstudio.com/download)
-* [Node.js](https://nodejs.org/)
-* [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
-* [Git](https://git-scm.com/downloads)
+* <img src="https://unpkg.com/lucide-static@latest/icons/code.svg" width="16" height="16"> [VS Code](https://code.visualstudio.com/download)
+* <img src="https://unpkg.com/lucide-static@latest/icons/terminal.svg" width="16" height="16"> [Node.js](https://nodejs.org/)
+* <img src="https://unpkg.com/lucide-static@latest/icons/database.svg" width="16" height="16"> [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+* <img src="https://unpkg.com/lucide-static@latest/icons/git-branch.svg" width="16" height="16"> [Git](https://git-scm.com/downloads)
 
 ### Database Setup
 
@@ -246,27 +246,29 @@ Ensure that the following software is installed on your system:
 7.  **Configuration:**
 
     * Create a `.env` file in the project root directory.
-    * Copy the contents of `.env.example` to `.env` and modify the values to match your environment, especially the database connection details for SQL Server.  You'll need to provide the connection string.
+    * Copy the contents of `.env.example` to `.env` and modify the values to match your environment, especially the database connection details for SQL Server. You'll need to provide the connection string.
 
 8.  **Run the Application:**
+
     * For the backend, deploy to Railway:
-        * Follow the instructions on [Railway's documentation](https://docs.railway.app/) to deploy your Node.js/Express.js application.  Make sure to configure the environment variables on Railway to match your SQL Server connection string.
+        * Follow the instructions on [Railway's documentation](https://docs.railway.app/) to deploy your Node.js/Express.js application. Make sure to configure the environment variables on Railway to match your SQL Server connection string.
     * For the frontend, deploy to Vercel:
         * Follow the instructions on [Vercel's documentation](https://vercel.com/docs) to deploy your React application.
 
 9.  **Access the Application:**
+
     * Once the frontend and backend are deployed, you can access the application through the URL provided by Vercel.
 
 ## Deployment
 
 The application is deployed to the following platforms:
 
-* **Frontend:** [Vercel](https://vercel.com/)
-* **Backend:** [Railway](https://railway.app/)
+* **Frontend:** ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+* **Backend:** ![Railway](https://img.shields.io/badge/Railway-111827?style=for-the-badge&logo=railway&logoColor=white)
 
 ## Version Control
 
-* **GitHub:** The project's source code is hosted on GitHub, enabling version control, collaboration, and issue tracking. You can find the repository here: [GitHub Repository Link](https://github.com/your-username/your-repo-name) (Replace with your actual repository URL)
+* <img src="https://unpkg.com/lucide-static@latest/icons/github.svg" width="16" height="16"> **GitHub:** The project's source code is hosted on GitHub, enabling version control, collaboration, and issue tracking. You can find the repository here: [GitHub Repository Link](https://github.com/your-username/your-repo-name) (Replace with your actual repository URL)
 
 ## Contribution
 

@@ -259,10 +259,12 @@ Ensure that the following software is installed on your system:
 
 The application is deployed to the following platforms:
 
-* **Frontend:** Vercel
-    <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Vercel_logo.svg" width="20" style="vertical-align: middle;">
-* **Backend:** Railway
-    <img src="https://avatars.githubusercontent.com/u/57484289?s=200&v=4" width="20" style="vertical-align: middle;">
+* **Frontend:** Vercel  
+  <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel Badge" />
+
+* **Backend:** Railway  
+  <img src="https://img.shields.io/badge/Railway-111827?style=for-the-badge&logo=railway&logoColor=white" alt="Railway Badge" />
+
 
 ## Version Control
 

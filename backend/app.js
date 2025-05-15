@@ -41,6 +41,7 @@ const ordersRoutes = require('./routes/orders.routes');
 const GRRoutes = require('./routes/gr.routes');
 const ChartRoutes = require('./routes/chart.routes');
 const StockOutRoute = require('./routes/stockOut.routes');
+const StockReportRoute = require('./routes/StockReport.routes');
 const expensesRoutes = require('./routes/expenses.routes');
 
 app.get('/', (req, res) => {
@@ -56,6 +57,7 @@ app.use('/api', ordersRoutes);
 app.use('/api', GRRoutes);
 app.use('/api', ChartRoutes);
 app.use('/api', StockOutRoute);
+app.use('/api', StockReportRoute);
 app.use('/api', expensesRoutes);
 
 app.listen(port, () => {

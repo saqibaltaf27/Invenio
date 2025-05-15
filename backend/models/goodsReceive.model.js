@@ -1,7 +1,11 @@
 const sql = require('mssql');
 const { poolPromise } = require('../db/conn.js');
+const PDFDocument = require('pdfkit');
+const fs = require("fs");
+const path = require("path");
+const axios = require("axios");
 
-// --- Utility: Calculate total amount of items ---
+
 const calculateTotalAmount = (items) => {
     return items.reduce((sum, item) => {
         const itemTotal = item.quantity * item.purchase_price * (1 + (item.tax_rate || 0) / 100);
@@ -9,7 +13,6 @@ const calculateTotalAmount = (items) => {
     }, 0);
 };
 
-// --- Controller: Create Goods Receive ---
 const createGoodsReceive = async (req, res) => {
     const { supplier_id, items, invoice_number, notes } = req.body;
 
@@ -74,7 +77,7 @@ const createGoodsReceive = async (req, res) => {
                 }
                 await transaction.request()
                     .input('gr_id', sql.Int, gr_id)
-                    .input('product_id', sql.NVarChar, product_id)    // Change to NVarChar
+                    .input('product_id', sql.NVarChar, product_id)    
                     .input('quantity', sql.Int, quantity)
                     .input('purchase_price', sql.Decimal(18, 2), purchase_price)
                     .input('tax_rate', sql.Decimal(5, 2), tax_rate || 0)
@@ -86,16 +89,19 @@ const createGoodsReceive = async (req, res) => {
                     `);
 
                 await transaction.request()
-                    .input('product_id', sql.NVarChar, product_id)    // Change to NVarChar
+                    .input('product_id', sql.NVarChar, product_id)    
                     .input('quantity', sql.Int, quantity)
+                    .input('purchase_price', sql.Decimal(18, 2), purchase_price)
                     .query(`
                         UPDATE products
-                        SET product_stock = ISNULL(product_stock, 0) + @quantity
+                        SET product_stock = ISNULL(product_stock, 0) + @quantity,
+                        purchase_price = CASE 
+                                                WHEN @purchase_price > ISNULL(purchase_price, 0) THEN @purchase_price
+                                                ELSE purchase_price END
                         WHERE product_id = @product_id
                     `);
             }
 
-            // 3. Update total_amount
             await transaction.request()
                 .input('gr_id', sql.Int, gr_id)
                 .input('total_amount', sql.Decimal(18, 2), totalAmount)
@@ -133,41 +139,49 @@ const createGoodsReceive = async (req, res) => {
     }
 };
 
-// --- Controller: Generate Goods Receive Invoice PDF ---
+
 const generateGRInvoice = async (req, res) => {
     const { gr_id } = req.params;
 
     try {
         const pool = await poolPromise;
 
-        // Fetch GR and item data
         const grResult = await pool.request()
             .input('gr_id', sql.Int, gr_id)
             .query(`
-                SELECT gr.*, s.name AS supplier_name, s.address AS supplier_address
+                SELECT gr.*, s.name AS supplier_name, s.address AS supplier_address,
+                       gr.notes AS gr_notes,
+                       gr.invoice_number,
+                       s.phone AS supplier_phone
                 FROM goods_receives gr
                 INNER JOIN suppliers s ON gr.supplier_id = s.supplier_id
                 WHERE gr.gr_id = @gr_id
             `);
+
         const gr = grResult.recordset[0];
 
         const itemsResult = await pool.request()
             .input('gr_id', sql.Int, gr_id)
             .query(`
-                SELECT gri.*, p.name AS product_name
+                SELECT gri.quantity, gri.purchase_price, p.name AS product_name, p.size
                 FROM goods_receive_items gri
                 INNER JOIN products p ON gri.product_id = p.product_id
                 WHERE gri.gr_id = @gr_id
             `);
-        const items = itemsResult.recordset;
+
+        const items = itemsResult.recordset.map(item => ({
+            ...item,
+            quantity: Number(item.quantity),
+            purchase_price: Number(item.purchase_price),
+        }));
 
         if (!gr || items.length === 0) {
             return res.status(404).json({ operation: 'error', message: 'Goods Receive not found' });
         }
 
-        // --- PDF Generation ---
+        // --- PDF Setup ---
         const doc = new PDFDocument({ margin: 50 });
-        const invoiceFileName = `GR_Invoice_${gr_id}.pdf`;
+        const invoiceFileName = `Purchase_Invoice_${gr_id}.pdf`;
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${invoiceFileName}"`);
@@ -177,49 +191,82 @@ const generateGRInvoice = async (req, res) => {
         const companyName = 'Shinwari Jongara Restaurant';
         const companyAddress = 'Shafi Market Saddar Peshawar';
 
-        doc.fontSize(20).text(companyName, 50, 50);
-        doc.fontSize(12).text(companyAddress, 50, 70);
-        doc.fontSize(16).text(`Goods Receive Invoice`, 400, 50, { align: 'right' });
-        doc.fontSize(12).text(`GR ID: ${gr.gr_id}`, 400, 70, { align: 'right' });
-        doc.fontSize(12).text(`Date: ${new Date(gr.gr_date).toLocaleDateString()}`, 400, 85, { align: 'right' });
-        doc.fontSize(12).text(`Invoice No: ${gr.invoice_number || '-'}`, 400, 100, { align: 'right' });
+        const themePrimary = '#2c3e50'; // Dark Blue
+        const themeAccent = '#ecf0f1';   // Light Gray
+        const tableHeaderBg = '#bdc3c7';
+        const tableRowAltBg = '#f2f2f2';
+
+        doc.rect(0, 30, doc.page.width, 60).fill(themePrimary);
+        doc.fillColor('#ffffff').fontSize(20).text(companyName, 50, 40, { align: 'left' });
+        doc.fontSize(12).text(companyAddress, 50, 65, { align: 'left' });
+        doc.fontSize(16).text(`Purchase Invoice`, -50, 40, { align: 'right' });
+        doc.fontSize(12).text(`GR ID: ${gr.gr_id}`, -50, 65, { align: 'right' });
+        doc.text(`Date: ${new Date(gr.gr_date).toLocaleDateString()}`, -50, 80, { align: 'right' });
+        doc.text(`Invoice No: ${gr.invoice_number || '-'}`, -50, 95, { align: 'right' });
+
+        doc.moveDown();
 
         // --- Supplier Info ---
-        doc.moveDown(2).fontSize(12).text(`Supplier: ${gr.supplier_name}`);
-        doc.text(`${gr.supplier_address}`);
+        doc.fillColor('black');
+        doc.moveDown(1).fontSize(12).text(`Supplier: ${gr.supplier_name}`, 50);
+        doc.text(`Address: ${gr.supplier_address}`, 50);
+        doc.text(`Phone: ${gr.supplier_phone}`, 50);;
 
         // --- Table Header ---
         const tableTop = doc.y + 20;
-        const columnStart = [50, 100, 300, 400, 500];
-        const headers = ['#', 'Product', 'Qty', 'Price', 'Total'];
+        const columnStart = [50, 150, 350, 400, 450, 520];
+        const headers = ['S.No', 'Product', 'Qty', 'Size', 'Price', 'Total'];
 
-        doc.font('Helvetica-Bold');
+        doc.rect(50, tableTop, 500, 20).fill(tableHeaderBg);
+        doc.fillColor('black').font('Helvetica-Bold');
         headers.forEach((header, i) => {
-            doc.text(header, columnStart[i], tableTop);
+            doc.text(header, columnStart[i], tableTop + 5);
         });
-        doc.font('Helvetica');
+
+        doc.font('Helvetica').fillColor('black');;
 
         // --- Table Rows ---
+        let totalAmount = 0;
         items.forEach((item, index) => {
-            const y = tableTop + 20 + index * 15;
+            const y = tableTop + 25 + index * 20;
+            const quantity = Number(item.quantity);
+            const price = Number(item.purchase_price);
+            const itemTotal = quantity * price;
+
+            if (index % 2 !== 0) {
+                doc.rect(50, y - 2, 500, 20).fill(tableRowAltBg);
+                doc.fillColor('black');
+            }
+
             doc.text(index + 1, columnStart[0], y);
             doc.text(item.product_name, columnStart[1], y);
-            doc.text(item.quantity, columnStart[2], y);
-            doc.text(item.purchase_price.toFixed(2), columnStart[3], y, { align: 'right' });
-            doc.text(item.item_total.toFixed(2), columnStart[4], y, { align: 'right' });
+            doc.text(quantity, columnStart[2], y);
+            doc.text(item.size || '-', columnStart[3], y);
+            doc.text(price.toFixed(2), columnStart[4], y);
+            doc.text(itemTotal.toFixed(2), columnStart[5], y);
+
+            totalAmount += itemTotal;
         });
 
-        // --- Total Amount ---
-        doc.moveDown(2).fontSize(14).text(`Total Amount: ${gr.total_amount.toFixed(2)}`, 400, doc.y, {
-            align: 'right',
-            font: 'Helvetica-Bold'
-        });
+        // Total Amount Section
+        doc.moveDown(2).fontSize(14).fillColor(themePrimary).font('Helvetica-Bold')
+            .text(`Total Amount: ${totalAmount.toFixed(2)}`, 400, doc.y, { align: 'right' });
+        doc.fillColor('black').font('Helvetica');
 
-        // --- Notes ---
-        if (gr.notes) {
-            doc.moveDown(2).fontSize(10).text(`Notes: ${gr.notes}`);
+        // Notes
+        if (gr.gr_notes) {
+            doc.moveDown(2).fontSize(10).text(`Notes: ${gr.gr_notes}`, 50, doc.y);
         }
 
+        // Signature Section
+        const signatureLineY = doc.y + 30;
+        doc.fontSize(12).text('Approved By:', 50, signatureLineY);
+        doc.lineCap('butt')
+            .moveTo(130, signatureLineY + 10)
+            .lineTo(250, signatureLineY + 10)
+            .stroke();
+
+        // Finalize
         doc.end();
 
     } catch (err) {

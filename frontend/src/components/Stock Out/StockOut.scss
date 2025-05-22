@@ -10,16 +10,17 @@ $scrollbar-thumb-hover-color: rgba(255, 255, 255, 0.5);
 $success-color: #198754;
 $danger-color: #dc3545;
 $primary-color: #007bff;
+$primary-color-rgb: rgb(0, 123, 255);
 
 .stock-out {
-  padding-bottom: 20px;
+  min-height: 100vh;
+  padding: 20px;
   background-color: $dark-bg;
   color: $dark-text;
-  height: auto;
-  height: 100%;
   overflow-y: auto;
   box-sizing: border-box;
-  
+  display: flex;
+  flex-direction: column;
 
   h2 {
     color: #6ee7b7;
@@ -55,7 +56,7 @@ $primary-color: #007bff;
 
     .form-control {
       width: 100%;
-      padding: 10px;
+      padding: 10px 24px 10px 10px;
       border: $glass-border;
       border-radius: 4px;
       box-sizing: border-box;
@@ -67,14 +68,14 @@ $primary-color: #007bff;
       background-repeat: no-repeat;
       background-position: right 8px center;
       background-size: 8px;
-      padding-right: 24px;
-      max-height: 200px; /* Added max-height */
-      overflow-y: auto;  /* Added overflow-y */
+      max-height: 200px;
+      overflow-y: auto;
+      transition: all 0.3s ease;
 
       &:focus {
         outline: none;
         border-color: $input-focus-border;
-        box-shadow: 0 0 0 0.2rem rgba($primary-color, 0.25);
+        box-shadow: 0 0 0 0.2rem rgba($primary-color-rgb, 0.25);
       }
 
       &::placeholder {
@@ -93,13 +94,26 @@ $primary-color: #007bff;
 
   &__item-row {
     margin-bottom: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 
     .form-group {
-      margin-bottom: 0; // Remove default margin for better layout in rows
+      margin-bottom: 0;
+      flex: 1;
     }
 
     .btn-danger {
-      // Inherit Bootstrap's btn-danger styles or customize further
+      background-color: $danger-color;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background-color: darken($danger-color, 10%);
+      }
     }
   }
 
@@ -138,8 +152,8 @@ $primary-color: #007bff;
     }
 
     th {
-      background-color: rgba($glass-bg, 0.8);
-      color: black;
+      background-color: rgba(255, 255, 255, 0.2);
+      color: $dark-text;
       font-weight: bold;
     }
   }
@@ -172,7 +186,6 @@ $primary-color: #007bff;
     }
   }
 
-  // Scrollbar styles for the entire component
   &::-webkit-scrollbar {
     width: $scrollbar-width;
   }
@@ -191,7 +204,6 @@ $primary-color: #007bff;
     background-color: $scrollbar-thumb-hover-color;
   }
 
-  // Scrollbar styles for the add items container (if needed separately)
   &__add-section::-webkit-scrollbar {
     width: $scrollbar-width;
   }
@@ -208,5 +220,26 @@ $primary-color: #007bff;
 
   &__add-section::-webkit-scrollbar-thumb:hover {
     background-color: $scrollbar-thumb-hover-color;
+  }
+
+  // Responsive Design
+  @media (max-width: 768px) {
+    &__item-row {
+      flex-direction: column;
+
+      .form-group {
+        width: 100%;
+      }
+    }
+
+    &__submit-button {
+      width: 100%;
+      margin-left: 0;
+      margin-top: 10px;
+    }
+
+    &__add-button {
+      width: 100%;
+    }
   }
 }

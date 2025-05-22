@@ -44,22 +44,28 @@ function ProductAddNew() {
 			return;
 		}
 
-		let f = new FormData();
-		f.append('name', name)
-		f.append('Type', type)
-		f.append('size', size)
-		f.append('material', material)
-		f.append('category', category)
-		f.append('description', description)
-		f.append('product_stock', parseInt(stock))
-		f.append('selling_price', parseFloat(sellingPrice))
-		f.append('purchase_price', parseFloat(purchasePrice))
+		const product = {
+		name,
+		type,
+		size,
+		material,
+		category,
+		description,
+		product_stock: parseInt(stock),
+		selling_price: parseFloat(sellingPrice),
+		purchase_price: parseFloat(purchasePrice)
+	};
 
 		setSubmitButtonState(true)
 
-		let response = await fetch(`https://invenio-api-production.up.railway.app/api/add_product`, {
+		let response = await fetch(//`http://localhost:5000/api/add_product` , {
+			`https://invenio-api-production.up.railway.app/api/add_product`, {
 			method: 'POST',
-			body: f,
+			headers: {
+				'Content-Type': 'application/json',
+				'Accept': 'application/json'
+			},
+			body: JSON.stringify(product),
 			credentials: 'include'
 		})
 		let body = await response.json()

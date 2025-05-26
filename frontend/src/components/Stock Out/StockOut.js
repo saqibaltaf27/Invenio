@@ -12,18 +12,13 @@ import {
   Modal,
   Pagination,
 } from 'react-bootstrap';
-import Loader from '../PageStates/Loader';
-import './StockOut.scss';
+import Loader from '../PageStates/Loader'; // Assuming this path is correct
+import './StockOut.scss'; // Assuming your SCSS file is here
 
-const StockOutItem = ({ item, index, products, onProductChange, onQuantityChange, onRemoveItem }) => {
-  useEffect(() => {
-    if (item.product_id && products.length > 0) {
-      const selectedProduct = products.find((p) => p.product_id === item.product_id);
-      if (selectedProduct) {
-        // You can use this to handle any specific logic based on the selected product
-      }
-    }
-  }, [item.product_id, products]);
+// --- StockOutItem Component (Nested) ---
+const StockOutItem = ({ item, index, products, onProductChange, onSupplierChange, onQuantityChange, onRemoveItem }) => {
+  const selectedProduct = products.find((p) => p.product_id === item.product_id);
+  const purchaseHistory = selectedProduct?.purchase_history || [];
 
   return (
     <Row key={index} className="stock-out__item-row">
@@ -50,6 +45,7 @@ const StockOutItem = ({ item, index, products, onProductChange, onQuantityChange
             type="number"
             value={item.quantity}
             onChange={(e) => onQuantityChange(index, e.target.value)}
+            min="1"
           />
         </Form.Group>
       </Col>
@@ -63,6 +59,41 @@ const StockOutItem = ({ item, index, products, onProductChange, onQuantityChange
           />
         </Form.Group>
       </Col>
+      {/* Supplier & Purchase Info Dropdown */}
+      <Col md={2}>
+        <Form.Group>
+          <Form.Label>Supplier</Form.Label>
+          <Form.Select
+            // The value combines supplier_id and purchase_price for uniqueness
+            value={`${item.supplier_id || ''}-${item.purchase_price || ''}`}
+            onChange={(e) => onSupplierChange(index, e.target.value, purchaseHistory)}
+            disabled={!item.product_id || purchaseHistory.length === 0}
+          >
+            <option value="">Select Supplier/Price</option>
+            {purchaseHistory.map((ph, idx) => (
+              <option
+                // Key needs to be unique for each option, e.g., combining ID and price
+                key={`${ph.supplier_id}-${ph.purchase_price}-${idx}`} // Use idx for uniqueness if same supplier/price
+                // Value also needs to be unique to identify this specific purchase record
+                value={`${ph.supplier_id}-${ph.purchase_price}`}
+              >
+                {ph.supplier_name} (Price: {ph.purchase_price.toFixed(2)} - Qty: {ph.purchase_quantity})
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+      </Col>
+      {/* Purchase Price - dynamically updated based on supplier selection */}
+      <Col md={2}>
+        <Form.Group>
+          <Form.Label>Purchase Price</Form.Label>
+          <Form.Control
+            type="text"
+            value={item.purchase_price ? `${item.purchase_price.toFixed(2)}` : 'N/A'}
+            disabled // This field is derived, so it should be disabled
+          />
+        </Form.Group>
+      </Col>
       <Col md={1} className="align-self-end">
         <Button variant="danger" size="sm" onClick={() => onRemoveItem(index)}>
           Remove
@@ -72,16 +103,19 @@ const StockOutItem = ({ item, index, products, onProductChange, onQuantityChange
   );
 };
 
+// --- ItemsTable Component (Nested) ---
 const ItemsTable = ({ items, onRemoveItem }) => (
   <Card className="mb-4">
     <Card.Body>
-      <h4>Items List</h4>
+      <h4>Items for Stock Out</h4>
       <Table bordered className="stock-out__table">
         <thead>
           <tr>
             <th>Product</th>
             <th>Qty To Remove</th>
             <th>Current Stock</th>
+            <th>Purchase Price</th>
+            <th>Supplier</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -91,6 +125,8 @@ const ItemsTable = ({ items, onRemoveItem }) => (
               <td>{item.name}</td>
               <td>{item.quantity}</td>
               <td>{item.stock}</td>
+              <td>{item.purchase_price ? `${item.purchase_price.toFixed(2)}` : 'N/A'}</td>
+              <td>{item.supplier_name || 'N/A'}</td>
               <td>
                 <Button variant="danger" size="sm" onClick={() => onRemoveItem(index)}>
                   Remove
@@ -109,92 +145,154 @@ const ItemsTable = ({ items, onRemoveItem }) => (
   </Card>
 );
 
-// --- Main Component ---
-
+// --- Main StockOut Component ---
 const StockOut = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [items, setItems] = useState([{ product_id: '', name: '', quantity: '', stock: 0 }]);
-  const [stockOutLogs, setStockOutLogs] = useState([]);  // State for stock out logs
+  const [items, setItems] = useState([
+    { product_id: '', name: '', quantity: '', stock: 0, supplier_id: '', supplier_name: '', purchase_price: 0 }
+  ]);
+  const [stockOutLogs, setStockOutLogs] = useState([]);
   const [customerInfo, setCustomerInfo] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successModalVisible, setSuccessModalVisible] = useState(false); // Modal visibility state
-  const [isError, setIsError] = useState(false);  // To handle error alerts
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [logsPerPage] = useState(5); // Number of logs per page
+  const [logsPerPage] = useState(5);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get('https://invenio-api-production.up.railway.app/api/products-with-stock');
-        setProducts(res.data);
-      } catch (err) {
-        setError(err.message || 'Error fetching products');
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Refactored: Combined data fetching into a single function for reusability
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const productsRes = await axios.get('https://invenio-api-production.up.railway.app/api/products-full-details');
+      setProducts(productsRes.data);
 
-    const fetchStockOutLogs = async () => {
-      setLoading(true);
-      try {
-        const url = 'https://invenio-api-production.up.railway.app/api/stock-out-logs';
-        console.log("Fetching logs from:", url);
-        const response = await axios.get(url);
-        console.log("Logs response:", response);
-        setStockOutLogs(response.data);
-      } catch (error) {
-        console.error("Failed to fetch stock out logs:", error);
-        setError(`Failed to fetch stock out logs.  Error: ${error.message}.  URL: https://invenio-api-production.up.railway.app/api/stock-out-logs`);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-    fetchStockOutLogs();
+      const logsRes = await axios.get('https://invenio-api-production.up.railway.app/api/stock-out-logs');
+      setStockOutLogs(logsRes.data);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError(err.response?.data?.message || err.message || 'Error fetching products or logs');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const handleProductChange = useCallback((index, value) => {
-    const selectedProduct = products.find((p) => p.product_id === value);
-    const updatedItems = [...items];
-    updatedItems[index].product_id = value;
-    updatedItems[index].name = selectedProduct?.name || '';
-    updatedItems[index].stock = selectedProduct?.product_stock || 0;
-    setItems(updatedItems);
-  }, [items, products]);
+  // Effect to fetch products and logs on component mount
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
+  // Handles product selection in the dropdown
+  const handleProductChange = useCallback((index, product_id) => {
+    const selectedProduct = products.find((p) => p.product_id === product_id);
+    setItems(prevItems => {
+      const updatedItems = [...prevItems];
+      updatedItems[index] = {
+        ...updatedItems[index],
+        product_id: product_id,
+        name: selectedProduct?.name || '',
+        stock: selectedProduct?.product_stock || 0,
+        supplier_id: '', // Reset supplier and price when product changes
+        supplier_name: '',
+        purchase_price: 0,
+      };
+
+      if (selectedProduct && selectedProduct.purchase_history.length > 0) {
+        // Set default to the first (latest) purchase history entry
+        const defaultPurchase = selectedProduct.purchase_history[0];
+        updatedItems[index].supplier_id = defaultPurchase.supplier_id;
+        updatedItems[index].supplier_name = defaultPurchase.supplier_name;
+        updatedItems[index].purchase_price = defaultPurchase.purchase_price;
+      }
+      return updatedItems;
+    });
+  }, [products]);
+
+  // Handles supplier selection in the dropdown
+  const handleSupplierChange = useCallback((index, selectedValue, purchaseHistoryForProduct) => {
+    // Split the combined value: "supplier_id-purchase_price"
+    const [supplier_id, purchase_price_str] = selectedValue.split('-');
+    const purchase_price = parseFloat(purchase_price_str);
+
+    const selectedPurchaseRecord = purchaseHistoryForProduct.find(
+      (ph) =>
+        String(ph.supplier_id) === String(supplier_id) &&
+        ph.purchase_price === purchase_price
+    );
+
+    setItems(prevItems => {
+      const updatedItems = [...prevItems];
+      updatedItems[index] = {
+        ...updatedItems[index],
+        supplier_id: selectedPurchaseRecord?.supplier_id || '',
+        supplier_name: selectedPurchaseRecord?.supplier_name || 'N/A',
+        purchase_price: selectedPurchaseRecord?.purchase_price || 0,
+      };
+      return updatedItems;
+    });
+  }, []);
+
+  // Handles quantity change
   const handleQuantityChange = useCallback((index, value) => {
-    const updatedItems = [...items];
-    updatedItems[index].quantity = value;
-    setItems(updatedItems);
-  }, [items, setItems]);
+    setItems(prevItems => {
+      const updatedItems = [...prevItems];
+      updatedItems[index].quantity = value;
+      return updatedItems;
+    });
+  }, []);
 
+  // Adds a new item row
   const addItem = useCallback(() => {
-    setItems([...items, { product_id: '', name: '', quantity: '', stock: 0 }]);
-  }, [items, setItems]);
+    setItems(prevItems => [...prevItems, { product_id: '', name: '', quantity: '', stock: 0, supplier_id: '', supplier_name: '', purchase_price: 0 }]);
+  }, []);
 
+  // Removes an item row
   const removeItem = useCallback((index) => {
     setItems((prevItems) => prevItems.filter((_, i) => i !== index));
-  }, [setItems]);
+  }, []);
 
+  // Handles form submission
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
 
-    if (!customerInfo) return setIsError(true);
-    if (items.some(item => !item.product_id || !item.quantity || item.quantity <= 0)) {
-      return setIsError(true);
+    setError('');
+
+    // Frontend validation
+    if (!customerInfo.trim()) {
+      setError("Customer information is required.");
+      return;
+    }
+
+    for (const item of items) {
+      if (!item.product_id) {
+        setError("Please select a product for all items.");
+        return;
+      }
+      if (!item.supplier_id || item.purchase_price === 0) {
+        setError(`Please select a specific supplier and purchase price for product: ${item.name || item.product_id}.`);
+        return;
+      }
+      const parsedQuantity = parseInt(item.quantity, 10);
+      if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
+        setError(`Quantity for product ${item.name || item.product_id} must be a positive number.`);
+        return;
+      }
+      if (parsedQuantity > item.stock) {
+        setError(`Not enough stock for product ${item.name || item.product_id}. Available: ${item.stock}, Requested: ${parsedQuantity}.`);
+        return;
+      }
     }
 
     const data = {
       customer_info: customerInfo,
-      items: items.map(({ product_id, quantity }) => ({
+      items: items.map(({ product_id, quantity, supplier_id, purchase_price }) => ({
         product_id,
         quantity: parseInt(quantity, 10),
+        supplier_id,
+        purchase_price,
       })),
     };
 
@@ -202,31 +300,26 @@ const StockOut = () => {
     try {
       await axios.post('https://invenio-api-production.up.railway.app/api/stock-out', data);
       setSuccessModalVisible(true);
-      setItems([{ product_id: '', name: '', quantity: '', stock: 0 }]);
+      setItems([{ product_id: '', name: '', quantity: '', stock: 0, supplier_id: '', supplier_name: '', purchase_price: 0 }]); // Reset form
       setCustomerInfo('');
-
-      const logsResponse = await axios.get('https://invenio-api-production.up.railway.app/api/stock-out-logs');
-      setStockOutLogs(logsResponse.data);
-
+      await fetchData(); // Refresh data after successful submission
     } catch (err) {
-      setIsError(true);
+      console.error("Stock out submission error:", err.response?.data?.message || err.message);
+      setError(err.response?.data?.message || "Failed to process stock out. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
-  }, [customerInfo, items]);
+  }, [customerInfo, items, fetchData]);
 
-  // Get current logs for pagination
+  // Pagination logic for logs
   const indexOfLastLog = currentPage * logsPerPage;
   const indexOfFirstLog = indexOfLastLog - logsPerPage;
   const currentLogs = stockOutLogs.slice(indexOfFirstLog, indexOfLastLog);
-
-  // Change page
-  const paginate = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
+  const totalPages = Math.ceil(stockOutLogs.length / logsPerPage);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(stockOutLogs.length / logsPerPage); i++) {
+  for (let i = 1; i <= totalPages; i++) {
     pageNumbers.push(i);
   }
 
@@ -234,9 +327,8 @@ const StockOut = () => {
     <Container fluid className="stock-out" style={{ maxHeight: '700px', overflowY: 'auto' }}>
       <h2>Stock Out</h2>
 
-      {loading && <p>Loading products and logs...</p>}
+      {loading && <Loader />}
       {error && <Alert variant="danger">{error}</Alert>}
-      {isError && <Alert variant="danger">Please complete all items with valid quantities</Alert>}
 
       {/* Success Modal */}
       <Modal show={successModalVisible} onHide={() => setSuccessModalVisible(false)} centered>
@@ -253,6 +345,7 @@ const StockOut = () => {
         </Modal.Footer>
       </Modal>
 
+      {/* Customer Info Card */}
       <Card className="stock-out__card" >
         <Card.Body>
           <Form.Group className="stock-out__form-group">
@@ -261,11 +354,13 @@ const StockOut = () => {
               type="text"
               value={customerInfo}
               onChange={(e) => setCustomerInfo(e.target.value)}
+              placeholder="e.g., John Doe / Sale Invoice #123"
             />
           </Form.Group>
         </Card.Body>
       </Card>
 
+      {/* Add Items Card */}
       <Card className="stock-out__card">
         <Card.Body className="stock-out__add-section">
           <h4>Add Items for Stock Out</h4>
@@ -276,6 +371,7 @@ const StockOut = () => {
               index={index}
               products={products}
               onProductChange={handleProductChange}
+              onSupplierChange={handleSupplierChange}
               onQuantityChange={handleQuantityChange}
               onRemoveItem={removeItem}
             />
@@ -286,19 +382,22 @@ const StockOut = () => {
         </Card.Body>
       </Card>
 
+      {/* Items Summary Table */}
       {items.length > 0 && (
         <ItemsTable items={items} onRemoveItem={removeItem} />
       )}
 
+      {/* Submit Button */}
       <Button
         variant="success"
         onClick={handleSubmit}
         className="stock-out__submit-button mt-3"
-        disabled={isSubmitting}
+        disabled={isSubmitting || items.length === 0 || items.some(item => !item.product_id || !item.quantity || parseInt(item.quantity, 10) <= 0 || !item.supplier_id || item.purchase_price === 0)}
       >
         {isSubmitting ? 'Submitting...' : 'Submit Stock Out'}
       </Button>
 
+      {/* Stock Out Logs Table */}
       {stockOutLogs.length > 0 && (
         <Card className="mt-4">
           <Card.Body>
@@ -310,11 +409,13 @@ const StockOut = () => {
                   <th>Customer</th>
                   <th>Product</th>
                   <th>Quantity</th>
+                  <th>Purchase Price</th> {/* Separate column */}
+                  <th>Supplier</th>      {/* Separate column */}
                 </tr>
               </thead>
               <tbody>
-                {currentLogs.map((log, index) => (
-                  <tr key={index}>
+                {currentLogs.map((log) => (
+                  <tr key={log.so_id}>
                     <td>{new Date(log.created_at).toLocaleString()}</td>
                     <td>{log.customer_info}</td>
                     <td>
@@ -331,22 +432,40 @@ const StockOut = () => {
                         </div>
                       ))}
                     </td>
+                    {/* Populating Purchase Price column */}
+                    <td>
+                      {log.items.map(item => (
+                        <div key={item.product_id}>
+                          {item.purchase_price ? `${item.purchase_price.toFixed(2)}` : 'N/A'}
+                        </div>
+                      ))}
+                    </td>
+                    {/* Populating Supplier column */}
+                    <td>
+                      {log.items.map(item => (
+                        <div key={item.product_id}>
+                          {item.supplier_name || 'N/A'}
+                        </div>
+                      ))}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </Table>
             {/* Pagination */}
-            <Pagination className="mt-3 justify-content-center">
-              {pageNumbers.map(number => (
-                <Pagination.Item
-                  key={number}
-                  active={number === currentPage}
-                  onClick={() => paginate(number)}
-                >
-                  {number}
-                </Pagination.Item>
-              ))}
-            </Pagination>
+            {pageNumbers.length > 1 && (
+              <Pagination className="mt-3 justify-content-center">
+                {pageNumbers.map(number => (
+                  <Pagination.Item
+                    key={number}
+                    active={number === currentPage}
+                    onClick={() => paginate(number)}
+                  >
+                    {number}
+                  </Pagination.Item>
+                ))}
+              </Pagination>
+            )}
           </Card.Body>
         </Card>
       )}
@@ -355,4 +474,3 @@ const StockOut = () => {
 };
 
 export default StockOut;
-

@@ -10,16 +10,16 @@ import ErrorComponent from '../PageStates/Error';
 import './Products.scss';
 
 const initialProduct = {
-  productId: null,
+  product_id: null,
   name: '',
   type: 'Regular',
   size: '',
   material: '',
   category: '',
   description: '',
-  stock: '0',
-  sellingPrice: '0',
-  purchasePrice: '0',
+  product_stock: '0',
+  selling_price: '0',
+  purchase_price: '0',
   oldImage: null,
   image: '',
 };
@@ -52,11 +52,22 @@ const Products = () => {
       stock: p.product_stock,
       addedon: moment(p.timeStamp).format('MMM Do, YYYY'),
       action: (
-        <>
-          {/* <button className="btn warning" style={{ marginRight: '0.5rem' }} onClick={() => openEditModal(p)}>Edit</button>
-          <button className="btn danger" onClick={() => deleteProduct(p.product_id)}>Delete</button> */}
-        </>
-      ),
+  <>
+    <button
+      className="btn warning"
+      style={{ marginRight: '0.5rem' }}
+      onClick={() => openEditModal(p)}
+    >
+      Edit
+    </button>
+    <button
+      className="btn danger"
+      onClick={() => deleteProduct(p.product_id)}
+    >
+      Delete
+    </button>
+  </>
+),
     }));
     setTableData(formattedData);
   }, [products]);
@@ -88,16 +99,16 @@ const Products = () => {
 
   const openEditModal = (product) => {
     setEditProduct({
-      productId: product.product_id,
+      product_id: product.product_id,
       name: product.name,
       type: product.type || 'Regular',
       size: product.size,
       material: product.material,
       category: product.category,
       description: product.description,
-      stock: product.product_stock.toString(),
-      sellingPrice: product.selling_price.toString(),
-      purchasePrice: product.purchase_price.toString(),
+      product_stock: product.product_stock.toString(),
+      selling_price: product.selling_price.toString(),
+      purchase_price: product.purchase_price.toString(),
       oldImage: product.image,
       image: '',
     });
@@ -121,8 +132,8 @@ const Products = () => {
   };
 
   const validate = () => {
-    const { name, sellingPrice, purchasePrice, stock } = editProduct;
-    if (!name || sellingPrice <= 0 || purchasePrice <= 0 || stock < 0) {
+    const { name, selling_price, purchase_price, product_stock } = editProduct;
+    if (!name || selling_price <= 0 || purchase_price <= 0 || product_stock < 0) {
       swal("Check Inputs", "Invalid fields", "error");
       return false;
     }
@@ -132,14 +143,17 @@ const Products = () => {
   const updateProduct = async () => {
     if (!validate()) return;
 
-    const formData = new FormData();
-    Object.entries(editProduct).forEach(([k, v]) => formData.append(k, v));
+    const body = JSON.stringify(editProduct)
 
     setIsUpdating(true);
     try {
-      const res = await fetch('https://invenio-api-production.up.railway.app/api/update_product', {
+      const res = await fetch( 'http://localhost:5000/api/update_product', {
+        //'https://invenio-api-production.up.railway.app/api/update_product', {
         method: 'POST',
-        body: formData,
+        headers: {
+        'Content-Type': 'application/json',
+        },
+        body: body,
         credentials: 'include',
       });
 
@@ -168,7 +182,8 @@ const Products = () => {
     })
     .then((willDelete) => {
       if (willDelete) {
-        fetch('https://invenio-api-production.up.railway.app/api/delete_product', {
+        fetch( //'http://localhost:5000/api/delete_product', {
+          'https://invenio-api-production.up.railway.app/api/delete_product', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ product_id: id }),

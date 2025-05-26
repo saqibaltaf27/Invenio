@@ -147,8 +147,8 @@ const Products = () => {
 
     setIsUpdating(true);
     try {
-      const res = await fetch( 'http://localhost:5000/api/update_product', {
-        //'https://invenio-api-production.up.railway.app/api/update_product', {
+      const res = await fetch( //'http://localhost:5000/api/update_product', {
+        'https://invenio-api-production.up.railway.app/api/update_product', {
         method: 'POST',
         headers: {
         'Content-Type': 'application/json',

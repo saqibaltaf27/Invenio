@@ -106,7 +106,7 @@ const Products = () => {
       material: product.material,
       category: product.category,
       description: product.description,
-      product_stock: product.product_stock.toString(),
+      product_stock: product.product_stock,
       selling_price: product.selling_price.toString(),
       purchase_price: product.purchase_price.toString(),
       oldImage: product.image,
@@ -132,8 +132,8 @@ const Products = () => {
   };
 
   const validate = () => {
-    const { name, selling_price, purchase_price, product_stock } = editProduct;
-    if (!name || selling_price <= 0 || purchase_price <= 0 || product_stock < 0) {
+    const { name, purchase_price, product_stock } = editProduct;
+    if (!name || purchase_price <= 0 || product_stock < 0) {
       swal("Check Inputs", "Invalid fields", "error");
       return false;
     }
@@ -216,18 +216,28 @@ const Products = () => {
       </Modal.Header>
       <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }} >
         <div className="modal-content">
-          {[ 'name', 'size', 'material', 'category', 'description', 'stock', 'sellingPrice', 'purchasePrice' ].map((field) => (
-            <div className="input-group" key={field}>
-              <label>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
-              <input
-                type="text"
-                value={editProduct[field]}
-                onChange={(e) =>
-                  setEditProduct((prev) => ({ ...prev, [field]: e.target.value }))
-                }
-              />
-            </div>
-          ))}
+          {[
+          { key: 'name', label: 'Name' },
+          { key: 'size', label: 'Size' },
+          { key: 'material', label: 'Material' },
+          { key: 'category', label: 'Category' },
+          { key: 'description', label: 'Description' },
+          { key: 'product_stock', label: 'Stock' },
+          { key: 'selling_price', label: 'Selling Price' },
+          { key: 'purchase_price', label: 'Purchase Price' },
+        ].map(({ key, label }) => (
+          <div className="input-group" key={key}>
+            <label>{label}</label>
+            <input
+              type="text"
+              value={editProduct[key]}
+              onChange={(e) =>
+                setEditProduct((prev) => ({ ...prev, [key]: e.target.value }))
+              }
+            />
+          </div>
+        ))}
+
           <div className='input-group'>
             <label className='fw-bold'>Type</label>
             <select
@@ -241,11 +251,6 @@ const Products = () => {
               <option value="wastage">Wastage</option>
               <option value="staff">Staff</option>
             </select>
-          </div>
-          <div className="input-group">
-            <label>Image</label>
-            <input type="file" accept="image/*" onChange={handleFileChange} ref={fileInputRef} />
-            {previewImage && <img src={previewImage} alt="Preview" />}
           </div>
           <div className="modal-footer">
             <button className="btn btn-danger" onClick={closeModal}>Cancel</button>

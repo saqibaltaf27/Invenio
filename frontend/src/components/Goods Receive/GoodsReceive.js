@@ -86,6 +86,12 @@ const GoodsReceiveCreate = () => {
         setNewItem((prev) => ({ ...prev, [name]: value }));
     };
 
+    const generateInvoiceNumber = () => {
+    const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const randomPart = Math.floor(1000 + Math.random() * 9000); // 4-digit random
+    return `GR-${datePart}-${randomPart}`;
+    };
+
     const handleAddItem = () => {
         const { product_id, quantity, purchase_price } = newItem;
         const parsedQty = parseInt(quantity, 10);
@@ -153,9 +159,12 @@ const GoodsReceiveCreate = () => {
         if (!selectedSupplierId) return showUserAlert('Please select a supplier.');
         if (items.length === 0) return showUserAlert('Please add at least one item.');
 
+        const autoInvoiceNumber = invoiceNumber || generateInvoiceNumber();
+        setInvoiceNumber(autoInvoiceNumber);
+
         const payload = {
             supplier_id: selectedSupplierId,
-            invoice_number: invoiceNumber, // Include invoice number
+            invoice_number: autoInvoiceNumber, // Include invoice number
             notes,
             items: items.map(item => ({
                 product_id: item.product_id,
@@ -344,7 +353,8 @@ const GoodsReceiveCreate = () => {
                 <Card className="mt-4">
                     <Card.Body>
                         <h4>Goods Receive Logs</h4>
-                        <Table bordered className="stock-out__table stock-out__logs-table">
+                        <Table bordered 
+                         className="stock-out__table stock-out__logs-table">
                             <thead>
                                 <tr>
                                     <th>Time</th>
@@ -359,62 +369,33 @@ const GoodsReceiveCreate = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {currentLogs.map((log, index) => (
-                                    <tr key={index}>
-                                        <td>{new Date(log.created_at).toLocaleString()}</td>
-                                        <td>{log.supplier_info}</td>
-                                        <td>{log.invoice_number}</td>
-                                        <td>
-                                            {log.items.map(item => (
-                                                <div key={item.product_id}>
-                                                    {item.product_name}
-                                                </div>
-                                            ))}
-                                        </td>
-                                        <td>
-                                            {log.items.map(item => (
-                                                <div key={item.product_id}>
-                                                    {item.quantity}
-                                                </div>
-                                            ))}
-                                        </td>
-                                        <td>
-                                            {log.items.map(item => (
-                                                <div key={item.product_id}>
-                                                    {item.purchase_price}
-                                                </div>
-                                            ))}
-                                        </td>
-                                        <td>
-                                            {log.items.map(item => (
-                                                <div key={item.product_id}>
-                                                    {item.tax_rate}
-                                                </div>
-                                            ))}
-                                        </td>
-                                        <td>
-                                            {log.items.map(item => {
-                                                const itemTotal = (parseFloat(item.purchase_price) || 0) * (parseInt(item.quantity) || 0) * (1 + (parseFloat(item.tax_rate) || 0) / 100);
-                                                return (
-                                                    <div key={item.product_id}>
-                                                        {itemTotal.toFixed(2)}
-                                                    </div>
-                                                )
-                                            })}
-                                        </td>
-                                        <td>
-                                            {log.items.map(item => {
-                                                const expiryDate = item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : 'N/A';
-                                                return (
-                                                    <div key={item.product_id}>
-                                                        {expiryDate}
-                                                    </div>)
+                            {currentLogs.map((log, logIndex) =>
+                                log.items.map((item, itemIndex) => {
+                                const itemTotal =
+                                    (parseFloat(item.purchase_price) || 0) *
+                                    (parseInt(item.quantity) || 0) *
+                                    (1 + (parseFloat(item.tax_rate) || 0) / 100);
+                                const expiryDate = item.expiry_date
+                                    ? new Date(item.expiry_date).toLocaleDateString()
+                                    : 'N/A';
 
-                                            })}
-                                        </td>
+                                return (
+                                    <tr key={`${logIndex}-${item.product_id}`}>
+                                    <td>{new Date(log.created_at).toLocaleString()}</td>
+                                    <td>{log.supplier_info}</td>
+                                    <td>{log.invoice_number}</td>
+                                    <td>{item.product_name}</td>
+                                    <td>{item.quantity}</td>
+                                    <td>{item.purchase_price}</td>
+                                    <td>{item.tax_rate}</td>
+                                    <td>{itemTotal.toFixed(2)}</td>
+                                    <td>{expiryDate}</td>
                                     </tr>
-                                ))}
+                                );
+                                })
+                            )}
                             </tbody>
+
                         </Table>
                         {/* Pagination */}
                         <Pagination className="mt-3 justify-content-center">

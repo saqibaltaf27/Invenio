@@ -38,6 +38,7 @@ export default function Feature({
     const [allInventory, setAllInventory] = useState([]);
 
     const totalInventoryCount = allInventory.length || 0;
+    const totalInventoryValue = allInventory.reduce((acc, item) => acc + (item.total_value || 0), 0);
 
     const fetchStockOutValue = async (date) => {
         try {
@@ -64,16 +65,15 @@ export default function Feature({
     }, []);
 
     const fetchAllInventory = async () => {
-    try {
-        const res = await axios.get(`${API_BASE}/api/get_all_inventory`);
-        if (Array.isArray(res.data.inventory)) {
-            setAllInventory(res.data.inventory);
+        try {
+            const res = await axios.get(`${API_BASE}/api/get_all_inventory`);
+            if (Array.isArray(res.data.info)) {
+                setAllInventory(res.data.info);
+            }
+        } catch (err) {
+            console.error("Error fetching all inventory:", err);
         }
-    } catch (err) {
-        console.error("Error fetching all inventory:", err);
-    }
-};
-
+    };
 
     const infoCard = (title, icon, link, label, value, color, extraControl = null) => (
         <div className="infoCard">
@@ -117,59 +117,60 @@ export default function Feature({
             </div>
 
             {/* INVENTORY */}
-<div className="featuredItem">
-  <span className="featuredTitle">Inventory</span>
-  <div className="featuredMoneyContainer inventoryFlex">
+            <div className="featuredItem">
+                <span className="featuredTitle">Inventory</span>
+                <div className="featuredMoneyContainer inventoryFlex">
 
-    {/* Total Items */}
-    {infoCard(
-      "Total Items",
-      <PlaylistAddCheckOutlined className="cardIcon steelblue" />,
-      "/products",
-      "Total Items:",
-      total_products,
-      "steelblue"
-    )}
+                    {/* Total Items */}
+                    {infoCard(
+                        "Total Items",
+                        <PlaylistAddCheckOutlined className="cardIcon steelblue" />,
+                        "/products",
+                        "Total Items:",
+                        total_products,
+                        "steelblue"
+                    )}
 
-    {/* All Inventory Accordion */}
-    <Accordion className="inventoryAccordion">
-      <AccordionSummary expandIcon={<ExpandMore />}>
-        <div className="infoCard">
-          <div className="infoIcon">
-            <Inventory2Outlined className="cardIcon green" />
-          </div>
-          <div className="infoContent">
-            <span className="infoLabel">All Inventory:</span>
-            <span className="infoValue green">{totalInventoryCount}</span>
-          </div>
-        </div>
-      </AccordionSummary>
-      <AccordionDetails>
-        <table className="inventoryTable">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Stock</th>
-              <th>Price</th>
-              <th>Total Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allInventory.map((item, idx) => (
-              <tr key={idx}>
-                <td>{item.name}</td>
-                <td>{item.product_stock}</td>
-                <td>Rs. {item.purchase_price.toLocaleString()}</td>
-                <td>Rs. {(item.product_stock * item.purchase_price).toLocaleString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </AccordionDetails>
-    </Accordion>
+                    {/* All Inventory Accordion */}
+                    <Accordion className="inventoryAccordion">
+                        <AccordionSummary expandIcon={<ExpandMore />}>
+                            <div className="infoCard">
+                                <div className="infoIcon">
+                                    <Inventory2Outlined className="cardIcon green" />
+                                </div>
+                                <div className="infoContent">
+                                    <span className="infoLabel">All Inventory:</span>
+                                    <span className="infoValue green"> Rs. {totalInventoryValue?.toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <table className="inventoryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Stock</th>
+                                        <th>Price</th>
+                                        <th>Total Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {allInventory.map((item, idx) => (
+                                        <tr key={idx}>
+                                            <td>{item.name}</td>
+                                            <td>{item.product_stock}</td>
+                                            <td>Rs. {item.purchase_price.toLocaleString()}</td>
+                                            {/* Using total_inventory directly */}
+                                            <td>Rs. {item.total_value.toLocaleString()}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </AccordionDetails>
+                    </Accordion>
 
-  </div>
-</div>
+                </div>
+            </div>
 
             {/* FINANCIALS */}
             <div className="featuredItem">

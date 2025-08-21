@@ -1,215 +1,228 @@
-/* Daily Stock Report Styles */
+/* Daily Stock Report - Themed Styles */
 .daily-stock-report {
-  background-color: #ffffff; /* Solid white background */
-  color: #333; /* Dark text */
-  border: 1px solid #e0e0e0; /* Lighter border */
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Softer shadow */
+  background: #fff;
+  color: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  font-family: 'Inter', sans-serif; /* Consistent font family */
+  font-family: "Inter", sans-serif;
+  overflow: hidden;
+}
 
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    background-color: #f9f9f9; /* Lighter background for header */
-    border-bottom: 1px solid #e0e0e0; /* Lighter border */
+.daily-stock-report .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+}
 
-    .card-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #333; /* Dark text */
-    }
+.daily-stock-report .card-header .card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+}
 
-    .dropdown-toggle {
-      background-color: #f0f2f5; /* Lighter background */
-      border: 1px solid #ccc; /* Lighter border */
-      color: #333; /* Dark text */
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.375rem;
+.daily-stock-report .card-header .dropdown-toggle {
+  background: #f9f9f9;
+  border: 1px solid #eee;
+  color: #333;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
 
-      &:hover {
-        background-color: #e0e0e0; /* Slightly darker on hover */
-      }
-    }
+.daily-stock-report .card-header .dropdown-toggle:hover {
+  background: #f0f4ff;
+  transform: translateY(-1px);
+}
 
-    .dropdown-menu {
-      background-color: #ffffff; /* Solid white background */
-      border: 1px solid #e0e0e0; /* Lighter border */
+.daily-stock-report .card-header .dropdown-menu {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
 
-      .dropdown-item {
-        color: #333; /* Dark text */
+.daily-stock-report .card-header .dropdown-item {
+  font-size: 13px;
+  padding: 8px 12px;
+  color: #333;
+  transition: background 0.2s;
+}
 
-        &:hover {
-          background-color: #f0f2f5; /* Light grey on hover */
-        }
-      }
-    }
+.daily-stock-report .card-header .dropdown-item:hover {
+  background: #f0f4ff;
+}
+
+.daily-stock-report .card-body {
+  padding: 16px;
+}
+
+.daily-stock-report .card-body h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.daily-stock-report .date-filter {
+  background: #fafafa;
+  border: 1px solid #eee;
+  color: #333;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+
+.daily-stock-report .date-filter:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.daily-stock-report .date-filter.disabled {
+  background: #e9e9e9;
+  color: #999;
+}
+
+.daily-stock-report .date-filter .react-datepicker-wrapper,
+.daily-stock-report .date-filter .react-datepicker__input-container {
+  width: 100%;
+}
+
+.daily-stock-report .date-filter-btn {
+  background: #3498db;
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.daily-stock-report .date-filter-btn:hover {
+  background: #2980b9;
+}
+
+.daily-stock-report .date-filter-btn:disabled {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+.daily-stock-report table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.daily-stock-report table thead {
+  background: #f9f9f9;
+}
+
+.daily-stock-report table th {
+  padding: 10px;
+  text-align: left;
+  font-weight: 600;
+  color: #3498db;
+  border-bottom: 1px solid #eee;
+}
+
+.daily-stock-report table td {
+  padding: 10px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+}
+
+.daily-stock-report table tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.daily-stock-report table tr:hover {
+  background: #f0f4ff;
+}
+
+.daily-stock-report p {
+  color: #555;
+  font-size: 13px;
+}
+
+.daily-stock-report .pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.daily-stock-report .pagination .page-item .page-link {
+  background: #fafafa;
+  color: #333;
+  border: 1px solid #eee;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: all 0.2s ease-in-out;
+}
+
+.daily-stock-report .pagination .page-item .page-link:hover {
+  background: #f0f4ff;
+  transform: translateY(-1px);
+}
+
+.daily-stock-report .pagination .page-item.active .page-link {
+  background: #3498db;
+  color: #fff;
+  border-color: #3498db;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .daily-stock-report {
+    padding: 12px;
   }
 
-  .card-body {
-    padding: 1.25rem;
-
-    h4 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #333; /* Dark text */
-      margin-bottom: 1rem;
-    }
-
-    .date-filter {
-      background-color: #f9f9f9; /* Lighter background */
-      border: 1px solid #e0e0e0; /* Lighter border */
-      color: #333; /* Dark text */
-      padding: 0.5rem;
-      border-radius: 0.375rem;
-      margin-bottom: 1rem;
-
-      &:focus {
-        border-color: #3498db; /* Standard blue on focus */
-        outline: none;
-      }
-
-      &.disabled {
-        background-color: #e9e9e9; /* Disabled background */
-        color: #999; /* Lighter text for disabled */
-      }
-
-      .react-datepicker-wrapper,
-      .react-datepicker__input-container {
-        width: 100%;
-      }
-    }
-
-    .date-filter-btn {
-      background-color: #3498db; /* Standard blue button */
-      color: #ffffff; /* White text */
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 0.375rem;
-      font-weight: 500;
-
-      &:hover {
-        background-color: #2980b9; /* Darker blue on hover */
-      }
-
-      &:disabled {
-        background-color: #ccc; /* Lighter grey for disabled */
-        cursor: not-allowed;
-        color: #666; /* Darker grey text for disabled */
-      }
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1.5rem;
-      font-size: 0.95rem;
-
-      thead {
-        background-color: #f0f2f5; /* Lighter background for table header */
-
-        th {
-          padding: 0.75rem;
-          text-align: left;
-          color: #3498db; /* Standard blue for headers */
-          border-bottom: 1px solid #e0e0e0; /* Lighter border */
-        }
-      }
-
-      tbody {
-        tr {
-          /* No specific background, will inherit from parent or default */
-          &:nth-child(even) {
-            background-color: #f8f8f8; /* Very light grey for even rows */
-          }
-
-          &:hover {
-            background-color: #f0f2f5; /* Light grey on hover */
-          }
-
-          td {
-            border-color: #eee; /* Lighter border */
-            color: #333; /* Dark text */
-            padding: 0.75rem; /* Added padding to table cells */
-          }
-        }
-      }
-    }
-
-    p {
-      color: #555; /* Darker text */
-    }
-
-    .pagination {
-      display: flex;
-      justify-content: center;
-
-      .page-item {
-        margin: 0 0.25rem;
-
-        .page-link {
-          background-color: #f0f2f5; /* Lighter background */
-          color: #333; /* Dark text */
-          border: 1px solid #ccc; /* Lighter border */
-          padding: 0.4rem 0.7rem;
-          border-radius: 0.375rem;
-
-          &:hover {
-            background-color: #e0e0e0; /* Slightly darker on hover */
-          }
-        }
-
-        &.active .page-link {
-          background-color: #3498db; /* Standard blue for active */
-          color: #ffffff; /* White text */
-          border-color: #3498db; /* Standard blue border */
-        }
-      }
-    }
+  .daily-stock-report .card-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  @media (max-width: 768px) {
-    padding: 1rem;
+  .daily-stock-report .card-header .dropdown-toggle {
+    margin-top: 8px;
+    width: 100%;
+  }
 
-    .card-header {
-      flex-direction: column;
-      align-items: flex-start;
+  .daily-stock-report .card-body {
+    padding: 12px;
+  }
 
-      .dropdown-toggle {
-        margin-top: 0.5rem;
-        width: 100%;
-      }
-    }
+  .daily-stock-report .card-body h4 {
+    font-size: 14px;
+  }
 
-    .card-body {
-      padding: 1rem;
+  .daily-stock-report .date-filter,
+  .daily-stock-report .date-filter-btn {
+    width: 100%;
+  }
 
-      h4 {
-        font-size: 1rem;
-      }
+  .daily-stock-report table {
+    font-size: 12px;
+  }
 
-      .date-filter,
-      .date-filter-btn {
-        width: 100%;
-      }
+  .daily-stock-report table th,
+  .daily-stock-report table td {
+    padding: 6px;
+  }
 
-      table {
-        font-size: 0.85rem;
-
-        thead th,
-        tbody td {
-          padding: 0.5rem;
-        }
-      }
-
-      .pagination .page-link {
-        font-size: 0.85rem;
-        padding: 0.35rem 0.6rem;
-      }
-    }
+  .daily-stock-report .pagination .page-link {
+    font-size: 12px;
+    padding: 5px 8px;
   }
 }

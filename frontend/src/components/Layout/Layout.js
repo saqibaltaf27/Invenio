@@ -7,7 +7,7 @@ const Layout = () => {
   return (
 	<div style={{display:"flex"}}>
 		<AsideNavbar/>
-		<div style={{ flexGrow: "1", display: "flex", flexDirection: "column" }}>
+		<div style={{ flexGrow: "2", display: "flex", flexDirection: "column" }}>
 			<Header/>
 			<Outlet/>
 		</div>

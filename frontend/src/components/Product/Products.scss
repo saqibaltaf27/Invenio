@@ -1,22 +1,45 @@
-// ===== SCSS Variables ===== //
-$card-border-light: 2px rgba(180, 180, 180, 0.329) solid;
-$card-border-dark: 1px rgba(255, 255, 255, 0.1) solid;
-$shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
+// ===== SCSS Variables (Light Theme Defaults) ===== //
+$primary-bg-color: #f0f2f5; // Overall light background for the page/main content area
+$secondary-bg-color: #ffffff; // Background for cards, modals, and other contained elements
+$tertiary-bg-color: #f9f9f9; // Slightly off-white for table headers, input backgrounds, etc.
+$border-color-light: #e0e0e0; // Light borders for elements
+$shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1); // Soft, subtle shadow for light theme
+
+$text-color-dark: #333; // Main dark text color
+$text-color-muted: #555; // Muted dark text color for labels, descriptions
+$text-color-placeholder: #999; // Placeholder text color
+$text-color-blue: #3498db; // Accent blue for links, active states
+$text-color-green: #28a745; // Green for success/add new
+$text-color-orange: #ffc107; // Orange for warning/view-edit
+$text-color-red: #dc3545; // Red for danger/delete
+
 $transition-speed: 0.3s;
 $mobile-breakpoint: 768px;
 
-$color-text-light: #222;
-$color-text-muted: #888;
-$color-bg-light: #fafafa;
-$color-bg-white: #fff;
-$color-bg-dark: #0f172a;  // Updated to a darker shade
-$color-text-dark: #f0f0f0;
+// ===== Dark Theme Variables (for toggle, if applicable) ===== //
+$dark-primary-bg-color: #0f172a;
+$dark-secondary-bg-color: #1e293b;
+$dark-tertiary-bg-color: #0f172a; // Often same as primary in dark themes
+$dark-border-color: #334155;
+$dark-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
 
-// ===== Base Styles ===== //
+$dark-text-color-light: #f1f5f9;
+$dark-text-color-muted: #94a3b8;
+$dark-text-color-blue: #38bdf8;
+$dark-text-color-green: #6ee7b7; // Adjust as needed for dark theme
+$dark-text-color-orange: #ff9800;
+$dark-text-color-red: #f44336;
+
+
+// ===== Base Styles (Default to Light Theme) ===== //
 .products {
   flex-grow: 1;
-  background-color: $color-bg-dark;  // Changed to dark background
+  background-color: $primary-bg-color;
   height: calc(100vh - 50px);
+  color: $text-color-dark;
+  font-family: 'Inter', sans-serif; /* Consistent font */
+  padding: 1rem; /* Add padding to the overall products section */
+  overflow-y: auto; /* Ensure scrollability if content overflows */
 
   .products-scroll {
     overflow-y: auto;
@@ -27,107 +50,164 @@ $color-text-dark: #f0f0f0;
   .product-header {
     display: flex;
     justify-content: space-between;
-    margin: 1rem;
+    align-items: center; /* Align items vertically */
+    margin: 1rem 0; /* Adjusted margin for better spacing */
+    border-bottom: 1px solid $border-color-light; /* Lighter divider */
+    padding-bottom: 0.5rem;
   }
 
-  .title,
-  .container {
-    color: $color-text-dark;  // Changed text color for dark background
+  .title {
+    color: $text-color-dark;
     font-size: x-large;
     font-weight: bold;
-    margin: 0 0.5rem;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    text-shadow: none; /* Removed text shadow */
   }
 
-  .card {
-    background-color: #2c2c2c;  // Darker card background
+  .container { /* This applies to the main content container, likely holding cards/table */
+    background-color: $secondary-bg-color; /* Solid white background */
+    border: 1px solid $border-color-light; /* Lighter border */
+    border-radius: 8px;
+    box-shadow: $shadow-light; /* Soft shadow */
+    padding: 1.5rem; /* Consistent padding */
+    margin: 1rem; /* Adjust margin if needed, or set to 0 to let parent control */
+    
+    /* Assuming this container holds cards or a table */
+    width: 100%; /* Ensure it fills out */
+    box-sizing: border-box; /* Include padding/border in width */
+  }
+
+  .card { /* Individual cards within the container */
+    background-color: $secondary-bg-color; /* Solid white card background */
     transition: $transition-speed;
-    margin: 20px;
-    border: $card-border-dark;  // Use dark card border
+    margin: 10px; /* Reduced margin */
+    border: 1px solid $border-color-light; /* Lighter border */
     border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Softer shadow */
+    
+    /* Responsive adjustment for card margins */
+    @media screen and (max-width: $mobile-breakpoint) {
+      margin: 10px; /* Reduce margin on tablets and smaller */
+    }
+
+    @media screen and (max-width: 480px) {
+      margin: 5px; /* Further reduce margin on smaller phones */
+    }
   }
 
   .btn {
-    border: 2px solid #777;      // Darker button border
-    background-color: #333;    // Darker button background
-    color: #f5f5f5;          // Light button text
-    padding: 5px 10px;
+    border: 1px solid $text-color-blue; /* Standard blue border */
+    background-color: transparent;
+    color: $text-color-blue; /* Standard blue text */
+    padding: 0.5rem 1rem;
     font-size: 16px;
     font-weight: bold;
     border-radius: 0.3rem;
     cursor: pointer;
-    transition: color 0.4s, background-color 0.4s;
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08); /* Subtle shadow */
 
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      color: $text-color-muted;
+      border-color: #ccc;
+      box-shadow: none;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: rgba(52, 152, 219, 0.1); /* Light blue hover background */
+      color: #2980b9; /* Darker blue text on hover */
+      border-color: #2980b9; /* Darker blue border */
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow on hover */
     }
   }
 
   // Button Variants
   .success {
-    border-color: #04AA6D;
-    color: #04AA6D;
+    border-color: $text-color-green;
+    color: $text-color-green;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Added subtle shadow for highlighted button */
+    background-color: $text-color-green; /* Solid green background */
+    color: #ffffff; /* White text */
 
-    &:hover {
-      background-color: #04AA6D;
-      color: white;
+    &:hover:not(:disabled) {
+      background-color: #218838; /* Even darker green on hover */
+      border-color: #218838;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Stronger shadow on hover */
+      color: #ffffff;
     }
   }
 
   .info {
-    border-color: #2196F3;
-    color: dodgerblue;
+    border-color: $text-color-blue;
+    color: $text-color-blue;
+    background-color: $text-color-orange; /* Solid orange background */
+    color: #ffffff; /* White text */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 
-    &:hover {
-      background-color: #2196F3;
-      color: white;
+    &:hover:not(:disabled) {
+      background-color: #e0a800; /* Darker orange on hover */
+      border-color: #e0a800;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
     }
   }
 
   .warning {
-    border-color: #ff9800;
-    color: orange;
+    border-color: $text-color-orange;
+    color: $text-color-orange;
 
-    &:hover {
-      background-color: #ff9800;
-      color: white;
+    &:hover:not(:disabled) {
+      background: rgba(243, 156, 18, 0.1);
+      color: #e67e22;
+      border-color: #e67e22;
     }
   }
 
   .danger {
-    border-color: #f44336;
-    color: rgb(222, 72, 72);
+    border-color: $text-color-red;
+    color: $text-color-red;
+    background-color: $text-color-red; /* Solid red background */
+    color: #ffffff; /* White text */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 
-    &:hover {
-      background-color: #f44336;
-      color: white;
+    &:hover:not(:disabled) {
+      background-color: #c82333; /* Darker red on hover */
+      border-color: #c82333;
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
     }
   }
 
   .default {
-    border-color: #444;  // Darker default border
-    color: #f5f5f5;      // Light default text
+    border-color: #95a5a6;
+    color: #95a5a6;
+    background-color: #f0f2f5; /* Light grey background */
 
-    &:hover {
-      background: #444;  // Darker default hover
-      color: #fff;
+    &:hover:not(:disabled) {
+      background: #e0e0e0;
+      color: #7f8c8d;
+      border-color: #7f8c8d;
     }
   }
 
   @media screen and (max-width: $mobile-breakpoint) {
-    height: 110vh;
+    height: auto; /* Adjust height for mobile, remove fixed 110vh */
     width: 100vw;
   }
 }
 
-// ===== Modal Styles ===== //
+// ===== Modal Styles (Default to Light Theme) ===== //
 .modal-content {
   padding: 1.5rem;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #2b2b2b;  // Darker modal background
-  color: $color-text-dark;    // Light text in modal
-  border: $card-border-dark;
+  font-family: 'Inter', sans-serif; /* Consistent font */
+  background-color: $secondary-bg-color;
+  color: $text-color-dark;
+  border: 1px solid $border-color-light;
   border-radius: 8px;
+  box-shadow: $shadow-light; /* Apply soft shadow */
 
   .input-group {
     display: flex;
@@ -137,7 +217,7 @@ $color-text-dark: #f0f0f0;
     label {
       font-weight: 600;
       margin-bottom: 0.5rem;
-      color: #ccc;      // Lighter label color
+      color: $text-color-muted;
     }
 
     input[type="text"],
@@ -147,17 +227,20 @@ $color-text-dark: #f0f0f0;
     select.form-select {
       padding: 0.5rem;
       font-size: 1rem;
-      border: 1px solid #666;  // Darker input border
+      border: 1px solid #ccc; /* Lighter input border */
       border-radius: 5px;
       transition: border-color 0.2s ease-in-out;
       width: 100%;
       box-sizing: border-box;
-      background-color: #333;
-      color: #eee;
+      background-color: $tertiary-bg-color; /* Use light input background */
+      color: $text-color-dark;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle inner shadow */
+
 
       &:focus {
-        border-color: #007bff;
+        border-color: $text-color-blue;
         outline: none;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2), inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Blue focus shadow */
       }
     }
 
@@ -165,7 +248,7 @@ $color-text-dark: #f0f0f0;
       margin-top: 0.75rem;
       max-width: 150px;
       height: auto;
-      border: 1px solid #555;  // Darker image border
+      border: 1px solid $border-color-light;
       border-radius: 8px;
     }
   }
@@ -181,24 +264,27 @@ $color-text-dark: #f0f0f0;
       font-size: 1rem;
       border-radius: 6px;
       font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow for modal buttons */
 
       &.btn-success {
-        background-color: #28a745;
+        background-color: $text-color-green;
         color: #fff;
         border: none;
 
         &:hover {
           background-color: #218838;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
       }
 
       &.btn-danger {
-        background-color: #dc3545;
+        background-color: $text-color-red;
         color: #fff;
         border: none;
 
         &:hover {
           background-color: #c82333;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
         }
       }
     }
@@ -208,7 +294,7 @@ $color-text-dark: #f0f0f0;
 .modal-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: $color-text-dark;  
+  color: $text-color-dark;
   margin-bottom: 1rem;
 }
 
@@ -223,91 +309,200 @@ $color-text-dark: #f0f0f0;
 }
 
 .my_card {
-  background-color: #2c2c2c;  // Darker card background
+  background-color: $secondary-bg-color; /* Solid white background */
   transition: $transition-speed;
   margin: 10px;
-  border: $card-border-dark;  // Dark card border
+  border: 1px solid $border-color-light;
   border-radius: 5px;
-  box-shadow: 0px 0px 15px -10px rgba(0, 0, 0, 0.75);
+  box-shadow: $shadow-light; /* Soft shadow */
   padding: 1rem;
-  color: $color-text-dark;
+  color: $text-color-dark;
 
   .my_form_control {
     width: 100%;
     padding: 2px 5px;
     border: none;
-    border-bottom: 1px solid #aaa;  // Darker input border
+    border-bottom: 1px solid #ccc; /* Lighter input border */
     font-size: 1rem;
     background-color: transparent;
-    color: $color-text-dark;
+    color: $text-color-dark;
 
     &:focus {
       outline: none;
       border-width: 2px;
-      border-color: #007bff;
+      border-color: $text-color-blue;
     }
   }
 }
 
-.my_btn {
-  color: #f5f5f5;
-  background-color: #333;
-  border-color: #777;
+.my_btn { /* General button styling for clarity, if needed outside .btn */
+  color: $text-color-dark;
+  background-color: $tertiary-bg-color;
+  border-color: #ccc;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08); /* Subtle shadow */
 
   &:hover {
-    box-shadow: 0px 0px 6px 4px #444;
-    background-color: #444;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    background-color: #e0e0e0;
   }
 }
 
-
+/* ===== Dark Theme Overrides (if a toggle is implemented) ===== */
 .dark {
   .products {
-    background-color: $color-bg-dark;
+    background-color: $dark-primary-bg-color;
+    color: $dark-text-color-light;
 
-    .title,
+    .title {
+      color: $dark-text-color-light;
+    }
+
     .container {
-      color: $color-text-dark;
+      background-color: $dark-secondary-bg-color;
+      border-color: $dark-border-color;
+      box-shadow: $dark-shadow;
     }
 
     .card {
-      background-color: #2c2c2c;
-      border: $card-border-dark;
+      background-color: $dark-secondary-bg-color;
+      border: 1px solid $dark-border-color;
+      box-shadow: $dark-shadow;
     }
 
     .btn {
-      background-color: #333;
-      color: #f5f5f5;
-      border-color: #777;
+      border-color: $dark-border-color;
+      background-color: $dark-secondary-bg-color;
+      color: $dark-text-color-light;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+      &:disabled {
+        color: $dark-text-color-muted;
+        border-color: $dark-text-color-muted;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: rgba(51, 65, 85, 0.8); /* Darker hover */
+        border-color: rgba(51, 65, 85, 0.9);
+        color: $dark-text-color-light;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
     }
 
-    .default:hover {
-      background-color: #444;
+    // Dark theme button variants
+    .success {
+      border-color: $dark-text-color-green;
+      background-color: $dark-text-color-green;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+
+      &:hover:not(:disabled) {
+        background-color: darken($dark-text-color-green, 10%);
+        border-color: darken($dark-text-color-green, 10%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    .info {
+      border-color: $dark-text-color-blue;
+      background-color: $dark-text-color-blue;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+
+      &:hover:not(:disabled) {
+        background-color: darken($dark-text-color-blue, 10%);
+        border-color: darken($dark-text-color-blue, 10%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    .warning {
+      border-color: $dark-text-color-orange;
+      color: $dark-text-color-orange;
+
+      &:hover:not(:disabled) {
+        background: rgba(243, 156, 18, 0.2);
+        color: $dark-text-color-light;
+        border-color: $dark-text-color-light;
+      }
+    }
+
+    .danger {
+      border-color: $dark-text-color-red;
+      background-color: $dark-text-color-red;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+
+      &:hover:not(:disabled) {
+        background-color: darken($dark-text-color-red, 10%);
+        border-color: darken($dark-text-color-red, 10%);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    .default {
+      border-color: $dark-text-color-muted;
+      color: $dark-text-color-light;
+
+      &:hover:not(:disabled) {
+        background: $dark-border-color;
+        color: $dark-text-color-light;
+        border-color: $dark-text-color-light;
+      }
     }
   }
 
   .modal-content {
-    background-color: #2b2b2b;
-    color: $color-text-dark;
+    background-color: $dark-secondary-bg-color;
+    color: $dark-text-color-light;
+    border-color: $dark-border-color;
+    box-shadow: $dark-shadow;
 
     label {
-      color: #ccc;
+      color: $dark-text-color-muted;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="file"],
+    textarea,
+    select.form-select {
+      background-color: $dark-tertiary-bg-color;
+      color: $dark-text-color-light;
+      border-color: $dark-border-color;
+
+      &:focus {
+        border-color: $dark-text-color-blue;
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2), inset 0 1px 3px rgba(0, 0, 0, 0.15);
+      }
     }
   }
 
   .modal-title {
-    color: $color-text-dark;
+    color: $dark-text-color-light;
   }
 
   .my_card {
-    background-color: #2c2c2c;
-    color: $color-text-dark;
-    border: $card-border-dark;
+    background-color: $dark-secondary-bg-color;
+    color: $dark-text-color-light;
+    border: 1px solid $dark-border-color;
+    box-shadow: $dark-shadow;
 
     .my_form_control {
       background-color: transparent;
-      color: $color-text-dark;
-      border-bottom: 1px solid #aaa;
+      color: $dark-text-color-light;
+      border-bottom: 1px solid $dark-border-color;
+    }
+  }
+
+  .my_btn {
+    color: $dark-text-color-light;
+    background-color: $dark-secondary-bg-color;
+    border-color: $dark-border-color;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      background-color: rgba(51, 65, 85, 0.8);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
   }
 }

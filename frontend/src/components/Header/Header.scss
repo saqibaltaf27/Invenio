@@ -1,86 +1,93 @@
+/* Header Styles - Adjusted for Light Theme */
 .header {
-	height: 50px;
-	border-bottom: 0.5px solid rgb(231, 228, 228);
-	background-color: white;
-	display: flex;
-	align-items: center;
-	font-size: 14px;
-	color: #555;
+  height: 50px;
+  border-bottom: 0.5px solid #e0e0e0; /* Lighter border */
+  background-color: #ffffff; /* Solid white background */
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #555; /* Darker text */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
 
-	.wrapper {
-		width: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
+  .wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 
-		.items {
-			display: flex;
-			align-items: center;
-			margin-left: 10px;
-			margin-right: 10px;
+    .items {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+      margin-right: 10px;
 
-			.item {
-				display: flex;
-				align-items: center;
-				margin-left: 10px;
-				margin-right: 10px;
-				position: relative;
-				cursor: pointer;
+      .item {
+        display: flex;
+        align-items: center;
+        margin-left: 10px;
+        margin-right: 10px;
+        position: relative;
+        cursor: pointer;
+      }
 
-				.icon {
-					font-size: 20px;
-				}
+      .icon {
+        font-size: 20px;
+        color: #666; /* Darker icon color */
+      }
 
-				.avatar {
-					width: 30px;
-					height: 30px;
-					border-radius: 50%;
-				}
+      .avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover; /* Ensure image fits well */
+      }
 
-				.avatar-textIcon {
-					background-color: lightgreen;
-					font-size: larger;
-					text-align: center;
-					color: #2b572d;
-					font-weight: bold;
-					line-height: 30px;
-					text-transform: uppercase;
-				}
+      .avatar-textIcon {
+        background-color: #d4edda; /* Lighter green */
+        font-size: larger;
+        text-align: center;
+        color: #155724; /* Darker green text */
+        font-weight: bold;
+        line-height: 30px;
+        text-transform: uppercase;
+      }
 
-				.counter {
-					width: 15px;
-					height: 15px;
-					background-color: red;
-					border-radius: 50%;
-					color: white;
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					font-size: 10px;
-					font-weight: bold;
-					position: absolute;
-					top: -5px;
-					right: -5px;
-				}
-			}
-		}
-	}
+      .counter {
+        width: 15px;
+        height: 15px;
+        background-color: #e74c3c; /* Red */
+        border-radius: 50%;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: bold;
+        position: absolute;
+        top: -5px;
+        right: -5px;
+      }
+    }
+  }
 
-	@media screen and (max-width: 768px)  {
-		z-index: 9999;
-		box-shadow: 0 1px 4px #92a1b0;
-	}
+  @media screen and (max-width: 768px) {
+    z-index: 9999;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Softer shadow for mobile */
+  }
 }
 
-.header-pencil{
-	width: 30px;
-    height: 30px;
-    text-align: center;
-    line-height: 30px;
-    border-radius: 50%;
-	cursor: pointer;
-	
-	&:hover {
-		background-color: #ade3bf;
-	}
+.header-pencil {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  background-color: #f0f2f5; /* Light grey background */
+  border: 1px solid #e0e0e0; /* Light border */
+  color: #666; /* Darker icon color */
+
+  &:hover {
+    background-color: #e0e0e0; /* Slightly darker grey on hover */
+  }
 }

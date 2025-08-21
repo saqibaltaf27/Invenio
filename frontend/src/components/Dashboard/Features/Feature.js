@@ -4,33 +4,91 @@ import {
     ShoppingCartOutlined,
     AssignmentLateOutlined,
     PlaylistAddCheckOutlined,
+    Inventory2Outlined,
+    LocalAtmOutlined,
+    ExpandMore,
 } from "@mui/icons-material";
+import {
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
+    TextField,
+} from "@mui/material";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-export default function Feature({ reportStats = [], productStats = [] }) {
-    console.log("reportStats raw:", reportStats);
-    console.log("ProductStats raw:", productStats);
-
-    const {
-        employee_count = 0,
-        supplier_count = 0
-    } = reportStats[0] || {};
-
+export default function Feature({
+    reportStats = [],
+    productStats = [],
+    stockOutValue = {},
+    inventoryValue = {},
+}) {
+    const { employee_count = 0, supplier_count = 0 } = reportStats[0] || {};
     const { total_products = 0, low_stock_items = [] } = productStats || {};
 
-    const infoCard = (title, icon, link, label, value, color) => (
-        <div className="d-flex gap-2">
-            <div className="d-flex align-items-center">
-                {icon}
+    const today = new Date().toISOString().split("T")[0];
+    const [stockOutDate, setStockOutDate] = useState(today);
+    const [inventoryDate, setInventoryDate] = useState(today);
+
+    const API_BASE = "https://invenio-api-production.up.railway.app";
+
+    const [stockOutTotal, setStockOutTotal] = useState(stockOutValue?.stock_out_value || 0);
+    const [inventoryTotal, setInventoryTotal] = useState(inventoryValue?.total_inventory_value || 0);
+    const [allInventory, setAllInventory] = useState([]);
+
+    const totalInventoryCount = allInventory.length || 0;
+
+    const fetchStockOutValue = async (date) => {
+        try {
+            const res = await axios.post(`${API_BASE}/api/get_stockout_value`, { date });
+            setStockOutTotal(res.data.info.stock_out_value || 0);
+        } catch (err) {
+            console.error("Error fetching stock out value:", err);
+        }
+    };
+
+    const fetchInventoryValue = async (date) => {
+        try {
+            const res = await axios.post(`${API_BASE}/api/get_inventory_value`, { date });
+            setInventoryTotal(res.data.info.total_inventory_value || 0);
+        } catch (err) {
+            console.error("Error fetching inventory value:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchStockOutValue(stockOutDate);
+        fetchInventoryValue(inventoryDate);
+        fetchAllInventory();
+    }, []);
+
+    const fetchAllInventory = async () => {
+    try {
+        const res = await axios.get(`${API_BASE}/api/get_all_inventory`);
+        if (Array.isArray(res.data.inventory)) {
+            setAllInventory(res.data.inventory);
+        }
+    } catch (err) {
+        console.error("Error fetching all inventory:", err);
+    }
+};
+
+
+    const infoCard = (title, icon, link, label, value, color, extraControl = null) => (
+        <div className="infoCard">
+            <div className="infoIcon">{icon}</div>
+            <div className="infoContent">
+                {link ? (
+                    <Link to={link} className="link">
+                        <span className="infoLabel">{label}</span>
+                    </Link>
+                ) : (
+                    <span className="infoLabel">{label}</span>
+                )}
+                <span className="infoValue" style={{ color }}>{value}</span>
             </div>
-            {link ? (
-                <Link to={link} className="link">
-                    <span className="text-hover-primary">{label}</span>
-                </Link>
-            ) : (
-                <span className="text-hover-primary">{label}</span>
-            )}
-            <span style={{ color }}>{value}</span>
+            {extraControl && <div className="infoControl">{extraControl}</div>}
         </div>
     );
 
@@ -40,73 +98,132 @@ export default function Feature({ reportStats = [], productStats = [] }) {
             {/* USERS */}
             <div className="featuredItem">
                 <span className="featuredTitle">Users</span>
-                <div className="featuredMoneyContainer flex-column flex-start">
+                <div className="featuredMoneyContainer">
                     {infoCard(
                         "Employees",
-                        <PersonOutlined className="cardIcon" style={{ backgroundColor: "rgba(255,0,0,0.3)" }} />,
+                        <PersonOutlined className="cardIcon red" />,
                         "/employees",
                         "Employees:",
                         employee_count
                     )}
                     {infoCard(
                         "Suppliers",
-                        <PersonOutlined className="cardIcon" style={{ backgroundColor: "rgba(0,0,255,0.3)" }} />,
+                        <PersonOutlined className="cardIcon blue" />,
                         "/suppliers",
                         "Suppliers:",
                         supplier_count
                     )}
                 </div>
-                <div className="d-flex justify-content-end align-items-center">
-                    <div style={{ backgroundColor: "rgba(255,102,0,0.3)", borderRadius: 5, padding: 3, color: "#5e5708" }}>
-                        <PersonOutlined />
-                    </div>
-                </div>
             </div>
 
             {/* INVENTORY */}
+<div className="featuredItem">
+  <span className="featuredTitle">Inventory</span>
+  <div className="featuredMoneyContainer inventoryFlex">
+
+    {/* Total Items */}
+    {infoCard(
+      "Total Items",
+      <PlaylistAddCheckOutlined className="cardIcon steelblue" />,
+      "/products",
+      "Total Items:",
+      total_products,
+      "steelblue"
+    )}
+
+    {/* All Inventory Accordion */}
+    <Accordion className="inventoryAccordion">
+      <AccordionSummary expandIcon={<ExpandMore />}>
+        <div className="infoCard">
+          <div className="infoIcon">
+            <Inventory2Outlined className="cardIcon green" />
+          </div>
+          <div className="infoContent">
+            <span className="infoLabel">All Inventory:</span>
+            <span className="infoValue green">{totalInventoryCount}</span>
+          </div>
+        </div>
+      </AccordionSummary>
+      <AccordionDetails>
+        <table className="inventoryTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Stock</th>
+              <th>Price</th>
+              <th>Total Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            {allInventory.map((item, idx) => (
+              <tr key={idx}>
+                <td>{item.name}</td>
+                <td>{item.product_stock}</td>
+                <td>Rs. {item.purchase_price.toLocaleString()}</td>
+                <td>Rs. {(item.product_stock * item.purchase_price).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </AccordionDetails>
+    </Accordion>
+
+  </div>
+</div>
+
+            {/* FINANCIALS */}
             <div className="featuredItem">
-                <span className="featuredTitle">Inventory</span>
-                <div className="featuredMoneyContainer flex-column flex-start">
+                <span className="featuredTitle">Financials</span>
+                <div className="featuredMoneyContainer">
                     {infoCard(
-                        "Total Items",
-                        <PlaylistAddCheckOutlined className="cardIcon" style={{ backgroundColor: "rgba(70,130,180,0.3)" }} />,
-                        "/products",
-                        "Total Items:",
-                        total_products
+                        "Inventory Value",
+                        <LocalAtmOutlined className="cardIcon green" />,
+                        null,
+                        "Inventory Value:",
+                        `Rs. ${inventoryTotal.toLocaleString()}`,
+                        "green",
+                        <TextField
+                            type="date"
+                            size="small"
+                            value={inventoryDate}
+                            onChange={(e) => {
+                                setInventoryDate(e.target.value);
+                                fetchInventoryValue(e.target.value);
+                            }}
+                        />
                     )}
                     {infoCard(
-                        "Low Stock",
-                        <AssignmentLateOutlined className="cardIcon" style={{ backgroundColor: "rgba(255,165,0,0.3)" }} />,
-                        "/products",
-                        "Low Stock:",
-                        `${low_stock_items.length} item(s)`,
-                        "orange"
+                        "Stock Out Value",
+                        <LocalAtmOutlined className="cardIcon red" />,
+                        null,
+                        "Stock Out Value:",
+                        `Rs. ${stockOutTotal.toLocaleString()}`,
+                        "red",
+                        <TextField
+                            type="date"
+                            size="small"
+                            value={stockOutDate}
+                            onChange={(e) => {
+                                setStockOutDate(e.target.value);
+                                fetchStockOutValue(e.target.value);
+                            }}
+                        />
                     )}
-                </div>
-                <div className="d-flex justify-content-end align-items-center">
-                    <div style={{ backgroundColor: "rgba(70,130,180,0.3)", borderRadius: 5, padding: 3, color: "#4682B4" }}>
-                        <ShoppingCartOutlined />
-                    </div>
                 </div>
             </div>
 
             {/* ALERTS */}
             <div className="featuredItem">
                 <span className="featuredTitle">Alerts</span>
-                <div className="featuredMoneyContainer flex-column flex-start">
+                <div className="featuredMoneyContainer">
                     {infoCard(
                         "Pending Restock",
-                        <AssignmentLateOutlined className="cardIcon" style={{ backgroundColor: "rgba(255,99,71,0.3)" }} />,
+                        <AssignmentLateOutlined className="cardIcon tomato" />,
                         null,
                         "Pending Restock:",
                         low_stock_items.length,
                         "tomato"
                     )}
-                </div>
-                <div className="d-flex justify-content-end align-items-center">
-                    <div style={{ backgroundColor: "rgba(255,99,71,0.3)", borderRadius: 5, padding: 3, color: "#FF6347" }}>
-                        <AssignmentLateOutlined />
-                    </div>
                 </div>
             </div>
 

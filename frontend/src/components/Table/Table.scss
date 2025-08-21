@@ -1,121 +1,128 @@
+/* Data Table Styles - Adjusted for Light Theme */
 .dataTable {
-	color: #f8f8f2; /* Default bright white text */
-	background-color: rgba(15, 23, 42, 0.9); /* Opaque dark background */
-	border-radius: 0.3rem;
-	margin: 0.5rem;
-	overflow-x: auto;
-	overflow-y: auto;
-	max-height: 70vh;
-	backdrop-filter: blur(12px);
-  
-	.tableToolbar {
-	  display: flex;
-	  justify-content: space-between;
-	  align-items: center;
-	  margin: 0.5rem;
-	  padding: 0.7rem 1rem;
-	  height: auto;
-	  background-color: rgba(30, 41, 59, 0.8); /* Slightly lighter dark toolbar */
-	  border-radius: 0.3rem;
-	  border: 1px solid rgba(110, 231, 183, 0.2);
-	  backdrop-filter: blur(10px);
-  
-	  .flex-grow-1 {
-		display: flex;
-		align-items: center;
-  
-		svg { /* Style the Close icon */
-		  fill: #f8f8f2; /* White fill for the icon */
-		  color: #f8f8f2; /* Ensure color is also white */
-		  transition: all 0.3s ease-in-out;
-		  cursor: pointer;
-		  margin-right: 0.5rem; /* Add some spacing */
-  
-		  &:hover {
-			fill: #e0f2fe; /* Slightly lighter on hover */
-			color: #e0f2fe;
-		  }
-		}
-	  }
-  
-	  .my__icon { /* You might not be using this in your current HTML */
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 2.2rem;
-		height: 2.2rem;
-		border-radius: 50%;
-		background-color: rgba(110, 231, 183, 0.2);
-		color: #0f172a;
-		margin: 0rem 0.6rem;
-		cursor: pointer;
-		transition: background-color 0.2s ease;
-  
-		&:hover {
-		  background-color: rgba(110, 231, 183, 0.3);
-		}
-	  }
-  
-	  .search__text {
-		border: none;
-		border-bottom: 1.5px solid #6ee7b7;
-		background-color: transparent;
-		color: #f8f8f2; /* White search text */
-		padding: 0.3rem 0.5rem;
-		width: 0;
-		transition: all 0.3s ease-in-out;
-  
-		&::placeholder {
-		  color: #d4d4d4;
-		}
-  
-		&:focus {
-		  width: 10rem;
-		  outline: none;
-		  border-bottom-width: 2px;
-		  border-bottom-color: #6ee7b7;
-		}
-	  }
-	}
-  
-	.tableContainer { /* Style the container around the table */
-	  width: 100%;
-	  overflow: auto; /* Enable horizontal scrolling if needed */
-	}
-  
-	.table { /* Target the actual table element */
-	  width: 100%;
-	  text-align: center;
-	  border-collapse: collapse;
-	  color: #f8f8f2; /* White text inside the table */
-  
-	  thead { /* Style the table header */
-		th {
-		  color: #e0f2fe; /* Very light blue/white for header text */
-		  font-weight: bold;
-		  padding: 1rem 0.5rem;
-		  border-bottom: 1px solid rgba(110, 231, 183, 0.2); /* Cyan bottom border */
-		  text-align: left; /* Align header text to the left for better readability */
-		}
-	  }
-  
-	  tbody { /* Style the table body */
-		tr {
-		  &:nth-child(even) { /* Add a subtle background to even rows for better readability */
-			background-color: rgba(255, 255, 255, 0.05);
-		  }
-		}
-  
-		td {
-		  padding: 0.8rem 0.5rem;
-		  border-bottom: 1px solid rgba(110, 231, 183, 0.1); /* Subtle cyan bottom border */
-		  text-align: left; /* Align data text to the left */
-		}
-	  }
-	}
+  color: #333; /* Default dark text */
+  background-color: #ffffff; /* Solid white background */
+  border-radius: 0.3rem;
+  margin: 0.5rem;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 70vh;
+  backdrop-filter: none; /* Removed glassmorphism blur */
+  border: 1px solid #e0e0e0; /* Lighter border */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Softer shadow */
+
+  .tableToolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem;
+    padding: 0.7rem 1rem;
+    height: auto;
+    background-color: #f9f9f9; /* Lighter toolbar background */
+    border-radius: 0.3rem;
+    border: 1px solid #e0e0e0; /* Lighter border */
+    backdrop-filter: none; /* Removed blur */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+
+    .flex-grow-1 {
+      display: flex;
+      align-items: center;
+
+      svg {
+        fill: #666; /* Darker fill for the icon */
+        color: #666; /* Ensure color is also dark */
+        transition: all 0.3s ease-in-out;
+        cursor: pointer;
+        margin-right: 0.5rem;
+
+        &:hover {
+          fill: #333; /* Darker on hover */
+          color: #333;
+        }
+      }
+    }
+
+    .my__icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      background-color: #e0e0e0; /* Light background */
+      color: #333; /* Dark text */
+      margin: 0rem 0.6rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08); /* Subtle shadow */
+
+      &:hover {
+        background-color: #d4d4d4; /* Slightly darker on hover */
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12); /* Slightly stronger hover shadow */
+      }
+    }
+
+    .search__text {
+      border: none;
+      border-bottom: 1.5px solid #ccc; /* Lighter border */
+      background-color: transparent;
+      color: #333; /* Dark search text */
+      padding: 0.3rem 0.5rem;
+      width: 0;
+      transition: all 0.3s ease-in-out;
+
+      &::placeholder {
+        color: #999; /* Lighter placeholder text */
+      }
+
+      &:focus {
+        width: 10rem;
+        outline: none;
+        border-bottom-width: 2px;
+        border-bottom-color: #3498db; /* Standard blue focus border */
+      }
+    }
   }
-  
+
+  .tableContainer {
+    width: 100%;
+    overflow: auto;
+  }
+
+  .table {
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+    color: #333; /* Dark text inside the table */
+
+    thead {
+      th {
+        color: #3498db; /* Standard blue for header text */
+        font-weight: bold;
+        padding: 1rem 0.5rem;
+        border-bottom: 1px solid #e0e0e0; /* Lighter bottom border */
+        text-align: left;
+        background-color: #f0f2f5; /* Light background for header */
+      }
+    }
+
+    tbody {
+      tr {
+        &:nth-child(even) {
+          background-color: #f8f8f8; /* Very light grey for even rows */
+        }
+
+        td {
+          padding: 0.8rem 0.5rem;
+          border-bottom: 1px solid #eee; /* Subtle lighter bottom border */
+          text-align: left;
+        }
+      }
+    }
+  }
+
   .showColumnHover:hover {
-	background-color: rgba(110, 231, 183, 0.1);
-	box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+    background-color: #f0f2f5; /* Light grey on hover */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Softer hover shadow */
   }
+}

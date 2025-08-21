@@ -1,98 +1,52 @@
+/* Premium Aside Navbar */
 .asideNavbar {
   .toggelDiv {
     display: none;
     height: 2.5rem;
     width: 2.5rem;
     margin: 0.3rem 0.8rem;
-    background-color: rgba(255, 255, 255, 0.1); /* Glassmorphism */
+    background-color: #fafafa; /* Softer white */
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #e2e8f0; /* Light text */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    transition: background-color 0.2s ease;
+    color: #444;
+    border: 1px solid #e6e6e6;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
 
     &:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-
-    @media screen and (max-width: 768px) {
-      position: fixed; // Changed to fixed for better visibility during scroll
-      top: 0.5rem; // Adjust position as needed
-      left: 0.5rem; // Adjust position as needed
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000; // Ensure it's above other elements
-      background-color: rgba(15, 23, 42, 0.9); /* Darker background for better contrast */
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(15px);
+      background: linear-gradient(135deg, #fafafa, #f3f3f3);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
     }
   }
 
   &__panel {
     height: 100vh;
     min-width: 220px;
-    border-right: 1px solid rgba(255, 255, 255, 0.1); /* Glassmorphism border */
-    background: linear-gradient(to bottom, #0f172a, #1e293b);
+    border-right: 1px solid #ececec;
+    background: #fdfdfd; /* Softer ivory */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    backdrop-filter: blur(12px);
-
-    @media screen and (max-width: 768px) {
-      display: none; /* Hide the default panel on mobile */
-    }
-
-    @media screen and (min-width: 769px) and (max-width: 1024px) {
-      /* Optional: Styles for tablets if you want a different behavior */
-      min-width: 180px; /* Example: Slightly narrower on tablets */
-    }
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.05);
+    color: #333;
   }
 
   &__menu {
     height: 100vh;
     min-width: 250px;
-    background: rgba(15, 23, 42, 0.95); /* Slightly more opaque mobile menu */
-    backdrop-filter: blur(15px);
+    background: #fdfdfd;
     position: fixed;
     top: 0;
-    left: -25rem; /* Initially hidden off-screen */
-    z-index: 99999999;
+    left: -25rem;
+    z-index: 9999;
     transition: all 0.3s ease-in-out;
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08);
+    border-right: 1px solid #ececec;
 
-    /* Class to trigger the slide-in animation (to be added/removed in your React component) */
-    &.active {
-      left: 0;
-    }
-
-    .toggelDiv {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 2.5rem;
-      width: 2.5rem;
-      padding: 0.5rem;
-      background-color: rgba(255, 255, 255, 0.1); /* Glassmorphism */
-      border-radius: 50%;
-      cursor: pointer;
-      color: #e2e8f0;
-      margin: 1rem 1rem 0 auto; /* Move to the top right of the mobile menu */
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(12px);
-      transition: background-color 0.2s ease;
-
-      &:hover {
-        background-color: rgba(255, 255, 255, 0.2);
-      }
-
-      @media screen and (min-width: 769px) {
-        display: none; /* Hide the mobile menu toggle on larger screens */
-      }
-    }
+    &.active { left: 0; }
   }
 
   .top {
@@ -100,21 +54,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    height: 50px;
+    border-bottom: 1px solid #ececec;
+    height: 55px;
 
     .logo {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: 700;
-      color: #6ee7b7; /* Cyan logo */
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      color: #444;
+      letter-spacing: 0.5px;
     }
-  }
-
-  hr {
-    height: 0;
-    border: 0.5px solid rgba(255, 255, 255, 0.1);
-    margin: 0.5rem 0;
   }
 
   .center {
@@ -124,15 +72,13 @@
 
     ul {
       list-style: none;
-      margin: 0;
       padding: 0;
 
       .title {
         font-size: 0.8rem;
-        font-weight: bold;
-        color: #94a3b8; /* Lighter text */
-        margin-top: 1rem;
-        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: black;
+        margin: 1rem 0 0.5rem;
         text-transform: uppercase;
       }
 
@@ -140,27 +86,24 @@
         display: flex;
         align-items: center;
         padding: 0.7rem 1rem;
+        color: darkblue;
         cursor: pointer;
-        border-radius: 0.3rem;
-        transition: background-color 0.3s ease;
+        border-radius: 0.5rem;
+        transition: background 0.3s ease, transform 0.2s ease;
         border: 1px solid transparent;
 
         &:hover {
-          background-color: rgba(255, 255, 255, 0.08);
-          border-color: rgba(255, 255, 255, 0.1);
+          background: #f7f7f7;
+          transform: translateX(2px);
         }
 
-        .icon {
-          font-size: 1.2rem;
-          color: #6ee7b7; /* Cyan icon */
-          margin-right: 0.8rem;
-          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
+        &.active-menu-item {
+          background: linear-gradient(135deg, #fffbea, #fdf6d9); /* Subtle golden highlight */
+          color: #d4a017;
+          border: 1px solid #d4a017;
+          font-weight: 600;
 
-        span {
-          font-size: 1rem;
-          font-weight: 500;
-          color: #e2e8f0;
+          .icon, span { color: #d4a017; }
         }
       }
     }
@@ -170,11 +113,11 @@
     display: flex;
     align-items: center;
     padding: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid #ececec;
 
     .theme-toggle-label {
       font-size: 0.9rem;
-      color: #94a3b8;
+      color: #666;
       margin-right: 0.5rem;
     }
 
@@ -182,20 +125,16 @@
       width: 1.2rem;
       height: 1.2rem;
       border-radius: 50%;
-      border: 1px solid #4a5568;
+      border: 1px solid #ccc;
       cursor: pointer;
       margin-left: 0.5rem;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
       background-color: #fff;
+      transition: all 0.3s ease;
 
       &.active {
-        border-color: #6ee7b7;
-        box-shadow: 0 0 0 0.2rem rgba(110, 231, 183, 0.5);
+        border-color: #d4a017;
+        box-shadow: 0 0 0 0.25rem rgba(212, 160, 23, 0.3);
       }
     }
-  }
-
-  @media screen and (max-width: 768px) {
-    display: none; /* Hide the default panel on mobile */
   }
 }

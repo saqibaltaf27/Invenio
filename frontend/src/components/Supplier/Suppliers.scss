@@ -1,127 +1,275 @@
-// ===== SCSS Variables ===== //
-$card-border-light: 2px rgba(180, 180, 180, 0.329) solid;
-$card-border-dark-glass: 1px rgba(255, 255, 255, 0.1) solid; // Glassmorphism border for dark mode
-$shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
+// ===== SCSS Variables (Light Theme Defaults - Replicated for consistency) ===== //
+$primary-bg-color: #f0f2f5; // Overall light background for the page/main content area
+$secondary-bg-color: #ffffff; // Background for cards, modals, and other contained elements
+$tertiary-bg-color: #f9f9f9; // Slightly off-white for table headers, input backgrounds, etc.
+$border-color-light: #e0e0e0; // Light borders for elements
+$shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1); // Soft, subtle shadow for light theme
+
+$text-color-dark: #333; // Main dark text color
+$text-color-muted: #555; // Muted dark text color for labels, descriptions
+$text-color-placeholder: #999; // Placeholder text color
+$text-color-blue: #3498db; // Accent blue for links, active states
+$text-color-green: #2ecc71; // Green for success
+$text-color-orange: #f39c12; // Orange for warning
+$text-color-red: #e74c3c; // Red for danger
+
 $transition-speed: 0.3s;
 $mobile-breakpoint: 768px;
 
-$color-text-light: #222;
-$color-text-muted: #888;
-$color-bg-light: #fafafa;
-$color-bg-white: #fff;
-$color-bg-dark: #0f172a;  // Updated to a darker shade
-$color-text-dark: #f0f0f0;
+// ===== Dark Theme Variables (for toggle, if applicable) ===== //
+$dark-primary-bg-color: #0f172a;
+$dark-secondary-bg-color: #1e293b;
+$dark-tertiary-bg-color: #0f172a; // Often same as primary in dark themes
+$dark-border-color: #334155;
+$dark-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
 
-$glass-bg: rgba(255, 255, 255, 0.08); // Translucent white for glassmorphism
+$dark-text-color-light: #f1f5f9;
+$dark-text-color-muted: #94a3b8;
+$dark-text-color-blue: #38bdf8;
+$dark-text-color-green: #6ee7b7;
+$dark-text-color-orange: #ff9800;
+$dark-text-color-red: #f44336;
 
-// ===== Base Styles ===== //
+
+// ===== Base Styles (Default to Light Theme) ===== //
 .suppliers {
   flex-grow: 1;
-  background-color: $color-bg-dark; // Changed to dark background
+  background-color: $primary-bg-color; /* Light background */
   height: calc(100vh - 50px);
+  color: $text-color-dark; /* Dark text color */
+  font-family: 'Inter', sans-serif; /* Consistent font */
+  padding: 1rem; /* Added padding for overall section */
+  overflow-y: auto; /* Ensure scrollability */
 
   .supplier-header {
     display: flex;
     justify-content: space-between;
-    margin: 1rem;
+    align-items: center; /* Align items vertically */
+    margin: 1rem 0; /* Adjusted margin for better spacing */
+    border-bottom: 1px solid $border-color-light; /* Lighter divider */
+    padding-bottom: 0.5rem;
   }
 
   .title {
-    color: $color-text-dark; // Changed text color for dark background
+    color: $text-color-dark; /* Dark title for consistency */
     font-size: x-large;
     font-weight: bold;
     margin-left: 0.5rem;
     margin-right: 0.5rem;
+    text-shadow: none; /* Removed text shadow */
   }
 
   .card {
     transition: $transition-speed;
     margin: 20px;
-    border: $card-border-dark-glass;  // Changed to dark glass border
+    border: 1px solid $border-color-light; /* Lighter border */
     border-radius: 5px;
-    background-color: $glass-bg; // Added glassmorphism background
-    backdrop-filter: blur(12px);
-    box-shadow: none;
+    background-color: $secondary-bg-color; /* Solid white background */
+    backdrop-filter: none; /* Removed glassmorphism effect */
+    box-shadow: $shadow-light; /* Soft shadow */
   }
 
   .container {
-    box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
-    padding: 2px 2px;
-    height: 100%;
+    background-color: $secondary-bg-color; /* Solid white background for container content */
+    border-radius: 8px;
+    box-shadow: $shadow-light; /* Soft shadow */
+    padding: 1rem; /* Adjusted padding */
+    height: 100%; /* Ensure it fills out */
+    border: 1px solid $border-color-light; /* Lighter border */
   }
 
   .btn {
-    border: 2px solid #777;      // Darker button border
-    background-color: #333;    // Darker button background
-    color: #f5f5f5;          // Light button text
-    padding: 5px 10px;
+    border: 1px solid $text-color-blue; /* Standard blue border */
+    background-color: transparent;
+    color: $text-color-blue; /* Standard blue text */
+    padding: 0.5rem 1rem;
     font-size: 16px;
     font-weight: bold;
     border-radius: 0.3rem;
     cursor: pointer;
-    transition: color 0.4s, background-color 0.4s;
-  }
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08); /* Subtle shadow */
 
-  .btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      color: $text-color-muted;
+      border-color: #ccc;
+      box-shadow: none;
+    }
+
+    &:hover:not(:disabled) {
+      background-color: rgba(52, 152, 219, 0.1); /* Light blue hover background */
+      color: #2980b9; /* Darker blue text on hover */
+      border-color: #2980b9; /* Darker blue border */
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow on hover */
+    }
   }
 
   /* Green */
   .success {
-    border-color: #04AA6D;
-    color: #04AA6D;
-  }
+    border-color: $text-color-green;
+    color: $text-color-green;
 
-  .success:hover {
-    background-color: #04AA6D;
-    color: white;
+    &:hover:not(:disabled) {
+      background-color: rgba(46, 204, 113, 0.1);
+      color: #27ae60;
+      border-color: #27ae60;
+    }
   }
 
   /* Blue */
   .info {
-    border-color: #2196F3;
-    color: dodgerblue;
-  }
+    border-color: $text-color-blue;
+    color: $text-color-blue;
 
-  .info:hover {
-    background: #2196F3;
-    color: white;
+    &:hover:not(:disabled) {
+      background: rgba(52, 152, 219, 0.1);
+      color: #2980b9;
+      border-color: #2980b9;
+    }
   }
 
   /* Orange */
   .warning {
-    border-color: #ff9800;
-    color: orange;
-  }
+    border-color: $text-color-orange;
+    color: $text-color-orange;
 
-  .warning:hover {
-    background: #ff9800;
-    color: white;
+    &:hover:not(:disabled) {
+      background: rgba(243, 156, 18, 0.1);
+      color: #e67e22;
+      border-color: #e67e22;
+    }
   }
 
   /* Red */
   .danger {
-    border-color: #f44336;
-    color: rgb(222, 72, 72);
-  }
+    border-color: $text-color-red;
+    color: $text-color-red;
 
-  .danger:hover {
-    background: #f44336;
-    color: white;
+    &:hover:not(:disabled) {
+      background: rgba(231, 76, 60, 0.1);
+      color: #c0392b;
+      border-color: #c0392b;
+    }
   }
 
   .default {
-    border-color: #444;  // Darker default border
-    color: #f5f5f5;      // Light default text
+    border-color: #95a5a6;
+    color: #95a5a6;
+
+    &:hover:not(:disabled) {
+      background: rgba(149, 165, 166, 0.1);
+      color: #7f8c8d;
+      border-color: #7f8c8d;
+    }
   }
 
-  .default:hover {
-    background: #444;  // Darker default hover
-    color: #fff;
+  @media screen and (max-width: $mobile-breakpoint) {
+    height: auto; /* Adjust height for mobile, remove fixed 100vh */
   }
+}
 
-  @media screen and (max-width: 768px) {
-    height: 100vh;
+// ===== Dark Theme Overrides for Suppliers (if a toggle is implemented) ===== //
+.dark {
+  .suppliers {
+    background-color: $dark-primary-bg-color;
+    color: $dark-text-color-light;
+
+    .supplier-header {
+      border-bottom: 1px solid $dark-border-color;
+    }
+
+    .title {
+      color: $dark-text-color-light;
+    }
+
+    .card {
+      background-color: $dark-secondary-bg-color;
+      border: 1px solid $dark-border-color;
+      box-shadow: $dark-shadow;
+      backdrop-filter: blur(12px); /* Re-add blur for dark theme glassmorphism */
+    }
+
+    .container {
+      background-color: $dark-secondary-bg-color;
+      border-color: $dark-border-color;
+      box-shadow: $dark-shadow;
+    }
+
+    .btn {
+      border-color: $dark-border-color;
+      background-color: $dark-secondary-bg-color;
+      color: $dark-text-color-light;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+      &:disabled {
+        color: $dark-text-color-muted;
+        border-color: $dark-text-color-muted;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: rgba(51, 65, 85, 0.8); /* Darker hover */
+        border-color: rgba(51, 65, 85, 0.9);
+        color: $dark-text-color-light;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+    }
+
+    // Dark theme button variants
+    .success {
+      border-color: $dark-text-color-green;
+      color: $dark-text-color-green;
+
+      &:hover:not(:disabled) {
+        background-color: rgba(110, 231, 183, 0.2);
+        color: $dark-text-color-light;
+        border-color: $dark-text-color-light;
+      }
+    }
+
+    .info {
+      border-color: $dark-text-color-blue;
+      color: $dark-text-color-blue;
+
+      &:hover:not(:disabled) {
+        background: rgba(56, 189, 248, 0.2);
+        color: $dark-text-color-light;
+        border-color: $dark-text-color-light;
+      }
+    }
+
+    .warning {
+      border-color: $dark-text-color-orange;
+      color: $dark-text-color-orange;
+
+      &:hover:not(:disabled) {
+        background: rgba(255, 152, 0, 0.2);
+        color: $dark-text-color-light;
+        border-color: $dark-text-color-light;
+      }
+    }
+
+    .danger {
+      border-color: $dark-text-color-red;
+      color: $dark-text-color-red;
+
+      &:hover:not(:disabled) {
+        background: rgba(244, 67, 54, 0.2);
+        color: $dark-text-color-light;
+        border-color: $dark-text-color-light;
+      }
+    }
+
+    .default {
+      border-color: $dark-text-color-muted;
+      color: $dark-text-color-light;
+
+      &:hover:not(:disabled) {
+        background: $dark-border-color;
+        color: $dark-text-color-light;
+        border-color: $dark-text-color-light;
+      }
+    }
   }
 }

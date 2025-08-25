@@ -12,8 +12,8 @@ import {
     Modal,
     Pagination,
 } from 'react-bootstrap';
-import Loader from '../PageStates/Loader'; // Corrected path to Loader
-import './StockOut.scss'; // Corrected path to StockOut.scss
+import Loader from '../PageStates/Loader';
+import './StockOut.scss';
 
 // --- StockOutItem Component (Nested) ---
 const StockOutItem = ({ item, index, products, onProductChange, onSupplierChange, onQuantityChange, onRemoveItem }) => {
@@ -140,7 +140,7 @@ const ItemsTable = ({ items, onRemoveItem }) => (
             </div>
             <Row className="stock-out__total-row mt-3">
                 <Col md={6}>
-                    <h5>Total Quantity: {items.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0)}</h5>
+                    <h5>Total Quantity: {items.reduce((sum, item) => sum + (parseFloat(item.quantity) || 0), 0)}</h5>
                 </Col>
             </Row>
         </Card.Body>
@@ -259,7 +259,7 @@ const StockOut = () => {
                 setError(`Please select a specific supplier and purchase price for product: ${item.name || item.product_id}.`);
                 return;
             }
-            const parsedQuantity = parseInt(item.quantity, 10);
+            const parsedQuantity = parseFloat(item.quantity, 10);
             if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
                 setError(`Quantity for product ${item.name || item.product_id} must be a positive number.`);
                 return;
@@ -274,7 +274,7 @@ const StockOut = () => {
             customer_info: customerInfo.trim() === '' ? 'N/A' : customerInfo,
             items: items.map(({ product_id, quantity, supplier_id, purchase_price }) => ({
                 product_id,
-                quantity: parseInt(quantity, 10),
+                quantity: parseFloat(quantity, 10),
                 supplier_id,
                 purchase_price,
             })),
@@ -343,7 +343,7 @@ const StockOut = () => {
                             </Form.Group>
                         </Col>
                     </Row>
-                    
+
                     <h4 className="mb-3">Add Items for Stock Out</h4>
                     {items.map((item, index) => (
                         <StockOutItem
@@ -371,7 +371,7 @@ const StockOut = () => {
                 variant="success"
                 onClick={handleSubmit}
                 className="stock-out__submit-button mt-3"
-                disabled={isSubmitting || items.length === 0 || items.some(item => !item.product_id || !item.quantity || parseInt(item.quantity, 10) <= 0 || !item.supplier_id || item.purchase_price === 0)}
+                disabled={isSubmitting || items.length === 0 || items.some(item => !item.product_id || !item.quantity || parseFloat(item.quantity, 10) <= 0 || !item.supplier_id || item.purchase_price === 0)}
             >
                 {isSubmitting ? 'Submitting...' : 'Submit Stock Out'}
             </Button>
@@ -390,6 +390,7 @@ const StockOut = () => {
                                         <th>Quantity</th>
                                         <th>Purchase Price</th>
                                         <th>Supplier</th>
+                                        <th>Total Value</th> {/* New column header */}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -417,6 +418,13 @@ const StockOut = () => {
                                             <td>
                                                 {log.items.map(item => (
                                                     <div key={item.product_id}>{item.supplier_name || 'N/A'}</div>
+                                                ))}
+                                            </td>
+                                            <td>
+                                                {log.items.map(item => (
+                                                    <div key={item.product_id}>
+                                                        {(item.quantity * item.purchase_price).toFixed(2)}
+                                                    </div>
                                                 ))}
                                             </td>
                                         </tr>

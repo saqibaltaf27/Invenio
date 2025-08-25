@@ -4,72 +4,118 @@ import {
     Card,
     Table,
     Button,
-    Pagination,
+    // Pagination, // Keeping Pagination in imports, but not using it for now due to backend changes
     Spinner,
     Form,
     InputGroup,
     Row,
     Col,
-    Alert
+    Alert,
+    ButtonGroup // New import for grouping buttons
 } from 'react-bootstrap';
 import { debounce } from 'lodash';
-import './DailyStockReport.scss';
+// Removed SCSS import as it caused a compilation error in a self-contained environment.
+// Custom styles will be handled inline or with Bootstrap classes.
 
 const DailyStockReport = () => {
+    // State to hold the data for the currently selected report
     const [reportData, setReportData] = useState([]);
+    // State for the selected report type: 'stockIn' or 'stockOut'
+    const [reportType, setReportType] = useState('stockIn');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const recordsPerPage = 8;
+    // Removed pagination states as backend model functions no longer support it
+    // const [currentPage, setCurrentPage] = useState(1);
+    // const [totalPages, setTotalPages] = useState(1);
+    // const recordsPerPage = 8; // No longer used for fetching
 
-    const fetchInventoryReport = useCallback(
+    // useCallback and debounce are used for efficient API calls
+    const fetchReport = useCallback(
         debounce(async () => {
             setLoading(true);
             setError('');
             try {
+                // Determine the API endpoint based on the selected report type
+                const url = reportType === 'stockIn'
+                    ? 'https://invenio-api-production.up.railway.app/api/stock-in-report'
+                    : 'https://invenio-api-production.up.railway.app/api/stock-out-report';
+
                 const params = {
-                    page: currentPage,
-                    limit: recordsPerPage,
+                    // Removed pagination params as backend doesn't support them in new endpoints
+                    // page: currentPage,
+                    // limit: recordsPerPage,
                     ...(startDate && { startDate }),
                     ...(endDate && { endDate }),
                 };
 
-                const response = await axios.get('https://invenio-api-production.up.railway.app/api/stock-report', { params });
-                const data = response.data;
+                const response = await axios.get(url, { params });
+                // The backend now returns { data: [...] } for both reports
+                setReportData(response.data.data || []); 
+                
+                // Removed pagination logic as it's not supported by the current backend model functions
+                // const count = response.data.totalCount || response.data.count || (response.data.data?.length || 0);
+                // setTotalPages(Math.ceil(count / recordsPerPage));
 
-                setReportData(data.data || []);
-                const count = data.totalCount || data.count || (data.data?.length || 0);
-                setTotalPages(Math.ceil(count / recordsPerPage));
             } catch (err) {
-                setError(err.message || 'Failed to fetch inventory report.');
+                setError(err.message || `Failed to fetch ${reportType === 'stockIn' ? 'stock-in' : 'stock-out'} report.`);
             } finally {
                 setLoading(false);
             }
         }, 400),
-        [currentPage, startDate, endDate]
+        [reportType, startDate, endDate] // Dependencies for useCallback
     );
 
+    // Effect hook to fetch data whenever reportType, startDate, or endDate changes
     useEffect(() => {
-        fetchInventoryReport();
-    }, [fetchInventoryReport]);
+        fetchReport();
+    }, [fetchReport]);
 
+    // Handle resetting filters
     const handleReset = () => {
         setStartDate('');
         setEndDate('');
-        setCurrentPage(1);
+        // setCurrentPage(1); // Removed as pagination is not used
+        fetchReport(); // Re-fetch report with reset filters
     };
 
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
+    // Handle report type change
+    const handleReportTypeChange = (type) => {
+        setReportType(type);
+        // setCurrentPage(1); // Reset page when changing report type
+        setReportData([]); // Clear previous data
+        // No need to call fetchReport explicitly here, it will be called by useEffect
     };
+
+    // Removed handlePageChange as pagination is not used
+    // const handlePageChange = (page) => {
+    //     setCurrentPage(page);
+    // };
 
     return (
-        <Card className="daily-stock-report shadow-sm rounded" style={{ maxWidth: '95%', margin: '20px auto' }}>
+        <Card className="shadow-sm rounded" style={{ maxWidth: '95%', margin: '20px auto' }}>
             <Card.Header className="text-black d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">📦 Daily Stock Report</h5>
+                <h5 className="mb-0">
+                    {reportType === 'stockIn' ? '📥 Stock-In Report' : '📤 Stock-Out Report'}
+                </h5>
+                {/* Button Group to switch between reports */}
+                <ButtonGroup aria-label="Report Type Selection">
+                    <Button
+                        variant={reportType === 'stockIn' ? 'primary' : 'outline-primary'}
+                        onClick={() => handleReportTypeChange('stockIn')}
+                        disabled={loading}
+                    >
+                        Stock In
+                    </Button>
+                    <Button
+                        variant={reportType === 'stockOut' ? 'primary' : 'outline-primary'}
+                        onClick={() => handleReportTypeChange('stockOut')}
+                        disabled={loading}
+                    >
+                        Stock Out
+                    </Button>
+                </ButtonGroup>
             </Card.Header>
 
             <Card.Body>
@@ -82,7 +128,7 @@ const DailyStockReport = () => {
                                 value={startDate}
                                 onChange={(e) => {
                                     setStartDate(e.target.value);
-                                    setCurrentPage(1);
+                                    // setCurrentPage(1); // Reset page
                                 }}
                             />
                         </InputGroup>
@@ -95,13 +141,13 @@ const DailyStockReport = () => {
                                 value={endDate}
                                 onChange={(e) => {
                                     setEndDate(e.target.value);
-                                    setCurrentPage(1);
+                                    // setCurrentPage(1); // Reset page
                                 }}
                             />
                         </InputGroup>
                     </Col>
                     <Col md={6} className="text-end">
-                        <Button variant="primary" onClick={fetchInventoryReport} disabled={loading}>
+                        <Button variant="primary" onClick={fetchReport} disabled={loading}>
                             {loading ? 'Filtering...' : 'Apply Filter'}
                         </Button>{' '}
                         <Button variant="outline-secondary" onClick={handleReset} disabled={loading}>
@@ -118,7 +164,7 @@ const DailyStockReport = () => {
                 ) : error ? (
                     <Alert variant="danger">{error}</Alert>
                 ) : reportData.length === 0 ? (
-                    <Alert variant="info">No records found for selected date range.</Alert>
+                    <Alert variant="info">No records found for the selected date range and report type.</Alert>
                 ) : (
                     <>
                         <Table striped bordered hover responsive className="text-center">
@@ -126,33 +172,44 @@ const DailyStockReport = () => {
                                 <tr>
                                     <th>Product</th>
                                     <th>Purchase Price</th>
-                                    <th>Stock In Qty</th>
-                                    <th>Stock In Value</th>
-                                    <th>Stock Out Qty</th>
-                                    <th>Stock Out Value</th>
-                                    <th>Remaining Stock</th>
-                                    <th>Stock Value</th>
-                                    <th>Last Transaction</th>
+                                    {reportType === 'stockIn' ? (
+                                        <>
+                                            <th>Total Stock In Qty</th>
+                                            <th>Total Stock In Value</th>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <th>Total Stock Out Qty</th>
+                                            <th>Total Stock Out Value</th>
+                                        </>
+                                    )}
+                                    <th>Transaction Date</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {reportData.map((item) => (
-                                    <tr key={item.product_id}>
+                                {reportData.map((item, index) => (
+                                    <tr key={item.product_id + '-' + item.transaction_date + '-' + index}>
                                         <td>{item.product_name}</td>
-                                        <td>{item.purchase_price.toFixed(2)}</td>
-                                        <td>{item.stock_in_qty ?? 0}</td>
-                                        <td>{item.stock_in_value?.toFixed(2) ?? 0}</td>
-                                        <td>{item.stock_out_qty ?? 0}</td>
-                                        <td>{item.stock_out_value?.toFixed(2) ?? 0}</td>
-                                        <td>{item.current_remaining_stock}</td>
-                                        <td>{item.stock_value?.toFixed(2)}</td>
-                                        <td>{new Date(item.latest_transaction_date).toLocaleDateString()}</td>
+                                        <td>{item.purchase_price ? item.purchase_price.toFixed(2) : '0.00'}</td>
+                                        {reportType === 'stockIn' ? (
+                                            <>
+                                                <td>{item.total_stock_in_qty ?? 0}</td>
+                                                <td>{item.total_stock_in_value ? item.total_stock_in_value.toFixed(2) : '0.00'}</td>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <td>{item.total_stock_out_qty ?? 0}</td>
+                                                <td>{item.total_stock_out_value ? item.total_stock_out_value.toFixed(2) : '0.00'}</td>
+                                            </>
+                                        )}
+                                        <td>{new Date(item.transaction_date).toLocaleDateString()}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </Table>
 
-                        {totalPages > 1 && (
+                        {/* Removed pagination UI as it's not supported by the current backend model functions */}
+                        {/* {totalPages > 1 && (
                             <Pagination className="justify-content-center mt-3">
                                 {[...Array(totalPages)].map((_, i) => (
                                     <Pagination.Item
@@ -164,7 +221,7 @@ const DailyStockReport = () => {
                                     </Pagination.Item>
                                 ))}
                             </Pagination>
-                        )}
+                        )} */}
                     </>
                 )}
             </Card.Body>

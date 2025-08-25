@@ -103,7 +103,7 @@ const GoodsReceiveCreate = () => {
 
   const handleAddItem = () => {
     const { product_id, quantity, purchase_price } = newItem;
-    const parsedQty = parseInt(quantity, 10);
+    const parsedQty = parseFloat(quantity, 10);
     const parsedPrice = parseFloat(purchase_price);
 
     if (!product_id || !parsedQty || !parsedPrice) {
@@ -358,254 +358,256 @@ const GoodsReceiveCreate = () => {
   };
 
   // Full screen loader if loading
-  if (loading) {
-    return (
-     <div className="fullscreen-loader">
-        <Loader />
-      </div>
-    );
-  }
+
 
   return (
-    <Container fluid className="goods-receive-create-page">
-      <h2>Create Goods Receive</h2>
+  <Container fluid className="goods-receive-create-page">
 
-      <CustomModal
-        show={showCustomModal}
-        title={customModalTitle}
-        message={customModalMessage}
-        variant={customModalVariant}
-        downloadUrl={customModalDownloadUrl}
-        onClose={() => {
-          setShowCustomModal(false);
-          setCustomModalDownloadUrl("");
-        }}
-        onDownload={handleDownloadInvoice}
-      />
+    {/* Fullscreen Loader */}
+    {loading && (
+      <div className="fullscreen-loader">
+        <Loader />
+      </div>
+    )}
 
-      {/* Supplier Selection */}
+    <h2>Create Goods Receive</h2>
+
+    <CustomModal
+      show={showCustomModal}
+      title={customModalTitle}
+      message={customModalMessage}
+      variant={customModalVariant}
+      downloadUrl={customModalDownloadUrl}
+      onClose={() => {
+        setShowCustomModal(false);
+        setCustomModalDownloadUrl("");
+      }}
+      onDownload={handleDownloadInvoice}
+    />
+
+    {/* Supplier Selection */}
+    <Card className="mb-4 goods-receive-create-page__card">
+      <Card.Body>
+        <Row>
+          <Col md={12}>
+            <h4 className="mb-3">Supplier Information</h4>
+            <Form.Group className="mb-4 goods-receive-create-page__form-group">
+              <Form.Label>Supplier</Form.Label>
+              <Form.Select
+                value={selectedSupplierId}
+                onChange={(e) => setSelectedSupplierId(e.target.value)}
+              >
+                <option value="">Select Supplier</option>
+                {suppliers.map(({ supplier_id, name }) => (
+                  <option key={supplier_id} value={supplier_id}>
+                    {name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        {/* Add Items */}
+        <h4 className="mb-3">Add Items</h4>
+        <Row className="add-item-form-row mb-3">
+          <Col md={3}>
+            <Form.Group>
+              <Form.Label>Product</Form.Label>
+              <Form.Select
+                name="product_id"
+                value={newItem.product_id}
+                onChange={handleNewItemChange}
+              >
+                <option value="">Select Product</option>
+                {products.map(({ product_id, name }) => (
+                  <option key={product_id} value={product_id}>
+                    {name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col md={3}>
+            <Form.Group>
+              <Form.Label>Quantity</Form.Label>
+              <Form.Control
+                type="number"
+                name="quantity"
+                value={newItem.quantity}
+                onChange={handleNewItemChange}
+              />
+            </Form.Group>
+          </Col>
+          <Col md={3}>
+            <Form.Group>
+              <Form.Label>Purchase Price</Form.Label>
+              <Form.Control
+                type="number"
+                name="purchase_price"
+                value={newItem.purchase_price}
+                onChange={handleNewItemChange}
+              />
+            </Form.Group>
+          </Col>
+          <Col md={3}>
+            <Form.Group>
+              <Form.Label>Entry Date</Form.Label>
+              <Form.Control
+                type="date"
+                name="entry_date"
+                value={newItem.entry_date}
+                onChange={handleNewItemChange}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+        <Button variant="primary" onClick={handleAddItem} className="mt-2">
+          Add Item
+        </Button>
+      </Card.Body>
+    </Card>
+
+    {/* Items List */}
+    {items.length > 0 && (
       <Card className="mb-4 goods-receive-create-page__card">
         <Card.Body>
+          <h4>Items List</h4>
+          <div className="table-responsive">
+            <Table bordered>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Entry Date</th>
+                  <th>Total</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.tempId}>
+                    <td>{item.product_name}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.purchase_price}</td>
+                    <td>{item.entry_date}</td>
+                    <td>{item.item_total}</td>
+                    <td>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleRemoveItem(item.tempId)}
+                      >
+                        Remove
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
           <Row>
-            <Col md={12}>
-              <h4 className="mb-3">Supplier Information</h4>
-              <Form.Group className="mb-4 goods-receive-create-page__form-group">
-                <Form.Label>Supplier</Form.Label>
-                <Form.Select
-                  value={selectedSupplierId}
-                  onChange={(e) => setSelectedSupplierId(e.target.value)}
-                >
-                  <option value="">Select Supplier</option>
-                  {suppliers.map(({ supplier_id, name }) => (
-                    <option key={supplier_id} value={supplier_id}>
-                      {name}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
-
-          {/* Add Items */}
-          <h4 className="mb-3">Add Items</h4>
-          <Row className="add-item-form-row mb-3">
-            <Col md={3}>
+            <Col md={6}>
               <Form.Group>
-                <Form.Label>Product</Form.Label>
-                <Form.Select
-                  name="product_id"
-                  value={newItem.product_id}
-                  onChange={handleNewItemChange}
-                >
-                  <option value="">Select Product</option>
-                  {products.map(({ product_id, name }) => (
-                    <option key={product_id} value={product_id}>
-                      {name}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            <Col md={3}>
-              <Form.Group>
-                <Form.Label>Quantity</Form.Label>
+                <Form.Label>Invoice #</Form.Label>
                 <Form.Control
-                  type="number"
-                  name="quantity"
-                  value={newItem.quantity}
-                  onChange={handleNewItemChange}
+                  value={invoiceNumber}
+                  onChange={(e) => setInvoiceNumber(e.target.value)}
                 />
               </Form.Group>
             </Col>
-            <Col md={3}>
+            <Col md={6}>
               <Form.Group>
-                <Form.Label>Purchase Price</Form.Label>
+                <Form.Label>Notes</Form.Label>
                 <Form.Control
-                  type="number"
-                  name="purchase_price"
-                  value={newItem.purchase_price}
-                  onChange={handleNewItemChange}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={3}>
-              <Form.Group>
-                <Form.Label>Entry Date</Form.Label>
-                <Form.Control
-                  type="date"
-                  name="entry_date"
-                  value={newItem.entry_date}
-                  onChange={handleNewItemChange}
+                  as="textarea"
+                  rows={2}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
                 />
               </Form.Group>
             </Col>
           </Row>
-          <Button variant="primary" onClick={handleAddItem} className="mt-2">
-            Add Item
+          <Row className="mt-3">
+            <Col md={12} className="text-end">
+              <h5>Total: {calculateTotal()}</h5>
+              <h5>Grand Total: {calculateTotal()}</h5>
+            </Col>
+          </Row>
+          <Button
+            variant="success"
+            className="mt-3"
+            onClick={handlePostGoodsReceive}
+            disabled={loading}
+          >
+            {loading ? <Loader size={20} /> : "Submit Goods Receive"}
           </Button>
         </Card.Body>
       </Card>
+    )}
 
-      {/* Items List */}
-      {items.length > 0 && (
-        <Card className="mb-4 goods-receive-create-page__card">
-          <Card.Body>
-            <h4>Items List</h4>
-            <div className="table-responsive">
-              <Table bordered>
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Entry Date</th>
-                    <th>Total</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((item) => (
-                    <tr key={item.tempId}>
-                      <td>{item.product_name}</td>
-                      <td>{item.quantity}</td>
-                      <td>{item.purchase_price}</td>
-                      <td>{item.entry_date}</td>
-                      <td>{item.item_total}</td>
-                      <td>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleRemoveItem(item.tempId)}
-                        >
-                          Remove
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
-            <Row>
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label>Invoice #</Form.Label>
-                  <Form.Control
-                    value={invoiceNumber}
-                    onChange={(e) => setInvoiceNumber(e.target.value)}
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label>Notes</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={2}
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row className="mt-3">
-              <Col md={12} className="text-end">
-                <h5>Total: {calculateTotal()}</h5>
-                <h5>Grand Total: {calculateTotal()}</h5>
-              </Col>
-            </Row>
-            <Button
-              variant="success"
-              className="mt-3"
-              onClick={handlePostGoodsReceive}
-              disabled={loading}
-            >
-              Submit Goods Receive
-            </Button>
-          </Card.Body>
-        </Card>
-      )}
-
-      {/* Logs */}
-      {goodsReceiveLogs.length > 0 && (
-        <Card className="mt-4 goods-receive-create-page__card">
-          <Card.Body>
-            <h4>Goods Receive Logs</h4>
-            <div className="table-responsive">
-              <Table bordered>
-                <thead>
-                  <tr>
-                    <th>Time</th>
-                    <th>Supplier</th>
-                    <th>Invoice #</th>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Purchase Price</th>
-                    <th>Item Total</th>
-                    <th>Entry Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentLogs.map((log, logIndex) =>
-                    log.items.map((item) => {
-                      const itemTotal =
-                        (parseFloat(item.purchase_price) || 0) *
-                        (parseInt(item.quantity) || 0);
-                      const entryDate = item.entry_date
-                        ? new Date(item.entry_date).toLocaleDateString()
-                        : "N/A";
-                      return (
-                        <tr key={`${logIndex}-${item.product_id}`}>
-                          <td>{new Date(log.created_at).toLocaleString()}</td>
-                          <td>{log.supplier_info}</td>
-                          <td>{log.invoice_number}</td>
-                          <td>{item.product_name}</td>
-                          <td>{item.quantity}</td>
-                          <td>{item.purchase_price}</td>
-                          <td>{itemTotal.toFixed(2)}</td>
-                          <td>{entryDate}</td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </Table>
-            </div>
-            <Pagination className="mt-3 justify-content-center">
-              {pageNumbers.map((number) => (
-                <Pagination.Item
-                  key={number}
-                  active={number === currentPage}
-                  onClick={() => paginate(number)}
-                >
-                                    {number}
-                                </Pagination.Item>
-                            ))}
-                        </Pagination>
-                    </Card.Body>
-                </Card>
-            )}
-        </Container>
-    );
+    {/* Logs */}
+    {goodsReceiveLogs.length > 0 && (
+      <Card className="mt-4 goods-receive-create-page__card">
+        <Card.Body>
+          <h4>Goods Receive Logs</h4>
+          <div className="table-responsive">
+            <Table bordered>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Supplier</th>
+                  <th>Invoice #</th>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Purchase Price</th>
+                  <th>Item Total</th>
+                  <th>Entry Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentLogs.map((log, logIndex) =>
+                  log.items.map((item) => {
+                    const itemTotal =
+                      (parseFloat(item.purchase_price) || 0) *
+                      (parseFloat(item.quantity) || 0);
+                    const entryDate = item.entry_date
+                      ? new Date(item.entry_date).toLocaleDateString()
+                      : "N/A";
+                    return (
+                      <tr key={`${logIndex}-${item.product_id}`}>
+                        <td>{new Date(log.created_at).toLocaleString()}</td>
+                        <td>{log.supplier_info}</td>
+                        <td>{log.invoice_number}</td>
+                        <td>{item.product_name}</td>
+                        <td>{item.quantity}</td>
+                        <td>{item.purchase_price}</td>
+                        <td>{itemTotal.toFixed(2)}</td>
+                        <td>{entryDate}</td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </Table>
+          </div>
+          <Pagination className="mt-3 justify-content-center">
+            {pageNumbers.map((number) => (
+              <Pagination.Item
+                key={number}
+                active={number === currentPage}
+                onClick={() => paginate(number)}
+              >
+                {number}
+              </Pagination.Item>
+            ))}
+          </Pagination>
+        </Card.Body>
+      </Card>
+    )}
+  </Container>
+);
 };
 
 export default GoodsReceiveCreate;

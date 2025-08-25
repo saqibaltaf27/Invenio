@@ -189,7 +189,7 @@ const Suppliers = () => {
           <div className="card">
             <div className="container">
               <Table
-                headers={['Sl.', 'Name', 'Address', 'Email', 'Phone', 'Added on', 'Action']} // Added 'Phone' header
+                headers={['SN.', 'Name', 'Address', 'Email', 'Phone', 'Added on', 'Action']} // Added 'Phone' header
                 columnOriginalNames={["name", "address", "email", "phone", "timeStamp"]} // Included 'phone'
                 sortColumn={sortColumn}
                 setSortColumn={setSortColumn}

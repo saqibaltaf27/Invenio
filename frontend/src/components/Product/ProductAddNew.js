@@ -39,7 +39,7 @@ function ProductAddNew() {
 			swal("Oops!", "Purchase Price can't be empty", "error")
 			return;
 		}
-		if ((stock < 0) || (parseInt(stock) < 0)) {
+		if ((stock < 0) || (parseFloat(stock) < 0)) {
 			swal("Oops!", "Product stock can't be negative", "error")
 			return;
 		}
@@ -51,7 +51,7 @@ function ProductAddNew() {
 		material,
 		category,
 		description,
-		product_stock: parseInt(stock),
+		product_stock: parseFloat(stock),
 		selling_price: parseFloat(sellingPrice),
 		purchase_price: parseFloat(purchasePrice)
 	};

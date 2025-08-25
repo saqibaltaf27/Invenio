@@ -110,11 +110,15 @@ $dark-text-color-red: #f44336;
   .success {
     border-color: $text-color-green;
     color: $text-color-green;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Added subtle shadow for highlighted button */
+    background-color: rgb(61, 160, 61); /* Solid green background */
+    color: #ffffff; /* White text */
 
     &:hover:not(:disabled) {
-      background-color: rgba(46, 204, 113, 0.1);
-      color: #27ae60;
-      border-color: #27ae60;
+      background-color: #218838; /* Even darker green on hover */
+      border-color: #218838;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Stronger shadow on hover */
+      color: #ffffff;
     }
   }
 

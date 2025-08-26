@@ -209,6 +209,40 @@ const Products = () => {
     });
   };
 
+  const resetAllProducts = async () => {
+    swal({
+      title: "Are you sure?",
+      text: "This will reset ALL product stock and purchase prices to 0!",
+      icon: "warning",
+      buttons: ["Cancel", "Reset"],
+      dangerMode: true,
+    }).then((willReset) => {
+      if (willReset) {
+        fetch(
+          //'http://localhost:5000/api/resetProducts', 
+          'https://invenio-api-production.up.railway.app/api/resetProducts',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+          }
+        )
+        .then(res => res.json())
+        .then(data => {
+          if (data.operation === "success") {
+          swal("Reset!", data.message, "success");
+          fetchProducts();
+          } else {
+          swal("Oops!", data.message || "Failed to reset", "error");
+        }
+        })
+        .catch(() => {
+          swal("Oops!", "Something went wrong", "error");
+        });
+      }
+    });
+  };
+
   const renderModal = () => (
     <Modal show={showModal} onHide={closeModal} size="lg">
       <Modal.Header closeButton>
@@ -267,7 +301,13 @@ const Products = () => {
     <div className='products'>
       <div className='product-header'>
         <div className='title'>Products</div>
-        <Link to="/products/addnew" className='btn success'>Add New</Link>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Link to="/products/addnew" className='btn success'>Add New</Link>
+          
+          <button className='btn danger' onClick={resetAllProducts}>
+            Reset Stock & Prices
+          </button>
+        </div>
       </div>
 
       {pageState === 1 && <Loader />}

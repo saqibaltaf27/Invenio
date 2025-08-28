@@ -115,7 +115,7 @@ const DailyStockReport = () => {
 
         if (reportType === 'dailyStock') {
             columns = [
-                "Item Name",  "Purchase Price (Avg)", 
+                "Item Name", "Size",  "Purchase Price (Avg)", 
                 "Old Stock (Qty)", "Stock In (Qty)", "Stock Out (Qty)", "Remaining Stock"
             ];
             rows = reportData.map(item => [
@@ -255,6 +255,7 @@ const DailyStockReport = () => {
                                 {reportType === 'dailyStock' ? (
                                     <>
                                         <th>ItemName</th>
+                                        <th>Size</th>
                                         <th>Purchase Price (Avg)</th>
                                         <th>Old Stock (Qty)</th>
                                         <th>Stock In (Qty)</th>
@@ -288,6 +289,7 @@ const DailyStockReport = () => {
                                     {reportType === 'dailyStock' ? (
                                         <>
                                             <td>{item.ItemName}</td>
+                                            <td>{item.size}</td>
                                             <td>{item.AvgPrice?.toFixed(2)}</td>
                                             <td>{item.OldStockQty}</td>
                                             <td>{item.StockInQty}</td>

@@ -9,8 +9,10 @@ import {
   Row,
   Col,
   Pagination,
+  Spinner
 } from "react-bootstrap";
 import Loader from "../PageStates/Loader"; // Loader component
+import Swal from "sweetalert2";
 import "./GoodsReceive.scss"; // SCSS styles
 
 const initialItem = {
@@ -30,6 +32,7 @@ const GoodsReceiveCreate = () => {
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true); // true initially to show fullscreen loader
+  const [deletingId, setDeletingId] = useState(null); // ID of the item being deleted
 
   // States for custom modal/alerts
   const [showCustomModal, setShowCustomModal] = useState(false);
@@ -239,6 +242,58 @@ const GoodsReceiveCreate = () => {
       setLoading(false);
     }
   };
+
+  const handleDeleteGoodsReceive = async (gr_id) => {
+    
+    const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "This will permanently delete the Goods Receive record!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#6c757d",
+    confirmButtonText: "Yes, delete it!",
+    cancelButtonText: "Cancel"
+  });
+
+  if (!result.isConfirmed) return;
+
+  setDeletingId(gr_id);
+  try {
+    const res = await axios.delete(
+      `https://invenio-api-production.up.railway.app/api/goods_receives/${gr_id}`
+    );
+
+    if (res.data.success) {
+    Swal.fire({
+    icon: "success",
+    title: "Deleted!",
+    text: res.data.message,
+    timer: 2000,
+    showConfirmButton: false,
+  });
+
+      const logsResponse = await axios.get(
+        "https://invenio-api-production.up.railway.app/api/goods-receive-logs"
+      );
+      setGoodsReceiveLogs(logsResponse.data);
+    } else {
+      showUserAlert(
+        res.data.message || "Failed to delete Goods Receive",
+        "danger",
+        "Delete Error"
+      );
+    }
+  } catch (err) {
+    showUserAlert(
+      err.message || "Error deleting Goods Receive",
+      "danger",
+      "Delete Error"
+    );
+  } finally {
+    setDeletingId(null);
+  }
+};
 
   const handleDownloadInvoice = async () => {
     if (!customModalDownloadUrl) {
@@ -563,7 +618,7 @@ const GoodsReceiveCreate = () => {
                   <th>Quantity</th>
                   <th>Purchase Price</th>
                   <th>Item Total</th>
-                  <th>Entry Date</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -584,7 +639,24 @@ const GoodsReceiveCreate = () => {
                         <td>{item.quantity}</td>
                         <td>{item.purchase_price}</td>
                         <td>{itemTotal.toFixed(2)}</td>
-                        <td>{entryDate}</td>
+                        <td>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        className="w-100 w-md-auto"
+                        onClick={() => handleDeleteGoodsReceive(log.gr_id)}
+                        disabled={deletingId === log.gr_id}
+                      >
+                        {deletingId === log.gr_id ? (
+                          <>
+                            <Spinner animation="border" size="sm" className="me-1" />
+                            Deleting...
+                          </>
+                        ) : (
+                          "Delete"
+                        )}
+                      </Button>
+                    </td>
                       </tr>
                     );
                   })

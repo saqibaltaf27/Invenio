@@ -14,6 +14,7 @@
     "bootstrap": "^5.2.3",
     "crypto-js": "^4.1.1",
     "file-saver": "^2.0.5",
+    "framer-motion": "^12.23.12",
     "jspdf-autotable": "^5.0.2",
     "moment": "^2.29.4",
     "notistack": "^3.0.1",
@@ -28,6 +29,7 @@
     "recharts": "^2.1.16",
     "sass": "^1.55.0",
     "sweetalert": "^2.1.2",
+    "sweetalert2": "^11.22.5",
     "vercel": "^41.7.3",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"

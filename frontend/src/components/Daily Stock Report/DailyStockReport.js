@@ -13,18 +13,20 @@ import {
     ButtonGroup
 } from 'react-bootstrap';
 import { debounce } from 'lodash';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const DailyStockReport = () => {
-
-    const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
     const [reportData, setReportData] = useState([]);
-    const [reportType, setReportType] = useState('stockIn'); 
+    const [reportType, setReportType] = useState('stockIn');
     const [startDate, setStartDate] = useState(today);
     const [endDate, setEndDate] = useState(today);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(today);
+    const [error, setError] = useState('');
 
+    // Fetch report
     const fetchReport = useCallback(
         debounce(async () => {
             setLoading(true);
@@ -35,20 +37,13 @@ const DailyStockReport = () => {
 
                 if (reportType === 'stockIn') {
                     url = 'https://invenio-api-production.up.railway.app/api/stock-in-report';
-                    params = {
-                        ...(startDate && { startDate }),
-                        ...(endDate && { endDate }),
-                    };
+                    params = { ...(startDate && { startDate }), ...(endDate && { endDate }) };
                 } else if (reportType === 'stockOut') {
                     url = 'https://invenio-api-production.up.railway.app/api/stock-out-report';
-                    params = {
-                        ...(startDate && { startDate }),
-                        ...(endDate && { endDate }),
-                    };
+                    params = { ...(startDate && { startDate }), ...(endDate && { endDate }) };
                 } else if (reportType === 'dailyStock') {
-                   // url = 'http://localhost:5000/api/daily-stock-report';
-                     url = 'https://invenio-api-production.up.railway.app/api/daily-stock-report';
-                    params = { ...(startDate && { startDate }) }; // ✅ only one date needed
+                    url = 'https://invenio-api-production.up.railway.app/api/daily-stock-report';
+                    params = { ...(startDate && { startDate }) }; // ✅ only one date
                 }
 
                 const response = await axios.get(url, { params });
@@ -67,14 +62,95 @@ const DailyStockReport = () => {
     }, [fetchReport]);
 
     const handleReset = () => {
-        setStartDate('');
-        setEndDate('');
+        setStartDate(today);
+        setEndDate(today);
         fetchReport();
     };
 
     const handleReportTypeChange = (type) => {
         setReportType(type);
         setReportData([]);
+    };
+
+    // ✅ Export to PDF
+    const exportToPDF = () => {
+        if (reportData.length === 0) {
+            alert("No data to export");
+            return;
+        }
+
+        const doc = new jsPDF();
+
+        const logo = "/images/logo.png"; 
+
+        doc.addImage(logo, 'PNG', 10, 10, 35, 35);
+
+        doc.setFontSize(16);
+        doc.text("SHINWARI JONGARA", 62, 20);
+
+
+        // Title
+        let reportTitle =
+            reportType === 'stockIn'
+                ? 'Stock-In Report'
+                : reportType === 'stockOut'
+                ? 'Stock-Out Report'
+                : 'Daily Stock Report';
+
+        doc.setFontSize(12);
+        doc.text(reportTitle, 70, 28);
+
+        // Subtitle (date range / date)
+        let subTitle =
+            reportType === 'dailyStock'
+                ? `Report Date: ${startDate}`
+                : `From: ${startDate}  To: ${endDate}`;
+
+        doc.setFontSize(10);
+        doc.text(subTitle, 70, 35);
+
+        // Columns and rows
+        let columns = [];
+        let rows = [];
+
+        if (reportType === 'dailyStock') {
+            columns = [
+                "Item Name",  "Purchase Price (Avg)", 
+                "Old Stock (Qty)", "Stock In (Qty)", "Stock Out (Qty)", "Remaining Stock"
+            ];
+            rows = reportData.map(item => [
+                item.ItemName,
+                item.Size,
+                item.AvgPrice?.toFixed(2),
+                item.OldStockQty,
+                item.StockInQty,
+                item.StockOutQty,
+                item.RemainingStock,
+            ]);
+        } else {
+            columns = reportType === 'stockIn'
+                ? ["Product", "Purchase Price", "Total Stock In Qty", "Total Stock In Value", "Transaction Date"]
+                : ["Product", "Purchase Price", "Total Stock Out Qty", "Total Stock Out Value", "Transaction Date"];
+
+            rows = reportData.map(item => [
+                item.product_name,
+                item.purchase_price?.toFixed(2),
+                reportType === 'stockIn' ? item.total_stock_in_qty : item.total_stock_out_qty,
+                reportType === 'stockIn'
+                    ? item.total_stock_in_value?.toFixed(2)
+                    : item.total_stock_out_value?.toFixed(2),
+                new Date(item.transaction_date).toLocaleDateString(),
+            ]);
+        }
+
+        autoTable(doc,{
+            head: [columns],
+            body: rows,
+            startY: 45,
+            styles: { fontSize: 8 },
+        });
+
+        doc.save(`${reportType}_${new Date().toISOString().split("T")[0]}.pdf`);
     };
 
     return (
@@ -156,6 +232,9 @@ const DailyStockReport = () => {
                         </Button>{' '}
                         <Button variant="outline-secondary" onClick={handleReset} disabled={loading}>
                             Reset
+                        </Button>{' '}
+                        <Button variant="danger" onClick={exportToPDF} disabled={reportData.length === 0}>
+                            📄 Download PDF
                         </Button>
                     </Col>
                 </Row>
@@ -175,15 +254,13 @@ const DailyStockReport = () => {
                             <tr>
                                 {reportType === 'dailyStock' ? (
                                     <>
+                                        <th>ItemName</th>
+                                        <th>Purchase Price (Avg)</th>
+                                        <th>Old Stock (Qty)</th>
+                                        <th>Stock In (Qty)</th>
+                                        <th>Stock Out (Qty)</th>
+                                        <th>Remaining Stock (Qty)</th>
                                         
-                                        <th>Item</th>
-                                        <th>Old Stock Qty</th>
-                                        <th>Stock In Qty</th>
-                                        <th>Stock Out Qty</th>
-                                        <th>Stock In Value</th>
-                                        <th>Stock Out Value</th>
-                                        <th>Remaining Stock</th>
-                                        <th>Avg Price</th>
                                     </>
                                 ) : (
                                     <>
@@ -210,15 +287,13 @@ const DailyStockReport = () => {
                                 <tr key={index}>
                                     {reportType === 'dailyStock' ? (
                                         <>
-                                        
                                             <td>{item.ItemName}</td>
+                                            <td>{item.AvgPrice?.toFixed(2)}</td>
                                             <td>{item.OldStockQty}</td>
                                             <td>{item.StockInQty}</td>
                                             <td>{item.StockOutQty}</td>
-                                            <td>{item.StockInValue?.toFixed(2)}</td>
-                                            <td>{item.StockOutValue?.toFixed(2)}</td>
                                             <td>{item.RemainingStock}</td>
-                                            <td>{item.AvgPrice?.toFixed(2)}</td>
+                                            
                                         </>
                                     ) : (
                                         <>

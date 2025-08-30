@@ -80,22 +80,27 @@ const StockOutItem = React.memo(function StockOutItem({
         <Form.Group className="stock-out__form-group">
           <Form.Label>Supplier</Form.Label>
           <Form.Select
-            value={
-              item.supplier_id && item.purchase_price
-                ? `${item.supplier_id}-${item.purchase_price}`
-                : ''
-            }
-            onChange={handleSupplierChangeLocal}
-            disabled={!item.product_id || purchaseHistory.length === 0}
-            className="form-control"
-          >
-            <option value="">Select Supplier/Price</option>
-            {purchaseHistory.map((ph, idx) => (
-              <option key={`${ph.supplier_id}-${ph.purchase_price}-${idx}`} value={`${ph.supplier_id}-${ph.purchase_price}`}>
-                {ph.supplier_name} (Price: {Number(ph.purchase_price).toFixed(2)} - Qty: {ph.purchase_quantity})
-              </option>
-            ))}
-          </Form.Select>
+  value={item.supplier_id ? `${item.supplier_id}|${item.purchase_price}` : ""}
+  onChange={(e) => {
+    const [supplier_id, purchase_price] = e.target.value.split("|");
+    const purchaseRecord = purchaseHistory.find(
+      ph => ph.supplier_id === supplier_id && Number(ph.purchase_price) === Number(purchase_price)
+    );
+    onSupplierChange(index, purchaseRecord);
+  }}
+>
+  <option value="">Select supplier</option>
+  {purchaseHistory.map(ph => (
+    <option
+      key={`${ph.supplier_id}-${ph.purchase_price}`}
+      value={`${ph.supplier_id}|${ph.purchase_price}`}
+    >
+      {ph.supplier_name} — Price: {Number(ph.purchase_price).toFixed(2)} — Qty: {ph.purchase_quantity}
+    </option>
+  ))}
+</Form.Select>
+
+
         </Form.Group>
       </Col>
 
@@ -213,7 +218,7 @@ export default function StockOut() {
     return stockOutLogs.slice(start, end);
   }, [stockOutLogs, currentPage, logsPerPage]);
 
- const fetchData = useCallback(async (opts = { showLoader: false }) => {
+const fetchData = useCallback(async (opts = { showLoader: false }) => {
   if (opts.showLoader) setPageState(1);
   try {
     const [productsRes, logsRes] = await Promise.all([
@@ -222,21 +227,7 @@ export default function StockOut() {
     ]);
 
     startTransition(() => {
-      // 🔹 Wrap purchase details into purchase_history array
-      const products = (productsRes.data || []).map((p) => ({
-        ...p,
-        purchase_history: [
-          {
-            supplier_id: p.supplier_id,
-            supplier_name: p.supplier_name,
-            purchase_price: p.purchase_price,
-            purchase_quantity: p.purchase_quantity,
-            gr_date: p.gr_date,
-          },
-        ],
-      }));
-
-      setProducts(products);
+      setProducts(productsRes.data || []);   // ✅ keep purchase_history array intact
       setStockOutLogs(logsRes.data || []);
       if (firstLoadRef.current || opts.showLoader) setPageState(2);
       firstLoadRef.current = false;
@@ -248,48 +239,44 @@ export default function StockOut() {
 }, []);
 
 
+
   useEffect(() => {
     fetchData({ showLoader: true });
   }, [fetchData]);
 
   const handleProductChange = useCallback(
-    (index, product_id) => {
-      const selectedProduct = productMap[product_id];
-      setItems((prev) => {
-        const updated = [...prev];
-        const current = { ...updated[index] };
-        current.product_id = product_id;
-        current.name = selectedProduct?.name || '';
-        current.stock = selectedProduct?.product_stock || 0;
-        current.supplier_id = '';
-        current.supplier_name = '';
-        current.purchase_price = 0;
-        updated[index] = current;
-        return updated;
-      });
-    },
-    [productMap]
-  );
-
-  const handleSupplierChange = useCallback((index, selectedValue, purchaseHistoryForProduct) => {
-    const [supplier_id, purchase_price_str] = String(selectedValue).split('-');
-    const purchase_price = parseFloat(purchase_price_str);
-
-    const selectedPurchaseRecord = purchaseHistoryForProduct?.find(
-      (ph) => String(ph.supplier_id) === String(supplier_id) && Number(ph.purchase_price) === Number(purchase_price)
-    );
-
+  (index, product_id) => {
+    const selectedProduct = productMap[product_id];
     setItems((prev) => {
       const updated = [...prev];
-      updated[index] = {
-        ...updated[index],
-        supplier_id: selectedPurchaseRecord?.supplier_id || '',
-        supplier_name: selectedPurchaseRecord?.supplier_name || 'N/A',
-        purchase_price: selectedPurchaseRecord?.purchase_price || 0,
-      };
+      const current = { ...updated[index] };
+      current.product_id = product_id;
+      current.name = selectedProduct?.name || '';
+      current.stock = selectedProduct?.product_stock || 0;
+      current.supplier_id = '';
+      current.supplier_name = '';
+      current.purchase_price = '';
+      updated[index] = current;
       return updated;
     });
-  }, []);
+  },
+  [productMap]
+);
+
+  const handleSupplierChange = useCallback((index, selectedPurchaseRecord) => {
+  setItems((prev) => {
+    const updated = [...prev];
+    updated[index] = {
+      ...updated[index],
+      supplier_id: selectedPurchaseRecord?.supplier_id || '',
+      supplier_name: selectedPurchaseRecord?.supplier_name || '',
+      purchase_price: selectedPurchaseRecord ? Number(selectedPurchaseRecord.purchase_price) : 0,
+    };
+    return updated;
+  });
+}, []);
+
+
 
   const handleQuantityChange = useCallback((index, value) => {
     setItems((prev) => {
@@ -316,9 +303,11 @@ export default function StockOut() {
       if (!item.product_id) errors.push('Please select a product for all items.');
       if (!item.supplier_id || !item.purchase_price)
         errors.push(`Please select a supplier/price for product: ${item.name || item.product_id}`);
-      const parsedQuantity = parseFloat(item.quantity);
+      const parsedQuantity = Number(item.quantity);
       if (isNaN(parsedQuantity) || parsedQuantity <= 0)
-        errors.push(`Quantity for product ${item.name || item.product_id} must be a positive number.`);
+      errors.push(`Quantity for product ${item.name || item.product_id} must be a positive number.`);
+      if (!item.supplier_id || Number(item.purchase_price) <= 0)
+      errors.push(`Please select a valid supplier/price for product: ${item.name || item.product_id}`);
       if (parsedQuantity > Number(item.stock))
         errors.push(
           `Not enough stock for product ${item.name || item.product_id}. Available: ${item.stock}, Requested: ${parsedQuantity}.`

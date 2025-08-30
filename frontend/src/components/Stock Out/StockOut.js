@@ -16,17 +16,6 @@ import ErrorComponent from '../PageStates/Error';
 import Swal from 'sweetalert2';
 import './StockOut.scss';
 
-/**
- * PERFORMANCE STRATEGY
- * - React.memo for row/table components
- * - useMemo for derived data (product map, paginated logs, totals)
- * - O(1) product lookup instead of Array.find
- * - Stable handlers via useCallback; avoid inline lambdas in lists
- * - Keep UI responsive with startTransition around heavy setState
- * - Avoid unnecessary pageState flicker during background refreshes
- * - Optional server-side pagination (fallback to client-side slice)
- */
-
 // --- StockOutItem (memoized) ---
 const StockOutItem = React.memo(function StockOutItem({
   item,
@@ -91,7 +80,11 @@ const StockOutItem = React.memo(function StockOutItem({
         <Form.Group className="stock-out__form-group">
           <Form.Label>Supplier</Form.Label>
           <Form.Select
-            value={`${item.supplier_id || ''}-${item.purchase_price || ''}`}
+            value={
+              item.supplier_id && item.purchase_price
+                ? `${item.supplier_id}-${item.purchase_price}`
+                : ''
+            }
             onChange={handleSupplierChangeLocal}
             disabled={!item.product_id || purchaseHistory.length === 0}
             className="form-control"
@@ -200,11 +193,9 @@ export default function StockOut() {
   const [currentPage, setCurrentPage] = useState(1);
   const [logsPerPage] = useState(5);
 
-  // Page states: 1 = loading, 2 = loaded, 3 = error
   const [pageState, setPageState] = useState(1);
   const firstLoadRef = useRef(true);
 
-  // Derived lookups
   const productMap = useMemo(() => {
     const map = Object.create(null);
     for (const p of products) map[p.product_id] = p;
@@ -222,39 +213,45 @@ export default function StockOut() {
     return stockOutLogs.slice(start, end);
   }, [stockOutLogs, currentPage, logsPerPage]);
 
-  const fetchData = useCallback(async (opts = { showLoader: false }) => {
-    if (opts.showLoader) setPageState(1);
-    try {
-      // OPTIONAL: If your backend supports server pagination, use it:
-      // const [productsRes, logsRes] = await Promise.all([
-      //   axios.get('/api/products-full-details'),
-      //   axios.get('/api/stock-out-logs', { params: { page: currentPage, limit: logsPerPage } })
-      // ]);
+ const fetchData = useCallback(async (opts = { showLoader: false }) => {
+  if (opts.showLoader) setPageState(1);
+  try {
+    const [productsRes, logsRes] = await Promise.all([
+      axios.get('https://invenio-api-production.up.railway.app/api/products-full-details'),
+      axios.get('https://invenio-api-production.up.railway.app/api/stock-out-logs'),
+    ]);
 
-      const [productsRes, logsRes] = await Promise.all([
-        axios.get('https://invenio-api-production.up.railway.app/api/products-full-details'),
-        axios.get('https://invenio-api-production.up.railway.app/api/stock-out-logs'),
-      ]);
+    startTransition(() => {
+      // 🔹 Wrap purchase details into purchase_history array
+      const products = (productsRes.data || []).map((p) => ({
+        ...p,
+        purchase_history: [
+          {
+            supplier_id: p.supplier_id,
+            supplier_name: p.supplier_name,
+            purchase_price: p.purchase_price,
+            purchase_quantity: p.purchase_quantity,
+            gr_date: p.gr_date,
+          },
+        ],
+      }));
 
-      startTransition(() => {
-        setProducts(productsRes.data || []);
-        setStockOutLogs(logsRes.data || []);
-        if (firstLoadRef.current || opts.showLoader) setPageState(2);
-        firstLoadRef.current = false;
-      });
-    } catch (err) {
-      console.error('Error fetching data:', err);
-      setPageState(3);
-    }
-  }, [/* currentPage, logsPerPage */]);
+      setProducts(products);
+      setStockOutLogs(logsRes.data || []);
+      if (firstLoadRef.current || opts.showLoader) setPageState(2);
+      firstLoadRef.current = false;
+    });
+  } catch (err) {
+    console.error('Error fetching data:', err);
+    setPageState(3);
+  }
+}, []);
+
 
   useEffect(() => {
-    // Initial mount shows loader
     fetchData({ showLoader: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchData]);
 
-  // Handlers
   const handleProductChange = useCallback(
     (index, product_id) => {
       const selectedProduct = productMap[product_id];
@@ -267,15 +264,6 @@ export default function StockOut() {
         current.supplier_id = '';
         current.supplier_name = '';
         current.purchase_price = 0;
-
-        // Preselect first purchase history record if available
-        const ph = selectedProduct?.purchase_history?.[0];
-        if (ph) {
-          current.supplier_id = ph.supplier_id;
-          current.supplier_name = ph.supplier_name;
-          current.purchase_price = ph.purchase_price;
-        }
-
         updated[index] = current;
         return updated;
       });
@@ -326,7 +314,7 @@ export default function StockOut() {
     const errors = [];
     for (const item of items) {
       if (!item.product_id) errors.push('Please select a product for all items.');
-      if (!item.supplier_id || Number(item.purchase_price) === 0)
+      if (!item.supplier_id || !item.purchase_price)
         errors.push(`Please select a supplier/price for product: ${item.name || item.product_id}`);
       const parsedQuantity = parseFloat(item.quantity);
       if (isNaN(parsedQuantity) || parsedQuantity <= 0)
@@ -366,7 +354,6 @@ export default function StockOut() {
         setSuccessModalVisible(true);
         setItems([{ product_id: '', name: '', quantity: '', stock: 0, supplier_id: '', supplier_name: '', purchase_price: 0 }]);
         setCustomerInfo('');
-        // Refresh data without flicker
         fetchData({ showLoader: false });
       } catch (err) {
         console.error('Stock out submission error:', err);
@@ -378,7 +365,6 @@ export default function StockOut() {
     [customerInfo, items, validateItems, fetchData]
   );
 
-  // Delete handlers
   const handleDeleteClick = useCallback(async (id) => {
     const result = await Swal.fire({
       title: 'Are you sure?',
@@ -427,7 +413,6 @@ export default function StockOut() {
         <Loader />
       ) : pageState === 2 ? (
         <>
-          {/* Success Modal */}
           <Modal show={successModalVisible} onHide={() => setSuccessModalVisible(false)} centered>
             <Modal.Header closeButton>
               <Modal.Title>Stock Out Successful</Modal.Title>
@@ -442,7 +427,6 @@ export default function StockOut() {
             </Modal.Footer>
           </Modal>
 
-          {/* Stock Out Form */}
           <Card className="stock-out__card">
             <Card.Body>
               <h4 className="mb-3">Stock Out Details</h4>
@@ -489,7 +473,8 @@ export default function StockOut() {
               isSubmitting ||
               items.length === 0 ||
               items.some(
-                (item) => !item.product_id || !item.quantity || parseFloat(item.quantity) <= 0 || !item.supplier_id || Number(item.purchase_price) === 0
+                (item) =>
+                  !item.product_id || !item.quantity || parseFloat(item.quantity) <= 0 || !item.supplier_id || !item.purchase_price
               )
             }
           >
@@ -519,23 +504,41 @@ export default function StockOut() {
                         <tr key={log.so_id}>
                           <td>{new Date(log.created_at).toLocaleString()}</td>
                           <td>{log.customer_info}</td>
-                          <td>{log.items.map((it) => (
-                            <div key={`${log.so_id}-${it.product_id}`}>{it.product_name}</div>
-                          ))}</td>
-                          <td>{log.items.map((it) => (
-                            <div key={`${log.so_id}-${it.product_id}`}>{it.quantity}</div>
-                          ))}</td>
-                          <td>{log.items.map((it) => (
-                            <div key={`${log.so_id}-${it.product_id}`}>{it.purchase_price ? Number(it.purchase_price).toFixed(2) : 'N/A'}</div>
-                          ))}</td>
-                          <td>{log.items.map((it) => (
-                            <div key={`${log.so_id}-${it.product_id}`}>{it.supplier_name || 'N/A'}</div>
-                          ))}</td>
-                          <td>{log.items.map((it) => (
-                            <div key={`${log.so_id}-${it.product_id}`}>{(Number(it.quantity) * Number(it.purchase_price)).toFixed(2)}</div>
-                          ))}</td>
                           <td>
-                            <Button variant="danger" size="sm" data-id={log.so_id} onClick={onDeleteBtnClick}>
+                            {log.items.map((it) => (
+                              <div key={`${log.so_id}-${it.product_id}`}>{it.product_name}</div>
+                            ))}
+                          </td>
+                          <td>
+                            {log.items.map((it) => (
+                              <div key={`${log.so_id}-${it.product_id}-qty`}>{it.quantity}</div>
+                            ))}
+                          </td>
+                          <td>
+                            {log.items.map((it) => (
+                              <div key={`${log.so_id}-${it.product_id}-price`}>{Number(it.purchase_price).toFixed(2)}</div>
+                            ))}
+                          </td>
+                          <td>
+                            {log.items.map((it) => (
+                              <div key={`${log.so_id}-${it.product_id}-supp`}>{it.supplier_name}</div>
+                            ))}
+                          </td>
+                          <td>
+                            {log.items.map((it) => (
+                              <div key={`${log.so_id}-${it.product_id}-val`}>
+                                {Number(it.purchase_price * it.quantity).toFixed(2)}
+                              </div>
+                            ))}
+                          </td>
+                          <td>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={onDeleteBtnClick}
+                              data-id={log.so_id}
+                              className="stock-out__delete-button"
+                            >
                               Delete
                             </Button>
                           </td>
@@ -544,15 +547,17 @@ export default function StockOut() {
                     </tbody>
                   </Table>
                 </div>
-                {totalPages > 1 && (
-                  <Pagination className="mt-3 justify-content-center">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
-                      <Pagination.Item key={number} active={number === currentPage} onClick={() => paginate(number)}>
-                        {number}
-                      </Pagination.Item>
-                    ))}
-                  </Pagination>
-                )}
+                <Pagination className="justify-content-center">
+                  <Pagination.First onClick={() => paginate(1)} disabled={currentPage === 1} />
+                  <Pagination.Prev onClick={() => paginate(Math.max(currentPage - 1, 1))} disabled={currentPage === 1} />
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+                    <Pagination.Item key={num} active={num === currentPage} onClick={() => paginate(num)}>
+                      {num}
+                    </Pagination.Item>
+                  ))}
+                  <Pagination.Next onClick={() => paginate(Math.min(currentPage + 1, totalPages))} disabled={currentPage === totalPages} />
+                  <Pagination.Last onClick={() => paginate(totalPages)} disabled={currentPage === totalPages} />
+                </Pagination>
               </Card.Body>
             </Card>
           )}

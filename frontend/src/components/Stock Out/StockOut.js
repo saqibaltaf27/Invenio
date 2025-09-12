@@ -22,13 +22,9 @@ const StockOutItem = React.memo(function StockOutItem({
   index,
   products,
   onProductChange,
-  onSupplierChange,
   onQuantityChange,
   onRemoveItem,
 }) {
-  const selectedProduct = products.find((p) => p.product_id === item.product_id);
-  const purchaseHistory = selectedProduct?.purchase_history || [];
-
   const handleProductChangeLocal = useCallback(
     (e) => onProductChange(index, e.target.value),
     [onProductChange, index]
@@ -39,16 +35,11 @@ const StockOutItem = React.memo(function StockOutItem({
     [onQuantityChange, index]
   );
 
-  const handleSupplierChangeLocal = useCallback(
-    (e) => onSupplierChange(index, e.target.value, purchaseHistory),
-    [onSupplierChange, index, purchaseHistory]
-  );
-
   const handleRemoveLocal = useCallback(() => onRemoveItem(index), [onRemoveItem, index]);
 
   return (
-    <Row className="stock-out__item-row">
-      <Col md={3} sm={12}>
+    <Row className="stock-out__item-row align-items-end">
+      <Col md={4} sm={12} className="mb-2">
         <Form.Group className="stock-out__form-group">
           <Form.Label>Product</Form.Label>
           <Form.Select value={item.product_id} onChange={handleProductChangeLocal} className="form-control">
@@ -62,61 +53,33 @@ const StockOutItem = React.memo(function StockOutItem({
         </Form.Group>
       </Col>
 
-      <Col md={2} sm={6}>
+      <Col md={2} sm={6} className="mb-2">
         <Form.Group className="stock-out__form-group">
           <Form.Label>Qty To Remove</Form.Label>
           <Form.Control type="number" value={item.quantity} onChange={handleQtyChangeLocal} min="1" className="form-control" />
         </Form.Group>
       </Col>
 
-      <Col md={2} sm={6}>
+      <Col md={2} sm={6} className="mb-2">
         <Form.Group className="stock-out__form-group">
           <Form.Label>Current Stock</Form.Label>
           <Form.Control type="text" value={item.stock} disabled className="form-control" />
         </Form.Group>
       </Col>
 
-      <Col md={2} sm={6}>
+      <Col md={3} sm={6} className="mb-2">
         <Form.Group className="stock-out__form-group">
-          <Form.Label>Supplier</Form.Label>
-          <Form.Select
-  value={item.supplier_id ? `${item.supplier_id}|${item.purchase_price}` : ""}
-  onChange={(e) => {
-    const [supplier_id, purchase_price] = e.target.value.split("|");
-    const purchaseRecord = purchaseHistory.find(
-      ph => ph.supplier_id === supplier_id && Number(ph.purchase_price) === Number(purchase_price)
-    );
-    onSupplierChange(index, purchaseRecord);
-  }}
->
-  <option value="">Select supplier</option>
-  {purchaseHistory.map(ph => (
-    <option
-      key={`${ph.supplier_id}-${ph.purchase_price}`}
-      value={`${ph.supplier_id}|${ph.purchase_price}`}
-    >
-      {ph.supplier_name} — Price: {Number(ph.purchase_price).toFixed(2)} — Qty: {ph.purchase_quantity}
-    </option>
-  ))}
-</Form.Select>
-
-
-        </Form.Group>
-      </Col>
-
-      <Col md={2} sm={6}>
-        <Form.Group className="stock-out__form-group">
-          <Form.Label>Purchase Price</Form.Label>
+          <Form.Label>Avg Purchase Price</Form.Label>
           <Form.Control
             type="text"
-            value={item.purchase_price ? `${Number(item.purchase_price).toFixed(2)}` : 'N/A'}
+            value={item.avg_purchase_price ? Number(item.avg_purchase_price).toFixed(2) : 'N/A'}
             disabled
             className="form-control"
           />
         </Form.Group>
       </Col>
 
-      <Col md={1} sm={12} className="d-flex align-items-end justify-content-center mt-md-0 mt-3">
+      <Col md={1} sm={12} className="d-flex align-items-end justify-content-center mb-2">
         <Button variant="danger" size="sm" onClick={handleRemoveLocal}>
           Remove
         </Button>
@@ -141,7 +104,7 @@ const ItemsTable = React.memo(function ItemsTable({ items, onRemoveItem }) {
   );
 
   return (
-    <Card className="stock-out__card">
+    <Card className="stock-out__card mt-3">
       <Card.Body>
         <h4>Items for Stock Out</h4>
         <div className="table-responsive">
@@ -151,8 +114,7 @@ const ItemsTable = React.memo(function ItemsTable({ items, onRemoveItem }) {
                 <th>Product</th>
                 <th>Qty To Remove</th>
                 <th>Current Stock</th>
-                <th>Purchase Price</th>
-                <th>Supplier</th>
+                <th>Avg Price</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -162,8 +124,7 @@ const ItemsTable = React.memo(function ItemsTable({ items, onRemoveItem }) {
                   <td>{item.name}</td>
                   <td>{item.quantity}</td>
                   <td>{item.stock}</td>
-                  <td>{item.purchase_price ? `${Number(item.purchase_price).toFixed(2)}` : 'N/A'}</td>
-                  <td>{item.supplier_name || 'N/A'}</td>
+                  <td>{item.avg_purchase_price ? Number(item.avg_purchase_price).toFixed(2) : 'N/A'}</td>
                   <td>
                     <Button variant="danger" size="sm" data-index={index} onClick={handleRemove}>
                       Remove
@@ -189,15 +150,15 @@ export default function StockOut() {
   const [products, setProducts] = useState([]);
   const [stockOutLogs, setStockOutLogs] = useState([]);
   const [items, setItems] = useState([
-    { product_id: '', name: '', quantity: '', stock: 0, supplier_id: '', supplier_name: '', purchase_price: 0 },
+    { product_id: '', name: '', quantity: '', stock: 0, avg_purchase_price: 0 },
   ]);
   const [customerInfo, setCustomerInfo] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-
+  const [summary, setSummary] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [logsPerPage] = useState(5);
-
   const [pageState, setPageState] = useState(1);
   const firstLoadRef = useRef(true);
 
@@ -207,10 +168,7 @@ export default function StockOut() {
     return map;
   }, [products]);
 
-  const totalPages = useMemo(
-    () => Math.ceil(stockOutLogs.length / logsPerPage) || 1,
-    [stockOutLogs.length, logsPerPage]
-  );
+  const totalPages = useMemo(() => Math.ceil(stockOutLogs.length / logsPerPage) || 1, [stockOutLogs.length, logsPerPage]);
 
   const currentLogs = useMemo(() => {
     const start = (currentPage - 1) * logsPerPage;
@@ -218,65 +176,59 @@ export default function StockOut() {
     return stockOutLogs.slice(start, end);
   }, [stockOutLogs, currentPage, logsPerPage]);
 
-const fetchData = useCallback(async (opts = { showLoader: false }) => {
-  if (opts.showLoader) setPageState(1);
-  try {
-    const [productsRes, logsRes] = await Promise.all([
-      axios.get('https://invenio-api-production.up.railway.app/api/products-full-details'),
-      axios.get('https://invenio-api-production.up.railway.app/api/stock-out-logs'),
-    ]);
+  const fetchData = useCallback(async (opts = { showLoader: false }) => {
+    if (opts.showLoader) setPageState(1);
+    try {
+      const [productsRes, logsRes] = await Promise.all([
+        axios.get('https://invenio-api-production.up.railway.app/api/products-full-details'),
+        axios.get('https://invenio-api-production.up.railway.app/api/stock-out-logs'),
+      ]);
 
-    startTransition(() => {
-      setProducts(productsRes.data || []);   // ✅ keep purchase_history array intact
-      setStockOutLogs(logsRes.data || []);
-      if (firstLoadRef.current || opts.showLoader) setPageState(2);
-      firstLoadRef.current = false;
-    });
-  } catch (err) {
-    console.error('Error fetching data:', err);
-    setPageState(3);
-  }
-}, []);
-
-
+      startTransition(() => {
+        setProducts(productsRes.data || []);
+        setStockOutLogs(logsRes.data || []);
+        if (firstLoadRef.current || opts.showLoader) setPageState(2);
+        firstLoadRef.current = false;
+      });
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setPageState(3);
+    }
+  }, []);
 
   useEffect(() => {
     fetchData({ showLoader: true });
   }, [fetchData]);
 
+  // Weighted average (by purchase_quantity)
+  const calculateAveragePrice = useCallback((purchaseHistory) => {
+    if (!purchaseHistory || purchaseHistory.length === 0) return 0;
+    const totalValue = purchaseHistory.reduce(
+      (sum, record) => sum + (Number(record.purchase_quantity || 0) * Number(record.purchase_price || 0)),
+      0
+    );
+    const totalQuantity = purchaseHistory.reduce((sum, record) => sum + (Number(record.purchase_quantity || 0)), 0);
+    return totalQuantity > 0 ? totalValue / totalQuantity : 0;
+  }, []);
+
   const handleProductChange = useCallback(
-  (index, product_id) => {
-    const selectedProduct = productMap[product_id];
-    setItems((prev) => {
-      const updated = [...prev];
-      const current = { ...updated[index] };
-      current.product_id = product_id;
-      current.name = selectedProduct?.name || '';
-      current.stock = selectedProduct?.product_stock || 0;
-      current.supplier_id = '';
-      current.supplier_name = '';
-      current.purchase_price = '';
-      updated[index] = current;
-      return updated;
-    });
-  },
-  [productMap]
-);
+    (index, product_id) => {
+      const selectedProduct = productMap[product_id];
+      const avgPrice = selectedProduct ? calculateAveragePrice(selectedProduct.purchase_history) : 0;
 
-  const handleSupplierChange = useCallback((index, selectedPurchaseRecord) => {
-  setItems((prev) => {
-    const updated = [...prev];
-    updated[index] = {
-      ...updated[index],
-      supplier_id: selectedPurchaseRecord?.supplier_id || '',
-      supplier_name: selectedPurchaseRecord?.supplier_name || '',
-      purchase_price: selectedPurchaseRecord ? Number(selectedPurchaseRecord.purchase_price) : 0,
-    };
-    return updated;
-  });
-}, []);
-
-
+      setItems((prev) => {
+        const updated = [...prev];
+        const current = { ...updated[index] };
+        current.product_id = product_id;
+        current.name = selectedProduct?.name || '';
+        current.stock = selectedProduct?.product_stock || 0;
+        current.avg_purchase_price = avgPrice;
+        updated[index] = current;
+        return updated;
+      });
+    },
+    [productMap, calculateAveragePrice]
+  );
 
   const handleQuantityChange = useCallback((index, value) => {
     setItems((prev) => {
@@ -287,27 +239,18 @@ const fetchData = useCallback(async (opts = { showLoader: false }) => {
   }, []);
 
   const addItem = useCallback(() => {
-    setItems((prev) => [
-      ...prev,
-      { product_id: '', name: '', quantity: '', stock: 0, supplier_id: '', supplier_name: '', purchase_price: 0 },
-    ]);
+    setItems((prev) => [...prev, { product_id: '', name: '', quantity: '', stock: 0, avg_purchase_price: 0 }]);
   }, []);
 
-  const removeItem = useCallback((index) => {
-    setItems((prev) => prev.filter((_, i) => i !== index));
-  }, []);
+  const removeItem = useCallback((index) => setItems((prev) => prev.filter((_, i) => i !== index)), []);
 
   const validateItems = useCallback(() => {
     const errors = [];
     for (const item of items) {
       if (!item.product_id) errors.push('Please select a product for all items.');
-      if (!item.supplier_id || !item.purchase_price)
-        errors.push(`Please select a supplier/price for product: ${item.name || item.product_id}`);
       const parsedQuantity = Number(item.quantity);
       if (isNaN(parsedQuantity) || parsedQuantity <= 0)
-      errors.push(`Quantity for product ${item.name || item.product_id} must be a positive number.`);
-      if (!item.supplier_id || Number(item.purchase_price) <= 0)
-      errors.push(`Please select a valid supplier/price for product: ${item.name || item.product_id}`);
+        errors.push(`Quantity for product ${item.name || item.product_id} must be a positive number.`);
       if (parsedQuantity > Number(item.stock))
         errors.push(
           `Not enough stock for product ${item.name || item.product_id}. Available: ${item.stock}, Requested: ${parsedQuantity}.`
@@ -321,19 +264,16 @@ const fetchData = useCallback(async (opts = { showLoader: false }) => {
       e.preventDefault();
       const errors = validateItems();
       if (errors.length) {
-        await Swal.fire({ icon: 'error', title: 'Validation Errors', html: `<ul style="text-align:left">${errors
-          .map((e) => `<li>${e}</li>`)
-          .join('')}</ul>` });
+        await Swal.fire({ icon: 'error', title: 'Validation Errors', html: `<ul style="text-align:left">${errors.map((er) => `<li>${er}</li>`).join('')}</ul>` });
         return;
       }
 
       const data = {
         customer_info: customerInfo.trim() === '' ? 'N/A' : customerInfo,
-        items: items.map(({ product_id, quantity, supplier_id, purchase_price }) => ({
+        items: items.map(({ product_id, quantity, avg_purchase_price }) => ({
           product_id,
           quantity: parseFloat(quantity),
-          supplier_id,
-          purchase_price,
+          purchase_price: avg_purchase_price,
         })),
       };
 
@@ -341,8 +281,9 @@ const fetchData = useCallback(async (opts = { showLoader: false }) => {
       try {
         await axios.post('https://invenio-api-production.up.railway.app/api/stock-out', data);
         setSuccessModalVisible(true);
-        setItems([{ product_id: '', name: '', quantity: '', stock: 0, supplier_id: '', supplier_name: '', purchase_price: 0 }]);
+        setItems([{ product_id: '', name: '', quantity: '', stock: 0, avg_purchase_price: 0 }]);
         setCustomerInfo('');
+        setSummary('');
         fetchData({ showLoader: false });
       } catch (err) {
         console.error('Stock out submission error:', err);
@@ -353,6 +294,55 @@ const fetchData = useCallback(async (opts = { showLoader: false }) => {
     },
     [customerInfo, items, validateItems, fetchData]
   );
+
+  const generateSummary = useCallback(async () => {
+    setIsGenerating(true);
+    setSummary('');
+
+    const totalItems = items.reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+    const totalValue = items.reduce((s, it) => s + (Number(it.quantity) || 0) * (Number(it.avg_purchase_price) || 0), 0);
+
+    const prompt = `You are an AI assistant for an inventory management system. Generate a concise, professional summary (under 100 words) for this stock out.
+Customer: ${customerInfo || 'N/A'}
+Items:
+${items
+  .map((item) => `- ${item.name || item.product_id}: ${item.quantity} @ $${Number(item.avg_purchase_price).toFixed(2)}`)
+  .join('\n')}
+Total Quantity: ${totalItems}
+Total Value: $${Number(totalValue).toFixed(2)}
+Provide one brief professional suggestion.`;
+
+    const payload = {
+      contents: [{ parts: [{ text: prompt }] }],
+      tools: [{ google_search: {} }],
+      systemInstruction: { parts: [{ text: 'You are a professional inventory management assistant. Summarize the transaction concisely.' }] },
+    };
+
+    const apiKey = ""; // add your API key here if available
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      const generatedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (generatedText) {
+        setSummary(generatedText.trim());
+      } else {
+        await Swal.fire({ icon: 'error', title: 'Summary Generation Error', text: 'Failed to generate a summary. Please try again.' });
+      }
+    } catch (error) {
+      console.error('Gemini API Error:', error);
+      Swal.fire({ icon: 'error', title: 'API Call Failed', text: 'Could not connect to the summary generation service.' });
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [items, customerInfo]);
 
   const handleDeleteClick = useCallback(async (id) => {
     const result = await Swal.fire({
@@ -395,8 +385,8 @@ const fetchData = useCallback(async (opts = { showLoader: false }) => {
   const paginate = useCallback((pageNumber) => setCurrentPage(pageNumber), []);
 
   return (
-    <Container fluid className="stock-out">
-      <h2>Stock Out</h2>
+    <Container fluid className="stock-out p-4">
+      <h2 className="mb-4">Stock Out</h2>
 
       {pageState === 1 ? (
         <Loader />
@@ -441,37 +431,56 @@ const fetchData = useCallback(async (opts = { showLoader: false }) => {
                   index={index}
                   products={products}
                   onProductChange={handleProductChange}
-                  onSupplierChange={handleSupplierChange}
                   onQuantityChange={handleQuantityChange}
                   onRemoveItem={removeItem}
                 />
               ))}
+
               <Button variant="primary" onClick={addItem} className="stock-out__add-button mt-2">
                 Add Item
               </Button>
             </Card.Body>
           </Card>
 
-          {items.length > 0 && <ItemsTable items={items} onRemoveItem={removeItem} />}
+          {items.length > 0 && (
+            <div>
+              <ItemsTable items={items} onRemoveItem={removeItem} />
 
-          <Button
-            variant="success"
-            onClick={handleSubmit}
-            className="stock-out__submit-button mt-3"
-            disabled={
-              isSubmitting ||
-              items.length === 0 ||
-              items.some(
-                (item) =>
-                  !item.product_id || !item.quantity || parseFloat(item.quantity) <= 0 || !item.supplier_id || !item.purchase_price
-              )
-            }
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit Stock Out'}
-          </Button>
+              <Card className="mt-3 stock-out__card">
+                <Card.Body>
+                  <h4>Summary</h4>
+                  {isGenerating ? (
+                    <Loader />
+                  ) : summary ? (
+                    <p className="stock-out__summary-text">{summary}</p>
+                  ) : (
+                    <p>Click the button below to generate a summary.</p>
+                  )}
+
+                  <Button
+                    variant="info"
+                    onClick={generateSummary}
+                    disabled={isGenerating || items.length === 0 || items.some((item) => !item.product_id || !item.quantity || parseFloat(item.quantity) <= 0)}
+                    className="mt-2"
+                  >
+                    Generate Summary ✨
+                  </Button>
+                </Card.Body>
+              </Card>
+
+              <Button
+                variant="success"
+                onClick={handleSubmit}
+                className="stock-out__submit-button mt-3"
+                disabled={isSubmitting || items.length === 0 || items.some((item) => !item.product_id || !item.quantity || parseFloat(item.quantity) <= 0)}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Stock Out'}
+              </Button>
+            </div>
+          )}
 
           {stockOutLogs.length > 0 && (
-            <Card className="mt-4">
+            <Card className="mt-4 stock-out__card">
               <Card.Body>
                 <h4>Stock Out Logs</h4>
                 <div className="table-responsive">
@@ -482,8 +491,7 @@ const fetchData = useCallback(async (opts = { showLoader: false }) => {
                         <th>Customer</th>
                         <th>Product</th>
                         <th>Quantity</th>
-                        <th>Purchase Price</th>
-                        <th>Supplier</th>
+                        <th>Avg Price</th>
                         <th>Total Value</th>
                         <th>Action</th>
                       </tr>
@@ -493,33 +501,10 @@ const fetchData = useCallback(async (opts = { showLoader: false }) => {
                         <tr key={log.so_id}>
                           <td>{new Date(log.created_at).toLocaleString()}</td>
                           <td>{log.customer_info}</td>
-                          <td>
-                            {log.items.map((it) => (
-                              <div key={`${log.so_id}-${it.product_id}`}>{it.product_name}</div>
-                            ))}
-                          </td>
-                          <td>
-                            {log.items.map((it) => (
-                              <div key={`${log.so_id}-${it.product_id}-qty`}>{it.quantity}</div>
-                            ))}
-                          </td>
-                          <td>
-                            {log.items.map((it) => (
-                              <div key={`${log.so_id}-${it.product_id}-price`}>{Number(it.purchase_price).toFixed(2)}</div>
-                            ))}
-                          </td>
-                          <td>
-                            {log.items.map((it) => (
-                              <div key={`${log.so_id}-${it.product_id}-supp`}>{it.supplier_name}</div>
-                            ))}
-                          </td>
-                          <td>
-                            {log.items.map((it) => (
-                              <div key={`${log.so_id}-${it.product_id}-val`}>
-                                {Number(it.purchase_price * it.quantity).toFixed(2)}
-                              </div>
-                            ))}
-                          </td>
+                          <td>{log.items.map((it) => <div key={`${log.so_id}-${it.product_id}`}>{it.product_name}</div>)}</td>
+                          <td>{log.items.map((it) => <div key={`${log.so_id}-${it.product_id}-qty`}>{it.quantity}</div>)}</td>
+                          <td>{log.items.map((it) => <div key={`${log.so_id}-${it.product_id}-price`}>{Number(it.avg_purchase_price).toFixed(2)}</div>)}</td>
+                          <td>{log.items.map((it) => <div key={`${log.so_id}-${it.product_id}-val`}>{Number(it.avg_purchase_price * it.quantity).toFixed(2)}</div>)}</td>
                           <td>
                             <Button
                               variant="danger"
@@ -536,7 +521,8 @@ const fetchData = useCallback(async (opts = { showLoader: false }) => {
                     </tbody>
                   </Table>
                 </div>
-                <Pagination className="justify-content-center">
+
+                <Pagination className="justify-content-center mt-3">
                   <Pagination.First onClick={() => paginate(1)} disabled={currentPage === 1} />
                   <Pagination.Prev onClick={() => paginate(Math.max(currentPage - 1, 1))} disabled={currentPage === 1} />
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (

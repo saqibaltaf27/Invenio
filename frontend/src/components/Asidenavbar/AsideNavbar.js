@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "./AsideNavbar.scss";
+import "./AsideNavbar.css";
 import swal from "sweetalert";
 
 // Icons

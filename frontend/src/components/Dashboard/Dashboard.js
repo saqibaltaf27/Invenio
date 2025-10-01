@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './Dashboard.scss';
+import './Dashboard.css';
 import Feature from './Features/Feature';
 import Chart from './chart/Chart';
 import Loader from '../PageStates/Loader';

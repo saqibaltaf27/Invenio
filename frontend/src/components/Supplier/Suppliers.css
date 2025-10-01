@@ -1,0 +1,294 @@
+/* ===== SCSS Variables (Light Theme Defaults - Replicated for consistency) ===== */
+/* Light Theme Colors */
+:root {
+  --primary-bg-color: #f0f2f5; /* Overall light background for the page/main content area */
+  --secondary-bg-color: #ffffff; /* Background for cards, modals, and other contained elements */
+  --tertiary-bg-color: #f9f9f9; /* Slightly off-white for table headers, input backgrounds, etc. */
+  --border-color-light: #e0e0e0; /* Light borders for elements */
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1); /* Soft, subtle shadow for light theme */
+
+  --text-color-dark: #333; /* Main dark text color */
+  --text-color-muted: #555; /* Muted dark text color for labels, descriptions */
+  --text-color-placeholder: #999; /* Placeholder text color */
+  --text-color-blue: #3498db; /* Accent blue for links, active states */
+  --text-color-green: #2ecc71; /* Green for success */
+  --text-color-orange: #f39c12; /* Orange for warning */
+  --text-color-red: #e74c3c; /* Red for danger */
+
+  --transition-speed: 0.3s;
+  --mobile-breakpoint: 768px;
+
+  /* Dark Theme Colors (as fallback/non-prefixed for .dark class) */
+  --dark-primary-bg-color: #0f172a;
+  --dark-secondary-bg-color: #1e293b;
+  --dark-tertiary-bg-color: #0f172a;
+  --dark-border-color: #334155;
+  --dark-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+
+  --dark-text-color-light: #f1f5f9;
+  --dark-text-color-muted: #94a3b8;
+  --dark-text-color-blue: #38bdf8;
+  --dark-text-color-green: #6ee7b7;
+  --dark-text-color-orange: #ff9800;
+  --dark-text-color-red: #f44336;
+}
+
+/* ===== Base Styles (Default to Light Theme) ===== */
+.suppliers {
+  flex-grow: 1;
+  background-color: var(--primary-bg-color); /* Light background */
+  height: calc(100vh - 50px);
+  color: var(--text-color-dark); /* Dark text color */
+  font-family: 'Inter', sans-serif; /* Consistent font */
+  padding: 1rem; /* Added padding for overall section */
+  overflow-y: auto; /* Ensure scrollability */
+}
+
+.suppliers .supplier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Align items vertically */
+  margin: 1rem 0; /* Adjusted margin for better spacing */
+  border-bottom: 1px solid var(--border-color-light); /* Lighter divider */
+  padding-bottom: 0.5rem;
+}
+
+.suppliers .title {
+  color: var(--text-color-dark); /* Dark title for consistency */
+  font-size: x-large;
+  font-weight: bold;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  text-shadow: none; /* Removed text shadow */
+}
+
+.suppliers .card {
+  transition: var(--transition-speed);
+  margin: 20px;
+  border: 1px solid var(--border-color-light); /* Lighter border */
+  border-radius: 5px;
+  background-color: var(--secondary-bg-color); /* Solid white background */
+  backdrop-filter: none; /* Removed glassmorphism effect */
+  box-shadow: var(--shadow-light); /* Soft shadow */
+}
+
+.suppliers .container {
+  background-color: var(--secondary-bg-color); /* Solid white background for container content */
+  border-radius: 8px;
+  box-shadow: var(--shadow-light); /* Soft shadow */
+  padding: 1rem; /* Adjusted padding */
+  height: 100%; /* Ensure it fills out */
+  border: 1px solid var(--border-color-light); /* Lighter border */
+}
+
+.suppliers .btn {
+  border: 1px solid var(--text-color-blue); /* Standard blue border */
+  background-color: transparent;
+  color: var(--text-color-blue); /* Standard blue text */
+  padding: 0.5rem 1rem;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  transition: color var(--transition-speed) ease, background-color var(--transition-speed) ease, border-color var(--transition-speed) ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08); /* Subtle shadow */
+}
+
+.suppliers .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--text-color-muted);
+  border-color: #ccc;
+  box-shadow: none;
+}
+
+.suppliers .btn:hover:not(:disabled) {
+  background-color: rgba(52, 152, 219, 0.1); /* Light blue hover background */
+  color: #2980b9; /* Darker blue text on hover */
+  border-color: #2980b9; /* Darker blue border */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow on hover */
+}
+
+/* Green (Success) */
+.suppliers .btn.success {
+  border-color: var(--text-color-green);
+  color: var(--text-color-green);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Added subtle shadow for highlighted button */
+  background-color: rgb(61, 160, 61); /* Solid green background */
+  color: #ffffff; /* White text */
+}
+
+.suppliers .btn.success:hover:not(:disabled) {
+  background-color: #218838; /* Even darker green on hover */
+  border-color: #218838;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Stronger shadow on hover */
+  color: #ffffff;
+}
+
+/* Blue (Info) */
+.suppliers .btn.info {
+  border-color: var(--text-color-blue);
+  color: var(--text-color-blue);
+}
+
+.suppliers .btn.info:hover:not(:disabled) {
+  background: rgba(52, 152, 219, 0.1);
+  color: #2980b9;
+  border-color: #2980b9;
+}
+
+/* Orange (Warning) */
+.suppliers .btn.warning {
+  border-color: var(--text-color-orange);
+  color: var(--text-color-orange);
+}
+
+.suppliers .btn.warning:hover:not(:disabled) {
+  background: rgba(243, 156, 18, 0.1);
+  color: #e67e22;
+  border-color: #e67e22;
+}
+
+/* Red (Danger) */
+.suppliers .btn.danger {
+  border-color: var(--text-color-red);
+  color: var(--text-color-red);
+}
+
+.suppliers .btn.danger:hover:not(:disabled) {
+  background: rgba(231, 76, 60, 0.1);
+  color: #c0392b;
+  border-color: #c0392b;
+}
+
+/* Default */
+.suppliers .btn.default {
+  border-color: #95a5a6;
+  color: #95a5a6;
+}
+
+.suppliers .btn.default:hover:not(:disabled) {
+  background: rgba(149, 165, 166, 0.1);
+  color: #7f8c8d;
+  border-color: #7f8c8d;
+}
+
+@media screen and (max-width: 768px) {
+  .suppliers {
+    height: auto; /* Adjust height for mobile, remove fixed 100vh */
+  }
+}
+
+/* ===== Dark Theme Overrides for Suppliers (if a toggle is implemented) ===== */
+.dark .suppliers {
+  background-color: var(--dark-primary-bg-color);
+  color: var(--dark-text-color-light);
+}
+
+.dark .suppliers .supplier-header {
+  border-bottom: 1px solid var(--dark-border-color);
+}
+
+.dark .suppliers .title {
+  color: var(--dark-text-color-light);
+}
+
+.dark .suppliers .card {
+  background-color: var(--dark-secondary-bg-color);
+  border: 1px solid var(--dark-border-color);
+  box-shadow: var(--dark-shadow);
+  backdrop-filter: blur(12px); /* Re-add blur for dark theme glassmorphism */
+}
+
+.dark .suppliers .container {
+  background-color: var(--dark-secondary-bg-color);
+  border-color: var(--dark-border-color);
+  box-shadow: var(--dark-shadow);
+}
+
+.dark .suppliers .btn {
+  border-color: var(--dark-border-color);
+  background-color: var(--dark-secondary-bg-color);
+  color: var(--dark-text-color-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .suppliers .btn:disabled {
+  color: var(--dark-text-color-muted);
+  border-color: var(--dark-text-color-muted);
+}
+
+.dark .suppliers .btn:hover:not(:disabled) {
+  background-color: rgba(51, 65, 85, 0.8); /* Darker hover */
+  border-color: rgba(51, 65, 85, 0.9);
+  color: var(--dark-text-color-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Dark theme button variants */
+.dark .suppliers .btn.success {
+  border-color: var(--dark-text-color-green);
+  color: var(--dark-text-color-green);
+  /* The base button style in dark mode makes all buttons look the same,
+     but we'll override the hover for the color-specific visual feedback. */
+  background-color: transparent; /* Reset to base dark button background */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Reset shadow to base dark button shadow */
+}
+
+.dark .suppliers .btn.success:hover:not(:disabled) {
+  background-color: rgba(110, 231, 183, 0.2);
+  color: var(--dark-text-color-light);
+  border-color: var(--dark-text-color-light);
+}
+
+.dark .suppliers .btn.info {
+  border-color: var(--dark-text-color-blue);
+  color: var(--dark-text-color-blue);
+  background-color: transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .suppliers .btn.info:hover:not(:disabled) {
+  background: rgba(56, 189, 248, 0.2);
+  color: var(--dark-text-color-light);
+  border-color: var(--dark-text-color-light);
+}
+
+.dark .suppliers .btn.warning {
+  border-color: var(--dark-text-color-orange);
+  color: var(--dark-text-color-orange);
+  background-color: transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .suppliers .btn.warning:hover:not(:disabled) {
+  background: rgba(255, 152, 0, 0.2);
+  color: var(--dark-text-color-light);
+  border-color: var(--dark-text-color-light);
+}
+
+.dark .suppliers .btn.danger {
+  border-color: var(--dark-text-color-red);
+  color: var(--dark-text-color-red);
+  background-color: transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .suppliers .btn.danger:hover:not(:disabled) {
+  background: rgba(244, 67, 54, 0.2);
+  color: var(--dark-text-color-light);
+  border-color: var(--dark-text-color-light);
+}
+
+.dark .suppliers .btn.default {
+  border-color: var(--dark-text-color-muted);
+  color: var(--dark-text-color-light);
+  background-color: transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .suppliers .btn.default:hover:not(:disabled) {
+  background: var(--dark-border-color);
+  color: var(--dark-text-color-light);
+  border-color: var(--dark-text-color-light);
+}

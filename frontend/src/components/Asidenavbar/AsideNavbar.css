@@ -1,0 +1,182 @@
+/* ===================== */
+/* AsideNavbar.css - Light Professional Inventory System UI */
+/* ===================== */
+
+.asideNavbar {
+  display: flex;
+  font-family: "Inter", sans-serif;
+  background: #f9fafb; /* very light neutral bg */
+}
+
+/* ===== Sidebar Panel (Desktop) ===== */
+.asideNavbar__panel {
+  height: 100vh;
+  min-width: 240px;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 10;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== Mobile Menu (Slide-in) ===== */
+.asideNavbar__menu {
+  height: 100vh;
+  width: 240px;
+  background: #ffffff;
+  position: fixed;
+  top: 0;
+  left: -100%;
+  z-index: 9999;
+  transition: all 0.4s ease-in-out;
+  box-shadow: 6px 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.asideNavbar__menu.open {
+  left: 0;
+}
+
+/* ===== Top Header ===== */
+.asideNavbar .top {
+  padding: 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.asideNavbar .top .logo {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2563eb; /* business blue */
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ===== Navigation Section ===== */
+.asideNavbar .center {
+  padding: 1rem 0.75rem;
+  flex-grow: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+.asideNavbar .center::-webkit-scrollbar {
+  width: 6px;
+}
+.asideNavbar .center::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 6px;
+}
+
+/* Section Title */
+.asideNavbar .center .title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin: 1.2rem 0 0.5rem 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===== Nav Links ===== */
+.asideNavbar .center ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.asideNavbar .center ul .nav-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.asideNavbar .center ul li {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: #374151; /* dark gray text */
+  font-weight: 500;
+  position: relative;
+}
+
+.asideNavbar .center ul li .icon {
+  font-size: 1.2rem;
+  color: #64748b;
+  transition: all 0.25s ease;
+}
+
+/* Hover Effect */
+.asideNavbar .center ul li:hover {
+  background: #f1f5f9;
+  color: #2563eb;
+}
+
+.asideNavbar .center ul li:hover .icon {
+  color: #2563eb;
+}
+
+/* Active Link */
+.asideNavbar .center ul li.active {
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.2);
+}
+
+.asideNavbar .center ul li.active .icon {
+  color: #ffffff;
+}
+
+/* Logout */
+.asideNavbar .center ul li.logout {
+  margin-top: 2rem;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.asideNavbar .center ul li.logout:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* ===== Mobile Toggle Button ===== */
+.menu-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .asideNavbar__panel {
+    display: none;
+  }
+
+  .menu-toggle {
+    display: block;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 10000;
+    cursor: pointer;
+    color: #2563eb;
+    font-size: 2rem;
+    background: #ffffff;
+    border-radius: 50%;
+    padding: 0.4rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+  }
+
+  .menu-toggle:hover {
+    background: #f1f5f9;
+    transform: scale(1.08);
+  }
+}

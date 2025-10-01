@@ -1,4 +1,4 @@
-import "./Feature.scss";
+import "./Feature.css";
 import {
     PersonOutlined,
     ShoppingCartOutlined,

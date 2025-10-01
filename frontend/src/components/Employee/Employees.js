@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
-import './Employees.scss';
+import './Employees.css';
 
 import moment from 'moment';
 import swal from 'sweetalert';

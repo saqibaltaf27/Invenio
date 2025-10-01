@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import './ProductAddNew.scss'
+import './ProductAddNew.css';
 
 import swal from 'sweetalert';
 import Error from '../PageStates/Error';

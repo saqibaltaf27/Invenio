@@ -7,7 +7,7 @@ import Modal from 'react-bootstrap/Modal';
 import Table from '../Table/Table';
 import Loader from '../PageStates/Loader';
 import ErrorComponent from '../PageStates/Error';
-import './Products.scss';
+import './Products.css';
 
 const initialProduct = {
   product_id: null,

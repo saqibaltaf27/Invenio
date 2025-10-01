@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './SupplierAddNew.scss';
+import './SupplierAddNew.css';
 
 import swal from 'sweetalert';
 import Loader from '../PageStates/Loader';

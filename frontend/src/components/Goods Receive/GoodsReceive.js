@@ -9,11 +9,12 @@ import {
   Row,
   Col,
   Pagination,
-  Spinner
+  Spinner,
+  Modal
 } from "react-bootstrap";
-import Loader from "../PageStates/Loader"; // Loader component
+import Loader from "../PageStates/Loader";
 import Swal from "sweetalert2";
-import "./GoodsReceive.scss"; // SCSS styles
+import "./GoodsReceive.css";
 
 const initialItem = {
   product_id: "",
@@ -31,26 +32,35 @@ const GoodsReceiveCreate = () => {
   const [newItem, setNewItem] = useState(initialItem);
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [notes, setNotes] = useState("");
-  const [loading, setLoading] = useState(true); // true initially to show fullscreen loader
-  const [deletingId, setDeletingId] = useState(null); // ID of the item being deleted
-
-  // States for custom modal/alerts
-  const [showCustomModal, setShowCustomModal] = useState(false);
-  const [customModalTitle, setCustomModalTitle] = useState("");
-  const [customModalMessage, setCustomModalMessage] = useState("");
-  const [customModalVariant, setCustomModalVariant] = useState("");
-  const [customModalDownloadUrl, setCustomModalDownloadUrl] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false); // New state for submission loading
+  const [deletingId, setDeletingId] = useState(null);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [generatedInvoiceData, setGeneratedInvoiceData] = useState(null);
 
   const [goodsReceiveLogs, setGoodsReceiveLogs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [logsPerPage] = useState(5);
 
-  // Modal-based alert system
-  const showUserAlert = (message, variant = "danger", title = "") => {
-    setCustomModalMessage(message);
-    setCustomModalVariant(variant);
-    setCustomModalTitle(title);
-    setShowCustomModal(true);
+  // SweetAlert2 based alert system
+  const showAlert = (title, message, icon = "error", confirmButtonText = "OK") => {
+    return Swal.fire({
+      title,
+      text: message,
+      icon,
+      confirmButtonText,
+      confirmButtonColor: "#0ea5e9",
+    });
+  };
+
+  const showSuccessAlert = (title, message) => {
+    return Swal.fire({
+      title,
+      text: message,
+      icon: "success",
+      confirmButtonText: "OK",
+      confirmButtonColor: "#10b981",
+    });
   };
 
   // Fetch suppliers, products, logs
@@ -79,10 +89,9 @@ const GoodsReceiveCreate = () => {
       setProducts(productsRes?.data?.info?.products || []);
       setGoodsReceiveLogs(logsRes?.data || []);
     } catch (err) {
-      showUserAlert(
-        err.message || "Error fetching data",
-        "danger",
-        "Data Fetch Error"
+      showAlert(
+        "Data Fetch Error",
+        err.message || "Error fetching data"
       );
     } finally {
       setLoading(false);
@@ -110,10 +119,9 @@ const GoodsReceiveCreate = () => {
     const parsedPrice = parseFloat(purchase_price);
 
     if (!product_id || !parsedQty || !parsedPrice) {
-      showUserAlert(
-        "Please provide valid product, quantity, and price.",
-        "danger",
-        "Input Error"
+      showAlert(
+        "Input Error",
+        "Please provide valid product, quantity, and price."
       );
       return;
     }
@@ -141,7 +149,7 @@ const GoodsReceiveCreate = () => {
       );
 
       if (!selectedProduct) {
-        showUserAlert("Product not found.", "danger", "Error");
+        showAlert("Error", "Product not found.");
         return;
       }
 
@@ -173,15 +181,11 @@ const GoodsReceiveCreate = () => {
 
   const handlePostGoodsReceive = async () => {
     if (!selectedSupplierId) {
-      showUserAlert("Please select a supplier.", "danger", "Validation Error");
+      showAlert("Validation Error", "Please select a supplier.");
       return;
     }
     if (items.length === 0) {
-      showUserAlert(
-        "Please add at least one item.",
-        "danger",
-        "Validation Error"
-      );
+      showAlert("Validation Error", "Please add at least one item.");
       return;
     }
 
@@ -200,7 +204,7 @@ const GoodsReceiveCreate = () => {
       })),
     };
 
-    setLoading(true);
+    setSubmitting(true);
     try {
       const response = await axios.post(
         "https://invenio-api-production.up.railway.app/api/goods_receives",
@@ -208,136 +212,149 @@ const GoodsReceiveCreate = () => {
       );
 
       if (response.data && response.data.gr_id) {
-        const generatedInvoiceUrl = `https://invenio-api-production.up.railway.app/api/goods_receives/${response.data.gr_id}/invoice`;
-        setCustomModalDownloadUrl(generatedInvoiceUrl);
-        showUserAlert(
-          "Goods Receive created successfully! Click the button to download the invoice.",
-          "success",
-          "Invoice Ready"
-        );
+        // Generate invoice data for frontend display
+        const selectedSupplier = suppliers.find(s => s.supplier_id === parseInt(selectedSupplierId));
+        const invoiceData = {
+          invoiceNumber: autoInvoiceNumber,
+          supplier: selectedSupplier,
+          items: items,
+          total: calculateTotal(),
+          notes: notes,
+          date: new Date().toLocaleDateString(),
+          time: new Date().toLocaleTimeString()
+        };
+        
+        setGeneratedInvoiceData(invoiceData);
+        setShowInvoiceModal(true);
 
+        // Reset form
         setItems([]);
         setInvoiceNumber("");
         setNotes("");
         setSelectedSupplierId("");
+
+        // Refresh logs
+        const logsResponse = await axios.get(
+          "https://invenio-api-production.up.railway.app/api/goods-receive-logs"
+        );
+        setGoodsReceiveLogs(logsResponse.data);
+        
+        showSuccessAlert("Success", "Goods Receive created successfully!");
+      } else {
+        showAlert(
+          "Process Warning",
+          "Goods Receive created, but there was an issue.",
+          "warning"
+        );
+      }
+    } catch (err) {
+      showAlert(
+        "Submission Error",
+        err.message || "Submission failed"
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteGoodsReceive = async (gr_id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This will permanently delete the Goods Receive record!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel"
+    });
+
+    if (!result.isConfirmed) return;
+
+    setDeletingId(gr_id);
+    try {
+      const res = await axios.delete(
+        `https://invenio-api-production.up.railway.app/api/goods_receives/${gr_id}`
+      );
+
+      if (res.data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: res.data.message,
+          timer: 2000,
+          showConfirmButton: false,
+        });
 
         const logsResponse = await axios.get(
           "https://invenio-api-production.up.railway.app/api/goods-receive-logs"
         );
         setGoodsReceiveLogs(logsResponse.data);
       } else {
-        showUserAlert(
-          "Goods Receive created, but invoice generation failed.",
-          "warning",
-          "Process Warning"
+        showAlert(
+          "Delete Error",
+          res.data.message || "Failed to delete Goods Receive"
         );
       }
     } catch (err) {
-      showUserAlert(
-        err.message || "Submission failed",
-        "danger",
-        "Submission Error"
+      showAlert(
+        "Delete Error",
+        err.message || "Error deleting Goods Receive"
       );
     } finally {
-      setLoading(false);
+      setDeletingId(null);
     }
   };
 
-  const handleDeleteGoodsReceive = async (gr_id) => {
+  const handlePrintInvoice = () => {
+    const invoiceElement = document.getElementById('invoice-content');
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Invoice ${generatedInvoiceData?.invoiceNumber}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .invoice-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .invoice-details { display: flex; justify-content: space-between; margin-bottom: 30px; }
+            .invoice-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .invoice-table th, .invoice-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+            .invoice-table th { background-color: #f8f9fa; }
+            .invoice-total { text-align: right; margin-top: 20px; font-size: 1.2em; font-weight: bold; }
+            .invoice-footer { margin-top: 40px; text-align: center; color: #666; }
+          </style>
+        </head>
+        <body>
+          ${invoiceElement.innerHTML}
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  };
+
+  const handleDownloadInvoice = () => {
+    const invoiceElement = document.getElementById('invoice-content');
+    const opt = {
+      margin: 1,
+      filename: `invoice-${generatedInvoiceData?.invoiceNumber}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    // You can use html2pdf library here if installed
+    // html2pdf().from(invoiceElement).set(opt).save();
     
-    const result = await Swal.fire({
-    title: "Are you sure?",
-    text: "This will permanently delete the Goods Receive record!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText: "Yes, delete it!",
-    cancelButtonText: "Cancel"
-  });
-
-  if (!result.isConfirmed) return;
-
-  setDeletingId(gr_id);
-  try {
-    const res = await axios.delete(
-      `https://invenio-api-production.up.railway.app/api/goods_receives/${gr_id}`
-    );
-
-    if (res.data.success) {
-    Swal.fire({
-    icon: "success",
-    title: "Deleted!",
-    text: res.data.message,
-    timer: 2000,
-    showConfirmButton: false,
-  });
-
-      const logsResponse = await axios.get(
-        "https://invenio-api-production.up.railway.app/api/goods-receive-logs"
-      );
-      setGoodsReceiveLogs(logsResponse.data);
-    } else {
-      showUserAlert(
-        res.data.message || "Failed to delete Goods Receive",
-        "danger",
-        "Delete Error"
-      );
-    }
-  } catch (err) {
-    showUserAlert(
-      err.message || "Error deleting Goods Receive",
-      "danger",
-      "Delete Error"
-    );
-  } finally {
-    setDeletingId(null);
-  }
-};
-
-  const handleDownloadInvoice = async () => {
-    if (!customModalDownloadUrl) {
-      showUserAlert(
-        "Download URL is not available.",
-        "danger",
-        "Download Error"
-      );
-      return;
-    }
-    setLoading(true);
-    try {
-      const pdfResponse = await axios.get(customModalDownloadUrl, {
-        responseType: "blob",
-      });
-
-      const blob = new Blob([pdfResponse.data], { type: "application/pdf" });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Purchase_Invoice_${invoiceNumber || Date.now()}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      setCustomModalDownloadUrl("");
-      setShowCustomModal(false);
-    } catch (pdfError) {
-      showUserAlert(
-        `Error downloading invoice: ${pdfError.message}`,
-        "danger",
-        "Download Error"
-      );
-    } finally {
-      setLoading(false);
-    }
+    // For now, we'll use print as fallback
+    handlePrintInvoice();
   };
 
   const indexOfLastLog = currentPage * logsPerPage;
   const indexOfFirstLog = indexOfLastLog - logsPerPage;
-  const currentLogs = goodsReceiveLogs.slice(
-    indexOfFirstLog,
-    indexOfLastLog
-  );
+  const currentLogs = goodsReceiveLogs.slice(indexOfFirstLog, indexOfLastLog);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -346,340 +363,346 @@ const GoodsReceiveCreate = () => {
     pageNumbers.push(i);
   }
 
-  // Custom Modal Component
-  const CustomModal = ({
-    show,
-    title,
-    message,
-    variant,
-    downloadUrl,
-    onClose,
-    onDownload,
-  }) => {
-    if (!show) return null;
-
-    let headerColor = "#3498db";
-    let borderColor = "#e0e0e0";
-
-    if (variant === "success") {
-      headerColor = "#2ecc71";
-      borderColor = "#2ecc71";
-    } else if (variant === "danger") {
-      headerColor = "#e74c3c";
-      borderColor = "#e74c3c";
-    } else if (variant === "warning") {
-      headerColor = "#f39c12";
-      borderColor = "#f39c12";
-    }
-
-    return (
-      <div className="custom-modal-overlay">
-        <div className="custom-modal-content" style={{ borderColor }}>
-          <div
-            className="custom-modal-header"
-            style={{ backgroundColor: headerColor }}
-          >
-            <h5 className="custom-modal-title" style={{ color: "white" }}>
-              {title}
-            </h5>
-            <button
-              className="custom-modal-close-button"
-              onClick={onClose}
-              style={{ color: "white" }}
-            >
-              &times;
-            </button>
-          </div>
-          <div className="custom-modal-body">
-            <p>{message}</p>
-          </div>
-          <div className="custom-modal-footer">
-            {downloadUrl && (
-              <Button
-                variant="primary"
-                onClick={onDownload}
-                style={{ marginRight: "10px" }}
-              >
-                Download Invoice
-              </Button>
-            )}
-            <Button variant="secondary" onClick={onClose}>
-              Close
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Full screen loader if loading
-
-
   return (
-  <Container fluid className="goods-receive-create-page">
+    <Container fluid className="goods-receive-create-page">
+      {/* Fullscreen Loader for initial data */}
+      {loading && (
+        <div className="fullscreen-loader">
+          <Loader />
+        </div>
+      )}
 
-    {/* Fullscreen Loader */}
-    {loading && (
-      <div className="fullscreen-loader">
-        <Loader />
-      </div>
-    )}
+      {/* Submission Loading Modal */}
+      <Modal show={submitting} centered className="submission-modal">
+        <Modal.Body className="text-center">
+          <div className="submission-loader">
+            <Loader size={40} />
+            <h5 className="mt-3">Submitting Goods Receive...</h5>
+            <p className="text-muted">Please wait while we process your request</p>
+          </div>
+        </Modal.Body>
+      </Modal>
 
-    <h2>Create Goods Receive</h2>
+      {/* Invoice Modal */}
+      <Modal show={showInvoiceModal} onHide={() => setShowInvoiceModal(false)} size="lg" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Invoice Generated</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div id="invoice-content" className="invoice-container">
+            <div className="invoice-header">
+              <h2>GOODS RECEIVE NOTE</h2>
+              <p className="invoice-number">Invoice #: {generatedInvoiceData?.invoiceNumber}</p>
+            </div>
+            
+            <div className="invoice-details">
+              <div className="supplier-info">
+                <h5>Supplier Information</h5>
+                <p><strong>Name:</strong> {generatedInvoiceData?.supplier?.name}</p>
+                <p><strong>Contact:</strong> {generatedInvoiceData?.supplier?.contact_info || 'N/A'}</p>
+              </div>
+              <div className="invoice-meta">
+                <p><strong>Date:</strong> {generatedInvoiceData?.date}</p>
+                <p><strong>Time:</strong> {generatedInvoiceData?.time}</p>
+              </div>
+            </div>
 
-    <CustomModal
-      show={showCustomModal}
-      title={customModalTitle}
-      message={customModalMessage}
-      variant={customModalVariant}
-      downloadUrl={customModalDownloadUrl}
-      onClose={() => {
-        setShowCustomModal(false);
-        setCustomModalDownloadUrl("");
-      }}
-      onDownload={handleDownloadInvoice}
-    />
+            <div className="invoice-items">
+              <h5>Items Received</h5>
+              <table className="invoice-table">
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {generatedInvoiceData?.items.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.product_name}</td>
+                      <td>{item.quantity}</td>
+                      <td>${parseFloat(item.purchase_price).toFixed(2)}</td>
+                      <td>${parseFloat(item.item_total).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-    {/* Supplier Selection */}
-    <Card className="mb-4 goods-receive-create-page__card">
-      <Card.Body>
-        <Row>
-          <Col md={12}>
-            <h4 className="mb-3">Supplier Information</h4>
-            <Form.Group className="mb-4 goods-receive-create-page__form-group">
-              <Form.Label>Supplier</Form.Label>
-              <Form.Select
-                value={selectedSupplierId}
-                onChange={(e) => setSelectedSupplierId(e.target.value)}
-              >
-                <option value="">Select Supplier</option>
-                {suppliers.map(({ supplier_id, name }) => (
-                  <option key={supplier_id} value={supplier_id}>
-                    {name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-        </Row>
+            <div className="invoice-total">
+              <h4>Grand Total: ${parseFloat(generatedInvoiceData?.total).toFixed(2)}</h4>
+            </div>
 
-        {/* Add Items */}
-        <h4 className="mb-3">Add Items</h4>
-        <Row className="add-item-form-row mb-3">
-          <Col md={3}>
-            <Form.Group>
-              <Form.Label>Product</Form.Label>
-              <Form.Select
-                name="product_id"
-                value={newItem.product_id}
-                onChange={handleNewItemChange}
-              >
-                <option value="">Select Product</option>
-                {products.map(({ product_id, name }) => (
-                  <option key={product_id} value={product_id}>
-                    {name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-          <Col md={3}>
-            <Form.Group>
-              <Form.Label>Quantity</Form.Label>
-              <Form.Control
-                type="number"
-                name="quantity"
-                value={newItem.quantity}
-                onChange={handleNewItemChange}
-              />
-            </Form.Group>
-          </Col>
-          <Col md={3}>
-            <Form.Group>
-              <Form.Label>Purchase Price</Form.Label>
-              <Form.Control
-                type="number"
-                name="purchase_price"
-                value={newItem.purchase_price}
-                onChange={handleNewItemChange}
-              />
-            </Form.Group>
-          </Col>
-          <Col md={3}>
-            <Form.Group>
-              <Form.Label>Entry Date</Form.Label>
-              <Form.Control
-                type="date"
-                name="entry_date"
-                value={newItem.entry_date}
-                onChange={handleNewItemChange}
-              />
-            </Form.Group>
-          </Col>
-        </Row>
-        <Button variant="primary" onClick={handleAddItem} className="mt-2">
-          Add Item
-        </Button>
-      </Card.Body>
-    </Card>
+            {generatedInvoiceData?.notes && (
+              <div className="invoice-notes">
+                <h5>Notes</h5>
+                <p>{generatedInvoiceData.notes}</p>
+              </div>
+            )}
 
-    {/* Items List */}
-    {items.length > 0 && (
+            <div className="invoice-footer">
+              <p>Thank you for your business!</p>
+              <p>Generated on {new Date().toLocaleDateString()}</p>
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowInvoiceModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handlePrintInvoice}>
+            Print Invoice
+          </Button>
+          <Button variant="success" onClick={handleDownloadInvoice}>
+            Download PDF
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <h2>Create Goods Receive</h2>
+
+      {/* Supplier Selection */}
       <Card className="mb-4 goods-receive-create-page__card">
         <Card.Body>
-          <h4>Items List</h4>
-          <div className="table-responsive">
-            <Table bordered>
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Price</th>
-                  <th>Entry Date</th>
-                  <th>Total</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item) => (
-                  <tr key={item.tempId}>
-                    <td>{item.product_name}</td>
-                    <td>{item.quantity}</td>
-                    <td>{item.purchase_price}</td>
-                    <td>{item.entry_date}</td>
-                    <td>{item.item_total}</td>
-                    <td>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleRemoveItem(item.tempId)}
-                      >
-                        Remove
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </div>
           <Row>
-            <Col md={6}>
+            <Col md={12}>
+              <h4 className="mb-3">Supplier Information</h4>
+              <Form.Group className="mb-4 goods-receive-create-page__form-group">
+                <Form.Label>Supplier</Form.Label>
+                <Form.Select
+                  value={selectedSupplierId}
+                  onChange={(e) => setSelectedSupplierId(e.target.value)}
+                >
+                  <option value="">Select Supplier</option>
+                  {suppliers.map(({ supplier_id, name }) => (
+                    <option key={supplier_id} value={supplier_id}>
+                      {name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+          </Row>
+
+          {/* Add Items */}
+          <h4 className="mb-3">Add Items</h4>
+          <Row className="add-item-form-row mb-3">
+            <Col md={3}>
               <Form.Group>
-                <Form.Label>Invoice #</Form.Label>
+                <Form.Label>Product</Form.Label>
+                <Form.Select
+                  name="product_id"
+                  value={newItem.product_id}
+                  onChange={handleNewItemChange}
+                >
+                  <option value="">Select Product</option>
+                  {products.map(({ product_id, name }) => (
+                    <option key={product_id} value={product_id}>
+                      {name}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Quantity</Form.Label>
                 <Form.Control
-                  value={invoiceNumber}
-                  onChange={(e) => setInvoiceNumber(e.target.value)}
+                  type="number"
+                  name="quantity"
+                  value={newItem.quantity}
+                  onChange={handleNewItemChange}
                 />
               </Form.Group>
             </Col>
-            <Col md={6}>
+            <Col md={3}>
               <Form.Group>
-                <Form.Label>Notes</Form.Label>
+                <Form.Label>Purchase Price</Form.Label>
                 <Form.Control
-                  as="textarea"
-                  rows={2}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  type="number"
+                  name="purchase_price"
+                  value={newItem.purchase_price}
+                  onChange={handleNewItemChange}
+                />
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label>Entry Date</Form.Label>
+                <Form.Control
+                  type="date"
+                  name="entry_date"
+                  value={newItem.entry_date}
+                  onChange={handleNewItemChange}
                 />
               </Form.Group>
             </Col>
           </Row>
-          <Row className="mt-3">
-            <Col md={12} className="text-end">
-              <h5>Total: {calculateTotal()}</h5>
-              <h5>Grand Total: {calculateTotal()}</h5>
-            </Col>
-          </Row>
-          <Button
-            variant="success"
-            className="mt-3"
-            onClick={handlePostGoodsReceive}
-            disabled={loading}
-          >
-            {loading ? <Loader size={20} /> : "Submit Goods Receive"}
+          <Button variant="primary" onClick={handleAddItem} className="mt-2">
+            Add Item
           </Button>
         </Card.Body>
       </Card>
-    )}
 
-    {/* Logs */}
-    {goodsReceiveLogs.length > 0 && (
-      <Card className="mt-4 goods-receive-create-page__card">
-        <Card.Body>
-          <h4>Goods Receive Logs</h4>
-          <div className="table-responsive">
-            <Table bordered>
-              <thead>
-                <tr>
-                  <th>Time</th>
-                  <th>Supplier</th>
-                  <th>Invoice #</th>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Purchase Price</th>
-                  <th>Item Total</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentLogs.map((log, logIndex) =>
-                  log.items.map((item) => {
-                    const itemTotal =
-                      (parseFloat(item.purchase_price) || 0) *
-                      (parseFloat(item.quantity) || 0);
-                    const entryDate = item.entry_date
-                      ? new Date(item.entry_date).toLocaleDateString()
-                      : "N/A";
-                    return (
-                      <tr key={`${logIndex}-${item.product_id}`}>
-                        <td>{new Date(log.created_at).toLocaleString()}</td>
-                        <td>{log.supplier_info}</td>
-                        <td>{log.invoice_number}</td>
-                        <td>{item.product_name}</td>
-                        <td>{item.quantity}</td>
-                        <td>{item.purchase_price}</td>
-                        <td>{itemTotal.toFixed(2)}</td>
-                        <td>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        className="w-100 w-md-auto"
-                        onClick={() => handleDeleteGoodsReceive(log.gr_id)}
-                        disabled={deletingId === log.gr_id}
-                      >
-                        {deletingId === log.gr_id ? (
-                          <>
-                            <Spinner animation="border" size="sm" className="me-1" />
-                            Deleting...
-                          </>
-                        ) : (
-                          "Delete"
-                        )}
-                      </Button>
-                    </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </Table>
-          </div>
-          <Pagination className="mt-3 justify-content-center">
-            {pageNumbers.map((number) => (
-              <Pagination.Item
-                key={number}
-                active={number === currentPage}
-                onClick={() => paginate(number)}
-              >
-                {number}
-              </Pagination.Item>
-            ))}
-          </Pagination>
-        </Card.Body>
-      </Card>
-    )}
-  </Container>
-);
+      {/* Items List */}
+      {items.length > 0 && (
+        <Card className="mb-4 goods-receive-create-page__card">
+          <Card.Body>
+            <h4>Items List</h4>
+            <div className="table-responsive">
+              <Table bordered>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Entry Date</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item) => (
+                    <tr key={item.tempId}>
+                      <td>{item.product_name}</td>
+                      <td>{item.quantity}</td>
+                      <td>{item.purchase_price}</td>
+                      <td>{item.entry_date}</td>
+                      <td>{item.item_total}</td>
+                      <td>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleRemoveItem(item.tempId)}
+                        >
+                          Remove
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+            <Row>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>Invoice #</Form.Label>
+                  <Form.Control
+                    value={invoiceNumber}
+                    onChange={(e) => setInvoiceNumber(e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>Notes</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row className="mt-3">
+              <Col md={12} className="text-end">
+                <h5>Total: {calculateTotal()}</h5>
+                <h5>Grand Total: {calculateTotal()}</h5>
+              </Col>
+            </Row>
+            <Button
+              variant="success"
+              className="mt-3"
+              onClick={handlePostGoodsReceive}
+              disabled={submitting}
+            >
+              {submitting ? "Submitting..." : "Submit Goods Receive"}
+            </Button>
+          </Card.Body>
+        </Card>
+      )}
+
+      {/* Logs */}
+      {goodsReceiveLogs.length > 0 && (
+        <Card className="mt-4 goods-receive-create-page__card">
+          <Card.Body>
+            <h4>Goods Receive Logs</h4>
+            <div className="table-responsive">
+              <Table bordered>
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Supplier</th>
+                    <th>Invoice #</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Purchase Price</th>
+                    <th>Item Total</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentLogs.map((log, logIndex) =>
+                    log.items.map((item) => {
+                      const itemTotal =
+                        (parseFloat(item.purchase_price) || 0) *
+                        (parseFloat(item.quantity) || 0);
+                      const entryDate = item.entry_date
+                        ? new Date(item.entry_date).toLocaleDateString()
+                        : "N/A";
+                      return (
+                        <tr key={`${logIndex}-${item.product_id}`}>
+                          <td>{new Date(log.created_at).toLocaleString()}</td>
+                          <td>{log.supplier_info}</td>
+                          <td>{log.invoice_number}</td>
+                          <td>{item.product_name}</td>
+                          <td>{item.quantity}</td>
+                          <td>{item.purchase_price}</td>
+                          <td>{itemTotal.toFixed(2)}</td>
+                          <td>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              className="w-100 w-md-auto"
+                              onClick={() => handleDeleteGoodsReceive(log.gr_id)}
+                              disabled={deletingId === log.gr_id}
+                            >
+                              {deletingId === log.gr_id ? (
+                                <>
+                                  <Spinner animation="border" size="sm" className="me-1" />
+                                  Deleting...
+                                </>
+                              ) : (
+                                "Delete"
+                              )}
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </Table>
+            </div>
+            <Pagination className="mt-3 justify-content-center">
+              {pageNumbers.map((number) => (
+                <Pagination.Item
+                  key={number}
+                  active={number === currentPage}
+                  onClick={() => paginate(number)}
+                >
+                  {number}
+                </Pagination.Item>
+              ))}
+            </Pagination>
+          </Card.Body>
+        </Card>
+      )}
+    </Container>
+  );
 };
 
 export default GoodsReceiveCreate;

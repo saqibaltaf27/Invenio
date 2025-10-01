@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Table.scss';
+import './Table.css';
 import { OverlayTrigger, Popover } from 'react-bootstrap';
 import SearchOutlined from "@mui/icons-material/SearchOutlined";
 import ViewColumn from "@mui/icons-material/ViewColumn";

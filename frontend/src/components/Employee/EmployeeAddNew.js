@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import './EmployeeAddNew.scss'
+import './EmployeeAddNew.css'
 
 import swal from 'sweetalert';
 //import CryptoJS from 'crypto-js';

@@ -1,0 +1,296 @@
+/* ===== Daily Stock Report - Themed Styles ===== */
+.daily-stock-report {
+  background: #fff;
+  color: #333;
+  border: 1px solid #e6ecf2;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+  font-family: "Inter", sans-serif;
+  overflow: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.daily-stock-report:hover {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* ===== Header ===== */
+.daily-stock-report .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #f9fafb, #f1f5f9);
+  border-bottom: 1px solid #e6ecf2;
+}
+
+.daily-stock-report .card-header .card-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #2c3e50;
+  letter-spacing: 0.3px;
+}
+
+/* Dropdown */
+.daily-stock-report .card-header .dropdown-toggle {
+  background: #f8fafc;
+  border: 1px solid #e6ecf2;
+  color: #334155;
+  padding: 7px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+}
+
+.daily-stock-report .card-header .dropdown-toggle:hover {
+  background: #eef5ff;
+  transform: translateY(-2px);
+}
+
+.daily-stock-report .card-header .dropdown-menu {
+  background: #fff;
+  border: 1px solid #e6ecf2;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.daily-stock-report .card-header .dropdown-item {
+  font-size: 13px;
+  padding: 10px 14px;
+  color: #334155;
+  transition: background 0.2s ease-in-out;
+}
+
+.daily-stock-report .card-header .dropdown-item:hover {
+  background: #eef5ff;
+  color: #1e293b;
+}
+
+/* ===== Body ===== */
+.daily-stock-report .card-body {
+  padding: 18px;
+}
+
+.daily-stock-report .card-body h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 14px;
+}
+
+/* Date Filter */
+.daily-stock-report .date-filter {
+  background: #f9fafb;
+  border: 1px solid #e6ecf2;
+  color: #334155;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  transition: border 0.2s ease-in-out;
+}
+
+.daily-stock-report .date-filter:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+.daily-stock-report .date-filter.disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+}
+
+.daily-stock-report .date-filter-btn {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+}
+
+.daily-stock-report .date-filter-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-1px);
+}
+
+.daily-stock-report .date-filter-btn:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+/* ===== Table ===== */
+.daily-stock-report table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 18px;
+  font-size: 13px;
+}
+
+.daily-stock-report table thead {
+  background: #f8fafc;
+}
+
+.daily-stock-report table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 700;
+  color: #2563eb;
+  border-bottom: 1px solid #e6ecf2;
+  font-size: 13px;
+}
+
+.daily-stock-report table td {
+  padding: 12px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.daily-stock-report table tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.daily-stock-report table tr:hover {
+  background: #eef5ff;
+  transition: background 0.2s ease-in-out;
+}
+
+/* ===== Text ===== */
+.daily-stock-report p {
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ===== Pagination ===== */
+.daily-stock-report .pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.daily-stock-report .pagination .page-item .page-link {
+  background: #f8fafc;
+  color: #334155;
+  border: 1px solid #e6ecf2;
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.25s ease-in-out;
+}
+
+.daily-stock-report .pagination .page-item .page-link:hover {
+  background: #eef5ff;
+  color: #1e293b;
+  transform: translateY(-2px);
+}
+
+.daily-stock-report .pagination .page-item.active .page-link {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+  border-color: #2563eb;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .daily-stock-report {
+    padding: 12px;
+  }
+
+  .daily-stock-report .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .daily-stock-report .card-header .dropdown-toggle {
+    margin-top: 6px;
+    width: 100%;
+  }
+
+  .daily-stock-report .card-body {
+    padding: 12px;
+  }
+
+  .daily-stock-report .card-body h4 {
+    font-size: 14px;
+  }
+
+  .daily-stock-report .date-filter,
+  .daily-stock-report .date-filter-btn {
+    width: 100%;
+  }
+
+  .daily-stock-report table {
+    font-size: 12px;
+  }
+
+  .daily-stock-report table th,
+  .daily-stock-report table td {
+    padding: 8px;
+  }
+
+  .daily-stock-report .pagination .page-link {
+    font-size: 12px;
+    padding: 6px 9px;
+  }
+}
+
+/* ===== Dark Mode ===== */
+.dark .daily-stock-report {
+  background: #1f2937;
+  border: 1px solid #334155;
+  color: #f1f5f9;
+}
+
+.dark .daily-stock-report .card-header {
+  background: #111827;
+  border-bottom: 1px solid #334155;
+}
+
+.dark .daily-stock-report .card-title {
+  color: #f8fafc;
+}
+
+.dark .daily-stock-report .date-filter {
+  background: #111827;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+}
+
+.dark .daily-stock-report .date-filter-btn {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.dark .daily-stock-report table thead {
+  background: #0f172a;
+}
+
+.dark .daily-stock-report table th {
+  color: #60a5fa;
+}
+
+.dark .daily-stock-report table td {
+  color: #e2e8f0;
+}
+
+.dark .daily-stock-report .pagination .page-link {
+  background: #111827;
+  color: #f8fafc;
+  border: 1px solid #334155;
+}
+
+.dark .daily-stock-report .pagination .page-item.active .page-link {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-color: #2563eb;
+}

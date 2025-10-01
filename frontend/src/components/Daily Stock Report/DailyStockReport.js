@@ -15,6 +15,7 @@ import {
 import { debounce } from 'lodash';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import './DailyStockReport.css';
 
 const DailyStockReport = () => {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD

@@ -1,0 +1,423 @@
+/* * Compiled CSS for the Goods Receive Create Page 
+ * SCSS variables and nested rules have been resolved into standard CSS,
+ * utilizing CSS Custom Properties for theme switching.
+ */
+
+/* ===== CSS Variables (for Light/Dark Mode) ===== */
+:root {
+    /* Light Theme Defaults (derived from SCSS variables) */
+    --primary-bg-color: #f0f2f5; 
+    --secondary-bg-color: #ffffff; 
+    --tertiary-bg-color: #f9f9f9;
+    --border-color-light: #e0e0e0;
+    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1); 
+    --text-color-dark: #333; 
+    --text-color-blue: #3498db; 
+    --text-color-green: #2ecc71; 
+    --text-color-red: #e74c3c;
+    --scrollbar-thumb-color: rgba(0, 0, 0, 0.2);
+    --scrollbar-thumb-hover-color: rgba(0, 0, 0, 0.4);
+    
+    /* SCSS Calculations for Light Theme */
+    --btn-primary-hover: #2c83c9; /* darken(#3498db, 10%) */
+    --btn-danger-hover: #cf4439;  /* darken(#e74c3c, 10%) */
+    --btn-success-hover: #26a664; /* darken(#2ecc71, 10%) */
+    --table-row-even-bg: #fdfdfd; /* lighten(#ffffff, 2%) */
+    --text-color-heading: #333; /* Default dark text for headings */
+}
+
+/* ===== Dark Theme Variables Overrides ===== */
+.dark {
+    --primary-bg-color: #0f172a;
+    --secondary-bg-color: #1e293b;
+    --tertiary-bg-color: #0f172a; 
+    --border-color-light: #334155;
+    --shadow-light: 0 6px 12px rgba(0, 0, 0, 0.25);
+    
+    --text-color-dark: #f1f5f9; /* Dark theme general text color */
+    --text-color-blue: #38bdf8; /* Dark theme accent blue */
+    --text-color-green: #6ee7b7; /* Dark theme accent green */
+    --text-color-red: #f44336; /* Dark theme accent red */
+    --text-color-heading: #6ee7b7; /* Dark theme green for headings */
+    
+    /* SCSS Calculations for Dark Theme */
+    --btn-primary-hover: #25a4d9; /* darken(#38bdf8, 10%) */
+    --btn-danger-hover: #e23e33;  /* darken(#f44336, 10%) */
+    --btn-success-hover: #5ec7a6; /* darken(#6ee7b7, 10%) */
+    --table-row-even-bg: rgba(255, 255, 255, 0.05);
+    
+    --scrollbar-thumb-color: rgba(255, 255, 255, 0.3);
+    --scrollbar-thumb-hover-color: rgba(255, 255, 255, 0.5);
+}
+
+
+.goods-receive-create-page {
+  padding: 20px;
+  background-color: var(--primary-bg-color);
+  color: var(--text-color-dark);
+  min-height: 100vh;
+  overflow-y: auto;
+  max-height: 90vh;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Headings and Labels */
+.goods-receive-create-page h2,
+.goods-receive-create-page h4,
+.goods-receive-create-page .form-label {
+  color: var(--text-color-heading);
+  font-weight: 600;
+}
+.goods-receive-create-page h2 {
+  margin-bottom: 20px;
+  color: var(--text-color-blue);
+  border-bottom: 2px solid var(--text-color-blue);
+  display: inline-block;
+  padding-bottom: 4px;
+}
+.goods-receive-create-page h3 {
+  margin-top: 25px;
+  margin-bottom: 10px;
+  color: var(--text-color-green);
+}
+
+/* Scrollbar Styles */
+.goods-receive-create-page::-webkit-scrollbar {
+  width: 8px;
+}
+.goods-receive-create-page::-webkit-scrollbar-track {
+  background: transparent;
+}
+.goods-receive-create-page::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-color);
+  border-radius: 20px;
+  border: transparent;
+}
+.goods-receive-create-page::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover-color);
+}
+.goods-receive-create-page * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-color) transparent;
+}
+.goods-receive-create-page *::-webkit-scrollbar {
+  width: 8px;
+}
+.goods-receive-create-page *::-webkit-scrollbar-track {
+  background: transparent;
+}
+.goods-receive-create-page *::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-color);
+  border-radius: 20px;
+  border: transparent;
+}
+.goods-receive-create-page *::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover-color);
+}
+
+/* Form Controls */
+.goods-receive-create-page .form-group {
+  margin-bottom: 15px;
+}
+.goods-receive-create-page .form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: var(--text-color-dark);
+}
+.goods-receive-create-page .form-group .form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color-light);
+  border-radius: 4px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: var(--tertiary-bg-color);
+  color: var(--text-color-dark);
+  backdrop-filter: none;
+  appearance: none;
+  -webkit-appearance: none;
+  /* SVG icon for light theme (dark icon) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23333' fill-opacity='0.5' d='M2 0L0 2h4z'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 8px;
+  padding-right: 24px;
+}
+.goods-receive-create-page .form-group .form-control:focus {
+  outline: none;
+  border-color: var(--text-color-blue);
+  box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+.goods-receive-create-page .form-group .form-control::placeholder {
+  color: #999;
+}
+
+/* Autocomplete Dropdown */
+.goods-receive-create-page .autocomplete-wrapper {
+  position: relative;
+  display: block;
+}
+.goods-receive-create-page .autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border: 1px solid var(--border-color-light);
+  border-radius: 4px;
+  background-color: var(--secondary-bg-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 5px;
+  backdrop-filter: none;
+}
+.goods-receive-create-page .autocomplete-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-color-dark);
+  transition: background-color 0.2s ease;
+}
+.goods-receive-create-page .autocomplete-item:hover {
+  background-color: var(--tertiary-bg-color);
+}
+
+/* Add Item Form Layout */
+.goods-receive-create-page .add-item-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.goods-receive-create-page .add-item-form label {
+  color: var(--text-color-dark);
+  font-weight: bold;
+}
+
+/* Compact Buttons */
+.goods-receive-create-page .btn-primary,
+.goods-receive-create-page .btn-success,
+.goods-receive-create-page .item-table .btn-danger {
+  padding: 6px 12px;
+  font-size: 0.9em;
+  border-radius: 6px;
+}
+
+/* Primary Button (Blue) */
+.goods-receive-create-page .btn-primary {
+  background-color: var(--text-color-blue);
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.goods-receive-create-page .btn-primary:hover {
+  background-color: var(--btn-primary-hover);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+.goods-receive-create-page .btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.goods-receive-create-page .btn-primary:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Success Button (Green) */
+.goods-receive-create-page .btn-success {
+  background-color: var(--text-color-green);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.goods-receive-create-page .btn-success:hover {
+  background-color: var(--btn-success-hover);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+.goods-receive-create-page .btn-success:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.goods-receive-create-page .btn-success:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Item Table */
+.goods-receive-create-page .item-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  color: var(--text-color-dark);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-color-light);
+  background-color: var(--secondary-bg-color);
+}
+.goods-receive-create-page .item-table th,
+.goods-receive-create-page .item-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--border-color-light);
+  text-align: left;
+  position: relative;
+}
+.goods-receive-create-page .item-table th {
+  background-color: var(--tertiary-bg-color);
+  font-weight: bold;
+  color: var(--text-color-dark);
+}
+.goods-receive-create-page .item-table tbody tr {
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.goods-receive-create-page .item-table tbody tr:nth-child(even) {
+  background-color: var(--table-row-even-bg);
+}
+.goods-receive-create-page .item-table tbody tr:hover {
+  background-color: var(--tertiary-bg-color);
+  transform: scale(1.01);
+}
+.goods-receive-create-page .item-table td:not(:last-child)::after,
+.goods-receive-create-page .item-table th:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 1px;
+  background-color: var(--border-color-light);
+}
+
+/* Danger Button (Red) */
+.goods-receive-create-page .item-table .btn-danger {
+  background-color: var(--text-color-red);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+.goods-receive-create-page .item-table .btn-danger:hover {
+  background-color: var(--btn-danger-hover);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+.goods-receive-create-page .item-table .btn-danger:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.goods-receive-create-page .selected-info {
+  font-size: 0.9em;
+  color: var(--text-color-dark);
+  margin-top: 5px;
+}
+
+/* ===== Dark Theme Overrides for Goods Receive Create Page ===== */
+.dark .goods-receive-create-page {
+  background-color: var(--primary-bg-color);
+  color: var(--text-color-dark);
+}
+
+.dark .goods-receive-create-page h2,
+.dark .goods-receive-create-page h4,
+.dark .goods-receive-create-page .form-label {
+  color: var(--text-color-heading);
+}
+
+.dark .goods-receive-create-page .form-group .form-control {
+  border: 1px solid var(--border-color-light);
+  background-color: var(--tertiary-bg-color);
+  color: var(--text-color-dark);
+  backdrop-filter: blur(10px);
+  /* SVG icon for dark theme (light icon) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23fff' fill-opacity='0.5' d='M2 0L0 2h4z'%3E%3C/path%3E%3C/svg%3E");
+}
+.dark .goods-receive-create-page .form-group .form-control:focus {
+  border-color: var(--text-color-blue);
+  box-shadow: 0 0 0 0.2rem rgba(56, 189, 248, 0.25);
+}
+.dark .goods-receive-create-page .form-group .form-control::placeholder {
+  color: rgba(241, 245, 249, 0.6);
+}
+
+.dark .goods-receive-create-page .autocomplete-dropdown {
+  border: 1px solid var(--border-color-light);
+  background-color: var(--tertiary-bg-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+}
+.dark .goods-receive-create-page .autocomplete-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .goods-receive-create-page .item-table {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color-light);
+  background-color: var(--secondary-bg-color);
+}
+.dark .goods-receive-create-page .item-table th,
+.dark .goods-receive-create-page .item-table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.dark .goods-receive-create-page .item-table th {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.dark .goods-receive-create-page .item-table tbody tr:nth-child(even) {
+  background-color: var(--table-row-even-bg);
+}
+.dark .goods-receive-create-page .item-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .goods-receive-create-page .btn-primary {
+  background-color: var(--text-color-blue);
+}
+.dark .goods-receive-create-page .btn-primary:hover {
+  background-color: var(--btn-primary-hover);
+}
+.dark .goods-receive-create-page .btn-danger {
+  background-color: var(--text-color-red);
+}
+.dark .goods-receive-create-page .item-table .btn-danger:hover {
+  background-color: var(--btn-danger-hover);
+}
+.dark .goods-receive-create-page .btn-success {
+  background-color: var(--text-color-green);
+}
+.dark .goods-receive-create-page .btn-success:hover {
+  background-color: var(--btn-success-hover);
+}
+
+/* ===== Mobile Fix: Table Horizontal Scroll ===== */
+@media screen and (max-width: 768px) {
+  .goods-receive-create-page .item-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

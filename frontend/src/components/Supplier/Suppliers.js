@@ -4,7 +4,7 @@ import Modal from 'react-bootstrap/Modal';
 import moment from 'moment';
 import swal from 'sweetalert';
 
-import './Suppliers.scss';
+import './Suppliers.css';
 import Table from '../Table/Table';
 import Loader from '../PageStates/Loader';
 import ErrorComponent from '../PageStates/Error';

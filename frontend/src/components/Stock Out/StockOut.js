@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef, startTransition } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import axios from 'axios';
 import {
   Button,
@@ -14,7 +14,7 @@ import {
 import Loader from '../PageStates/Loader';
 import ErrorComponent from '../PageStates/Error';
 import Swal from 'sweetalert2';
-import './StockOut.scss';
+import './StockOut.css';
 
 // --- StockOutItem (memoized) ---
 const StockOutItem = React.memo(function StockOutItem({
@@ -42,7 +42,11 @@ const StockOutItem = React.memo(function StockOutItem({
       <Col md={4} sm={12} className="mb-2">
         <Form.Group className="stock-out__form-group">
           <Form.Label>Product</Form.Label>
-          <Form.Select value={item.product_id} onChange={handleProductChangeLocal} className="form-control">
+          <Form.Select 
+            value={item.product_id} 
+            onChange={handleProductChangeLocal} 
+            className="form-control"
+          >
             <option value="">Select Product</option>
             {products.map(({ product_id, name }) => (
               <option key={product_id} value={product_id}>
@@ -56,14 +60,25 @@ const StockOutItem = React.memo(function StockOutItem({
       <Col md={2} sm={6} className="mb-2">
         <Form.Group className="stock-out__form-group">
           <Form.Label>Qty To Remove</Form.Label>
-          <Form.Control type="number" value={item.quantity} onChange={handleQtyChangeLocal} min="1" className="form-control" />
+          <Form.Control 
+            type="number" 
+            value={item.quantity} 
+            onChange={handleQtyChangeLocal} 
+            min="1" 
+            className="form-control" 
+          />
         </Form.Group>
       </Col>
 
       <Col md={2} sm={6} className="mb-2">
         <Form.Group className="stock-out__form-group">
           <Form.Label>Current Stock</Form.Label>
-          <Form.Control type="text" value={item.stock} disabled className="form-control" />
+          <Form.Control 
+            type="text" 
+            value={item.stock} 
+            disabled 
+            className="form-control" 
+          />
         </Form.Group>
       </Col>
 
@@ -96,9 +111,8 @@ const ItemsTable = React.memo(function ItemsTable({ items, onRemoveItem }) {
   );
 
   const handleRemove = useCallback(
-    (e) => {
-      const idx = Number(e.currentTarget.getAttribute('data-index'));
-      onRemoveItem(idx);
+    (index) => {
+      onRemoveItem(index);
     },
     [onRemoveItem]
   );
@@ -126,7 +140,11 @@ const ItemsTable = React.memo(function ItemsTable({ items, onRemoveItem }) {
                   <td>{item.stock}</td>
                   <td>{item.avg_purchase_price ? Number(item.avg_purchase_price).toFixed(2) : 'N/A'}</td>
                   <td>
-                    <Button variant="danger" size="sm" data-index={index} onClick={handleRemove}>
+                    <Button 
+                      variant="danger" 
+                      size="sm" 
+                      onClick={() => handleRemove(index)}
+                    >
                       Remove
                     </Button>
                   </td>
@@ -145,6 +163,100 @@ const ItemsTable = React.memo(function ItemsTable({ items, onRemoveItem }) {
   );
 });
 
+// --- Logs Table Component ---
+const StockOutLogsTable = React.memo(function StockOutLogsTable({ 
+  logs, 
+  onDeleteClick, 
+  paginationItems, 
+  currentPage, 
+  totalPages, 
+  onPaginate 
+}) {
+  return (
+    <Card className="mt-4 stock-out__card">
+      <Card.Body>
+        <h4>Stock Out Logs</h4>
+        <div className="table-responsive">
+          <Table bordered className="stock-out__table stock-out__logs-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Avg Price Used</th>
+                <th>Total Value</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {logs.map((log) => (
+                <tr key={log.so_id}>
+                  <td>{new Date(log.created_at).toLocaleString()}</td>
+                  <td>{log.customer_info}</td>
+                  <td>
+                    {log.items.map((it) => (
+                      <div key={`${log.so_id}-${it.product_id}`} className="log-product-name">
+                        {it.product_name}
+                      </div>
+                    ))}
+                  </td>
+                  <td>
+                    {log.items.map((it) => (
+                      <div key={`${log.so_id}-${it.product_id}-qty`}>
+                        {it.quantity}
+                      </div>
+                    ))}
+                  </td>
+                  <td>
+                    {log.items.map((it) => (
+                      <div key={`${log.so_id}-${it.product_id}-price`} className="log-price">
+                        {/* Display avg_purchase_price from the stock-out API response */}
+                        {it.avg_purchase_price ? Number(it.avg_purchase_price).toFixed(2) : 
+                         it.purchase_price ? Number(it.purchase_price).toFixed(2) : '0.00'}
+                      </div>
+                    ))}
+                  </td>
+                  <td>
+                    {log.items.map((it) => {
+                      // Calculate total value using avg_purchase_price or purchase_price
+                      const price = it.avg_purchase_price || it.purchase_price || 0;
+                      const itemValue = (parseFloat(it.quantity) || 0) * (parseFloat(price) || 0);
+                      return (
+                        <div key={`${log.so_id}-${it.product_id}-val`} className="log-value">
+                          {itemValue.toFixed(2)}
+                        </div>
+                      );
+                    })}
+                  </td>
+                  <td>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => onDeleteClick(log.so_id)}
+                      className="stock-out__delete-button"
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+
+        <Pagination className="justify-content-center mt-3">
+          <Pagination.First onClick={() => onPaginate(1)} disabled={currentPage === 1} />
+          <Pagination.Prev onClick={() => onPaginate(Math.max(currentPage - 1, 1))} disabled={currentPage === 1} />
+          {paginationItems}
+          <Pagination.Next onClick={() => onPaginate(Math.min(currentPage + 1, totalPages))} disabled={currentPage === totalPages} />
+          <Pagination.Last onClick={() => onPaginate(totalPages)} disabled={currentPage === totalPages} />
+        </Pagination>
+      </Card.Body>
+    </Card>
+  );
+});
+
 // --- Main Component ---
 export default function StockOut() {
   const [products, setProducts] = useState([]);
@@ -155,20 +267,22 @@ export default function StockOut() {
   const [customerInfo, setCustomerInfo] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successModalVisible, setSuccessModalVisible] = useState(false);
-  const [summary, setSummary] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [logsPerPage] = useState(5);
   const [pageState, setPageState] = useState(1);
   const firstLoadRef = useRef(true);
 
+  // Memoized computations
   const productMap = useMemo(() => {
-    const map = Object.create(null);
-    for (const p of products) map[p.product_id] = p;
+    const map = {};
+    products.forEach(p => map[p.product_id] = p);
     return map;
   }, [products]);
 
-  const totalPages = useMemo(() => Math.ceil(stockOutLogs.length / logsPerPage) || 1, [stockOutLogs.length, logsPerPage]);
+  const totalPages = useMemo(() => 
+    Math.ceil(stockOutLogs.length / logsPerPage) || 1, 
+    [stockOutLogs.length, logsPerPage]
+  );
 
   const currentLogs = useMemo(() => {
     const start = (currentPage - 1) * logsPerPage;
@@ -176,20 +290,34 @@ export default function StockOut() {
     return stockOutLogs.slice(start, end);
   }, [stockOutLogs, currentPage, logsPerPage]);
 
+  // Optimized data fetching
   const fetchData = useCallback(async (opts = { showLoader: false }) => {
     if (opts.showLoader) setPageState(1);
+    
     try {
       const [productsRes, logsRes] = await Promise.all([
         axios.get('https://invenio-api-production.up.railway.app/api/products-full-details'),
         axios.get('https://invenio-api-production.up.railway.app/api/stock-out-logs'),
       ]);
 
-      startTransition(() => {
-        setProducts(productsRes.data || []);
-        setStockOutLogs(logsRes.data || []);
-        if (firstLoadRef.current || opts.showLoader) setPageState(2);
-        firstLoadRef.current = false;
-      });
+      setProducts(productsRes.data || []);
+      
+      // Process logs to ensure we have the avg_purchase_price
+      const processedLogs = (logsRes.data || []).map(log => ({
+        ...log,
+        items: log.items.map(item => ({
+          ...item,
+          // Ensure avg_purchase_price is available, fallback to purchase_price
+          avg_purchase_price: item.avg_purchase_price || item.purchase_price
+        }))
+      }));
+      
+      setStockOutLogs(processedLogs);
+      
+      if (firstLoadRef.current || opts.showLoader) {
+        setPageState(2);
+      }
+      firstLoadRef.current = false;
     } catch (err) {
       console.error('Error fetching data:', err);
       setPageState(3);
@@ -200,38 +328,43 @@ export default function StockOut() {
     fetchData({ showLoader: true });
   }, [fetchData]);
 
-  // Weighted average (by purchase_quantity)
+  // Optimized average price calculation
   const calculateAveragePrice = useCallback((purchaseHistory) => {
     if (!purchaseHistory || purchaseHistory.length === 0) return 0;
-    const totalValue = purchaseHistory.reduce(
-      (sum, record) => sum + (Number(record.purchase_quantity || 0) * Number(record.purchase_price || 0)),
-      0
-    );
-    const totalQuantity = purchaseHistory.reduce((sum, record) => sum + (Number(record.purchase_quantity || 0)), 0);
+    
+    let totalValue = 0;
+    let totalQuantity = 0;
+    
+    for (const record of purchaseHistory) {
+      const quantity = Number(record.purchase_quantity || 0);
+      const price = Number(record.purchase_price || 0);
+      totalValue += quantity * price;
+      totalQuantity += quantity;
+    }
+    
     return totalQuantity > 0 ? totalValue / totalQuantity : 0;
   }, []);
 
-  const handleProductChange = useCallback(
-    (index, product_id) => {
-      const selectedProduct = productMap[product_id];
-      const avgPrice = selectedProduct ? calculateAveragePrice(selectedProduct.purchase_history) : 0;
+  // Optimized handlers
+  const handleProductChange = useCallback((index, product_id) => {
+    const selectedProduct = productMap[product_id];
+    const avgPrice = selectedProduct ? calculateAveragePrice(selectedProduct.purchase_history) : 0;
 
-      setItems((prev) => {
-        const updated = [...prev];
-        const current = { ...updated[index] };
-        current.product_id = product_id;
-        current.name = selectedProduct?.name || '';
-        current.stock = selectedProduct?.product_stock || 0;
-        current.avg_purchase_price = avgPrice;
-        updated[index] = current;
-        return updated;
-      });
-    },
-    [productMap, calculateAveragePrice]
-  );
+    setItems(prev => {
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        product_id,
+        name: selectedProduct?.name || '',
+        stock: selectedProduct?.product_stock || 0,
+        avg_purchase_price: avgPrice
+      };
+      return updated;
+    });
+  }, [productMap, calculateAveragePrice]);
 
   const handleQuantityChange = useCallback((index, value) => {
-    setItems((prev) => {
+    setItems(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], quantity: value };
       return updated;
@@ -239,111 +372,90 @@ export default function StockOut() {
   }, []);
 
   const addItem = useCallback(() => {
-    setItems((prev) => [...prev, { product_id: '', name: '', quantity: '', stock: 0, avg_purchase_price: 0 }]);
+    setItems(prev => [...prev, { 
+      product_id: '', 
+      name: '', 
+      quantity: '', 
+      stock: 0, 
+      avg_purchase_price: 0 
+    }]);
   }, []);
 
-  const removeItem = useCallback((index) => setItems((prev) => prev.filter((_, i) => i !== index)), []);
+  const removeItem = useCallback((index) => {
+    setItems(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
+  // Optimized validation
   const validateItems = useCallback(() => {
     const errors = [];
-    for (const item of items) {
-      if (!item.product_id) errors.push('Please select a product for all items.');
+    
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (!item.product_id) {
+        errors.push('Please select a product for all items.');
+        continue;
+      }
+      
       const parsedQuantity = Number(item.quantity);
-      if (isNaN(parsedQuantity) || parsedQuantity <= 0)
+      if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
         errors.push(`Quantity for product ${item.name || item.product_id} must be a positive number.`);
-      if (parsedQuantity > Number(item.stock))
+        continue;
+      }
+      
+      if (parsedQuantity > Number(item.stock)) {
         errors.push(
           `Not enough stock for product ${item.name || item.product_id}. Available: ${item.stock}, Requested: ${parsedQuantity}.`
         );
+      }
     }
+    
     return errors;
   }, [items]);
 
-  const handleSubmit = useCallback(
-    async (e) => {
-      e.preventDefault();
-      const errors = validateItems();
-      if (errors.length) {
-        await Swal.fire({ icon: 'error', title: 'Validation Errors', html: `<ul style="text-align:left">${errors.map((er) => `<li>${er}</li>`).join('')}</ul>` });
-        return;
-      }
+  // Optimized submission - Send both purchase_price and avg_purchase_price
+  const handleSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    const errors = validateItems();
+    
+    if (errors.length > 0) {
+      await Swal.fire({ 
+        icon: 'error', 
+        title: 'Validation Errors', 
+        html: `<ul style="text-align:left">${errors.map((er) => `<li>${er}</li>`).join('')}</ul>` 
+      });
+      return;
+    }
 
-      const data = {
-        customer_info: customerInfo.trim() === '' ? 'N/A' : customerInfo,
-        items: items.map(({ product_id, quantity, avg_purchase_price }) => ({
-          product_id,
-          quantity: parseFloat(quantity),
-          purchase_price: avg_purchase_price,
-        })),
-      };
-
-      setIsSubmitting(true);
-      try {
-        await axios.post('https://invenio-api-production.up.railway.app/api/stock-out', data);
-        setSuccessModalVisible(true);
-        setItems([{ product_id: '', name: '', quantity: '', stock: 0, avg_purchase_price: 0 }]);
-        setCustomerInfo('');
-        setSummary('');
-        fetchData({ showLoader: false });
-      } catch (err) {
-        console.error('Stock out submission error:', err);
-        Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to process stock out. Please try again.' });
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [customerInfo, items, validateItems, fetchData]
-  );
-
-  const generateSummary = useCallback(async () => {
-    setIsGenerating(true);
-    setSummary('');
-
-    const totalItems = items.reduce((s, it) => s + (Number(it.quantity) || 0), 0);
-    const totalValue = items.reduce((s, it) => s + (Number(it.quantity) || 0) * (Number(it.avg_purchase_price) || 0), 0);
-
-    const prompt = `You are an AI assistant for an inventory management system. Generate a concise, professional summary (under 100 words) for this stock out.
-Customer: ${customerInfo || 'N/A'}
-Items:
-${items
-  .map((item) => `- ${item.name || item.product_id}: ${item.quantity} @ $${Number(item.avg_purchase_price).toFixed(2)}`)
-  .join('\n')}
-Total Quantity: ${totalItems}
-Total Value: $${Number(totalValue).toFixed(2)}
-Provide one brief professional suggestion.`;
-
-    const payload = {
-      contents: [{ parts: [{ text: prompt }] }],
-      tools: [{ google_search: {} }],
-      systemInstruction: { parts: [{ text: 'You are a professional inventory management assistant. Summarize the transaction concisely.' }] },
+    const data = {
+      customer_info: customerInfo.trim() === '' ? 'N/A' : customerInfo,
+      items: items.map(({ product_id, quantity, avg_purchase_price }) => ({
+        product_id,
+        quantity: parseFloat(quantity),
+        purchase_price: avg_purchase_price, // Store as purchase_price
+        avg_purchase_price: avg_purchase_price, // Also store as avg_purchase_price for clarity
+      })),
     };
 
-    const apiKey = ""; // add your API key here if available
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
+    setIsSubmitting(true);
     try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+      await axios.post('https://invenio-api-production.up.railway.app/api/stock-out', data);
+      setSuccessModalVisible(true);
+      setItems([{ product_id: '', name: '', quantity: '', stock: 0, avg_purchase_price: 0 }]);
+      setCustomerInfo('');
+      fetchData({ showLoader: false });
+    } catch (err) {
+      console.error('Stock out submission error:', err);
+      Swal.fire({ 
+        icon: 'error', 
+        title: 'Error', 
+        text: 'Failed to process stock out. Please try again.' 
       });
-
-      const result = await response.json();
-      const generatedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (generatedText) {
-        setSummary(generatedText.trim());
-      } else {
-        await Swal.fire({ icon: 'error', title: 'Summary Generation Error', text: 'Failed to generate a summary. Please try again.' });
-      }
-    } catch (error) {
-      console.error('Gemini API Error:', error);
-      Swal.fire({ icon: 'error', title: 'API Call Failed', text: 'Could not connect to the summary generation service.' });
     } finally {
-      setIsGenerating(false);
+      setIsSubmitting(false);
     }
-  }, [items, customerInfo]);
+  }, [customerInfo, items, validateItems, fetchData]);
 
+  // Optimized delete handler
   const handleDeleteClick = useCallback(async (id) => {
     const result = await Swal.fire({
       title: 'Are you sure?',
@@ -360,6 +472,10 @@ Provide one brief professional suggestion.`;
 
     try {
       await axios.delete(`https://invenio-api-production.up.railway.app/api/stock-out/${id}`);
+      
+      // Optimistic update - remove from local state immediately
+      setStockOutLogs(prev => prev.filter(log => log.so_id !== id));
+      
       await Swal.fire({
         icon: 'success',
         title: 'Deleted!',
@@ -367,178 +483,132 @@ Provide one brief professional suggestion.`;
         timer: 1500,
         showConfirmButton: false,
       });
-      fetchData({ showLoader: false });
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to delete stock-out log.' });
-      console.error(err);
+      // Revert optimistic update on error
+      fetchData({ showLoader: false });
+      Swal.fire({ 
+        icon: 'error', 
+        title: 'Error', 
+        text: 'Failed to delete stock-out log.' 
+      });
     }
   }, [fetchData]);
 
-  const onDeleteBtnClick = useCallback(
-    (e) => {
-      const id = e.currentTarget.getAttribute('data-id');
-      if (id) handleDeleteClick(id);
-    },
-    [handleDeleteClick]
-  );
+  const paginate = useCallback((pageNumber) => {
+    setCurrentPage(pageNumber);
+  }, []);
 
-  const paginate = useCallback((pageNumber) => setCurrentPage(pageNumber), []);
+  // Memoized pagination items
+  const paginationItems = useMemo(() => {
+    const items = [];
+    for (let i = 1; i <= totalPages; i++) {
+      items.push(
+        <Pagination.Item 
+          key={i} 
+          active={i === currentPage} 
+          onClick={() => paginate(i)}
+        >
+          {i}
+        </Pagination.Item>
+      );
+    }
+    return items;
+  }, [totalPages, currentPage, paginate]);
+
+  if (pageState === 1) {
+    return (
+      <Container fluid className="stock-out p-4">
+        <Loader />
+      </Container>
+    );
+  }
+
+  if (pageState === 3) {
+    return (
+      <Container fluid className="stock-out p-4">
+        <ErrorComponent />
+      </Container>
+    );
+  }
 
   return (
     <Container fluid className="stock-out p-4">
       <h2 className="mb-4">Stock Out</h2>
 
-      {pageState === 1 ? (
-        <Loader />
-      ) : pageState === 2 ? (
-        <>
-          <Modal show={successModalVisible} onHide={() => setSuccessModalVisible(false)} centered>
-            <Modal.Header closeButton>
-              <Modal.Title>Stock Out Successful</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <p>Your stock-out has been successfully processed!</p>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={() => setSuccessModalVisible(false)}>
-                Close
-              </Button>
-            </Modal.Footer>
-          </Modal>
+      <Modal show={successModalVisible} onHide={() => setSuccessModalVisible(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Stock Out Successful</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Your stock-out has been successfully processed!</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setSuccessModalVisible(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-          <Card className="stock-out__card">
-            <Card.Body>
-              <h4 className="mb-3">Stock Out Details</h4>
-              <Row className="mb-4">
-                <Col md={12}>
-                  <Form.Group className="stock-out__form-group">
-                    <Form.Label>Customer Information (Optional)</Form.Label>
-                    <Form.Control
-                      type="text"
-                      value={customerInfo}
-                      onChange={(e) => setCustomerInfo(e.target.value)}
-                      placeholder="e.g., John Doe / Sale Invoice #123"
-                    />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <h4 className="mb-3">Add Items for Stock Out</h4>
-              {items.map((item, index) => (
-                <StockOutItem
-                  key={`item-${index}`}
-                  item={item}
-                  index={index}
-                  products={products}
-                  onProductChange={handleProductChange}
-                  onQuantityChange={handleQuantityChange}
-                  onRemoveItem={removeItem}
+      <Card className="stock-out__card">
+        <Card.Body>
+          <h4 className="mb-3">Stock Out Details</h4>
+          <Row className="mb-4">
+            <Col md={12}>
+              <Form.Group className="stock-out__form-group">
+                <Form.Label>Customer Information (Optional)</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={customerInfo}
+                  onChange={(e) => setCustomerInfo(e.target.value)}
+                  placeholder="e.g., John Doe / Sale Invoice #123"
                 />
-              ))}
+              </Form.Group>
+            </Col>
+          </Row>
 
-              <Button variant="primary" onClick={addItem} className="stock-out__add-button mt-2">
-                Add Item
-              </Button>
-            </Card.Body>
-          </Card>
+          <h4 className="mb-3">Add Items for Stock Out</h4>
+          {items.map((item, index) => (
+            <StockOutItem
+              key={`item-${index}`}
+              item={item}
+              index={index}
+              products={products}
+              onProductChange={handleProductChange}
+              onQuantityChange={handleQuantityChange}
+              onRemoveItem={removeItem}
+            />
+          ))}
 
-          {items.length > 0 && (
-            <div>
-              <ItemsTable items={items} onRemoveItem={removeItem} />
+          <Button variant="primary" onClick={addItem} className="stock-out__add-button mt-2">
+            Add Item
+          </Button>
+        </Card.Body>
+      </Card>
 
-              <Card className="mt-3 stock-out__card">
-                <Card.Body>
-                  <h4>Summary</h4>
-                  {isGenerating ? (
-                    <Loader />
-                  ) : summary ? (
-                    <p className="stock-out__summary-text">{summary}</p>
-                  ) : (
-                    <p>Click the button below to generate a summary.</p>
-                  )}
+      {items.length > 0 && items.some(item => item.product_id) && (
+        <div>
+          <ItemsTable items={items.filter(item => item.product_id)} onRemoveItem={removeItem} />
 
-                  <Button
-                    variant="info"
-                    onClick={generateSummary}
-                    disabled={isGenerating || items.length === 0 || items.some((item) => !item.product_id || !item.quantity || parseFloat(item.quantity) <= 0)}
-                    className="mt-2"
-                  >
-                    Generate Summary ✨
-                  </Button>
-                </Card.Body>
-              </Card>
+          <Button
+            variant="success"
+            onClick={handleSubmit}
+            className="stock-out__submit-button mt-3"
+            disabled={isSubmitting || items.length === 0 || items.some((item) => !item.product_id || !item.quantity || parseFloat(item.quantity) <= 0)}
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit Stock Out'}
+          </Button>
+        </div>
+      )}
 
-              <Button
-                variant="success"
-                onClick={handleSubmit}
-                className="stock-out__submit-button mt-3"
-                disabled={isSubmitting || items.length === 0 || items.some((item) => !item.product_id || !item.quantity || parseFloat(item.quantity) <= 0)}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Stock Out'}
-              </Button>
-            </div>
-          )}
-
-          {stockOutLogs.length > 0 && (
-            <Card className="mt-4 stock-out__card">
-              <Card.Body>
-                <h4>Stock Out Logs</h4>
-                <div className="table-responsive">
-                  <Table bordered className="stock-out__table stock-out__logs-table">
-                    <thead>
-                      <tr>
-                        <th>Time</th>
-                        <th>Customer</th>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Avg Price</th>
-                        <th>Total Value</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentLogs.map((log) => (
-                        <tr key={log.so_id}>
-                          <td>{new Date(log.created_at).toLocaleString()}</td>
-                          <td>{log.customer_info}</td>
-                          <td>{log.items.map((it) => <div key={`${log.so_id}-${it.product_id}`}>{it.product_name}</div>)}</td>
-                          <td>{log.items.map((it) => <div key={`${log.so_id}-${it.product_id}-qty`}>{it.quantity}</div>)}</td>
-                          <td>{log.items.map((it) => <div key={`${log.so_id}-${it.product_id}-price`}>{Number(it.avg_purchase_price).toFixed(2)}</div>)}</td>
-                          <td>{log.items.map((it) => <div key={`${log.so_id}-${it.product_id}-val`}>{Number(it.avg_purchase_price * it.quantity).toFixed(2)}</div>)}</td>
-                          <td>
-                            <Button
-                              variant="danger"
-                              size="sm"
-                              onClick={onDeleteBtnClick}
-                              data-id={log.so_id}
-                              className="stock-out__delete-button"
-                            >
-                              Delete
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </div>
-
-                <Pagination className="justify-content-center mt-3">
-                  <Pagination.First onClick={() => paginate(1)} disabled={currentPage === 1} />
-                  <Pagination.Prev onClick={() => paginate(Math.max(currentPage - 1, 1))} disabled={currentPage === 1} />
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
-                    <Pagination.Item key={num} active={num === currentPage} onClick={() => paginate(num)}>
-                      {num}
-                    </Pagination.Item>
-                  ))}
-                  <Pagination.Next onClick={() => paginate(Math.min(currentPage + 1, totalPages))} disabled={currentPage === totalPages} />
-                  <Pagination.Last onClick={() => paginate(totalPages)} disabled={currentPage === totalPages} />
-                </Pagination>
-              </Card.Body>
-            </Card>
-          )}
-        </>
-      ) : (
-        <ErrorComponent />
+      {stockOutLogs.length > 0 && (
+        <StockOutLogsTable
+          logs={currentLogs}
+          onDeleteClick={handleDeleteClick}
+          paginationItems={paginationItems}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPaginate={paginate}
+        />
       )}
     </Container>
   );

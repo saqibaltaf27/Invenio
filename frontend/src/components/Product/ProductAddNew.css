@@ -1,0 +1,177 @@
+/* ===== CSS Variables (Light Theme Defaults) ===== */
+:root {
+  --primary-bg-color: #f0f2f5;
+  --secondary-bg-color: #ffffff;
+  --tertiary-bg-color: #f9f9f9;
+  --border-color-light: #e0e0e0;
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  --text-color-dark: #333;
+  --text-color-muted: #555;
+  --text-color-placeholder: #999;
+  --text-color-blue: #3498db;
+  --text-color-green: #28a745;
+  --text-color-orange: #ffc107;
+  --text-color-red: #dc3545;
+
+  --transition-speed: 0.3s;
+  --mobile-breakpoint: 768px;
+}
+
+/* ===== Base Styles ===== */
+.productaddnew {
+  flex-grow: 1;
+  background-color: var(--primary-bg-color);
+  height: calc(100vh - 50px);
+  color: var(--text-color-dark);
+  font-family: 'Inter', sans-serif;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.productaddnew .product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0;
+  border-bottom: 1px solid var(--border-color-light);
+  padding-bottom: 0.5rem;
+}
+
+.productaddnew .title {
+  color: var(--text-color-dark);
+  font-size: x-large;
+  font-weight: bold;
+  margin: 0 0.5rem;
+}
+
+/* Card */
+.productaddnew .card {
+  transition: var(--transition-speed);
+  margin: 20px;
+  border: 1px solid var(--border-color-light);
+  border-radius: 5px;
+  background-color: var(--secondary-bg-color);
+  box-shadow: var(--shadow-light);
+}
+
+/* Container */
+.productaddnew .container {
+  padding: 1rem;
+  height: 100%;
+  background-color: var(--secondary-bg-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-light);
+  border: 1px solid var(--border-color-light);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.productaddnew .container .left {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding-right: 1rem;
+  border-right: 1px solid var(--border-color-light);
+}
+
+.productaddnew .container .right {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Buttons */
+.productaddnew .btn {
+  border: 1px solid var(--text-color-blue);
+  background-color: transparent;
+  color: var(--text-color-blue);
+  padding: 0.5rem 1rem;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.productaddnew .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--text-color-muted);
+  border-color: #ccc;
+}
+
+/* Green Button */
+.productaddnew .success {
+  border-color: var(--text-color-green);
+  background-color: var(--text-color-green);
+  color: #fff;
+}
+
+/* Info Button (orange in your SCSS) */
+.productaddnew .info {
+  background-color: var(--text-color-orange);
+  border-color: var(--text-color-blue);
+  color: #fff;
+}
+
+/* Orange */
+.productaddnew .warning {
+  border-color: var(--text-color-orange);
+  color: var(--text-color-orange);
+}
+
+/* Red */
+.productaddnew .danger {
+  background-color: var(--text-color-red);
+  border-color: var(--text-color-red);
+  color: #fff;
+}
+
+/* Default */
+.productaddnew .default {
+  border-color: #95a5a6;
+  color: #95a5a6;
+  background-color: var(--primary-bg-color);
+}
+
+/* Inputs */
+.productaddnew .my_input,
+.productaddnew .form-select {
+  margin-top: 5px;
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  background-color: var(--tertiary-bg-color);
+  color: var(--text-color-dark);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.productaddnew .my_input:focus,
+.productaddnew .form-select:focus {
+  border-color: var(--text-color-blue);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.25);
+  outline: none;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  .productaddnew {
+    height: auto;
+  }
+  .productaddnew .container .left {
+    flex: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color-light);
+    padding-bottom: 1.5rem;
+  }
+  .productaddnew .container .right {
+    flex: 100%;
+    padding-top: 1.5rem;
+  }
+}

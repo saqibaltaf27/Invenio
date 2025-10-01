@@ -1,0 +1,230 @@
+/* ===== Featured Section ===== */
+.featured {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 18px;
+  font-family: "Inter", sans-serif;
+}
+
+.featuredItem {
+  background: linear-gradient(135deg, #fdfbfb, #ebedee);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #eaeaea;
+  position: relative;
+  overflow: hidden;
+}
+
+.featuredItem::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.featuredItem:hover::before {
+  opacity: 1;
+}
+
+.featuredItem:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.featuredTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 14px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+
+.featuredMoneyContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== Info Cards ===== */
+.infoCard {
+  flex: 1;
+  width: 100%;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.25s ease-in-out;
+  border: 1px solid #e6ecf2;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.infoCard:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+/* ===== Colored Variants ===== */
+.infoCard.blue {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  border-color: #bfdbfe;
+}
+
+.infoCard.green {
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  border-color: #bbf7d0;
+}
+
+.infoCard.orange {
+  background: linear-gradient(135deg, #fff7ed, #fed7aa);
+  border-color: #fed7aa;
+}
+
+.infoCard.purple {
+  background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+  border-color: #ddd6fe;
+}
+
+.infoCard.red {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  border-color: #fecaca;
+}
+
+/* ===== Icons ===== */
+.cardIcon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.cardIcon.red { color: #ef4444; }
+.cardIcon.blue { color: #3b82f6; }
+.cardIcon.green { color: #16a34a; }
+.cardIcon.orange { color: #f97316; }
+.cardIcon.purple { color: #8b5cf6; }
+
+/* ===== Info Content ===== */
+.infoContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5d6d7e;
+}
+
+.infoValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.infoControl input {
+  font-size: 12px;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* ===== Accordion ===== */
+.inventoryAccordion {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e6ecf2;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* ===== Table ===== */
+.inventoryTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.inventoryTable th, 
+.inventoryTable td {
+  border-bottom: 1px solid #eee;
+  padding: 10px;
+  text-align: left;
+}
+
+.inventoryTable th {
+  background: #f1f5f9;
+  font-weight: 700;
+  color: #34495e;
+}
+
+/* ===== Links ===== */
+.link {
+  color: #3b82f6;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #1e293b;
+  text-decoration: underline;
+}
+
+/* ===== Mobile Responsiveness ===== */
+@media (max-width: 768px) {
+  .featured {
+    grid-template-columns: 1fr;
+  }
+
+  .infoCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* ===== Dark Mode Overrides ===== */
+.dark .featuredItem {
+  background: linear-gradient(135deg, #1e293b, #111827);
+  border: 1px solid #334155;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.dark .featuredTitle { color: #f1f5f9; }
+
+.dark .infoCard {
+  background: linear-gradient(135deg, #1f2937, #111827);
+  border: 1px solid #334155;
+  color: #f1f5f9;
+}
+
+.dark .infoLabel { color: #94a3b8; }
+.dark .infoValue { color: #f8fafc; }
+
+.dark .inventoryAccordion {
+  background: #1e293b;
+  border: 1px solid #334155;
+}
+
+.dark .inventoryTable th {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+.dark .link {
+  color: #38bdf8;
+}

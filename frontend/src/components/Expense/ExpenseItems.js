@@ -11,13 +11,15 @@ function ExpenseItems() {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const backend_url = "https://invenio-api-production.up.railway.app";
+
   useEffect(() => {
     fetchExpenseItems();
   }, []);
 
   const fetchExpenseItems = async () => {
     try {
-      const result = await fetch(`http://localhost:5000/api/get_expense_items`, {
+      const result = await fetch(`${backend_url}/api/get_expense_items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
@@ -36,7 +38,7 @@ function ExpenseItems() {
     setLoading(true);
     
     try {
-      const result = await fetch(`http://localhost:5000/api/add_expense_item`, {
+      const result = await fetch(`${backend_url}/api/add_expense_item`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

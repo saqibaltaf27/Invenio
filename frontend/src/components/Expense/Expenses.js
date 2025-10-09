@@ -19,6 +19,7 @@ function Expenses() {
   const [sortOrder, setSortOrder] = useState("");
   const [tablePage, setTablePage] = useState(1);
   const [data, setData] = useState([]);
+  const backend_url = "https://invenio-api-production.up.railway.app";
 
   // Modal related state variables
   const [viewModalShow, setViewModalShow] = useState(false);
@@ -26,7 +27,7 @@ function Expenses() {
 
   const getExpenses = async (searchValue, sc, so, startVal) => {
     try {
-      let result = await fetch(`http://localhost:5000/api/get_expenses`, {
+      let result = await fetch(`${backend_url}/api/get_expenses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -102,7 +103,7 @@ function Expenses() {
 
   const deleteExpense = async (id) => {
     try {
-      let result = await fetch(`http://localhost:5000/api/delete_expense`, {
+      let result = await fetch(`${backend_url}/api/delete_expense`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ expense_id: id }),
@@ -124,7 +125,7 @@ function Expenses() {
 
   const viewModalInit = async (id) => {
     try {
-      const result = await fetch(`http://localhost:5000/api/get_expense_details`, {
+      const result = await fetch(`${backend_url}/api/get_expense_details`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ expense_id: id }),

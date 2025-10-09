@@ -6,6 +6,7 @@ import {
     PlaylistAddCheckOutlined,
     Inventory2Outlined,
     LocalAtmOutlined,
+    ReceiptLongOutlined,
     ExpandMore,
 } from "@mui/icons-material";
 import {
@@ -22,19 +23,25 @@ export default function Feature({
     reportStats = [],
     productStats = [],
     stockOutValue = {},
-    inventoryValue = {},
 }) {
-    const { employee_count = 0, supplier_count = 0 } = reportStats[0] || {};
+    const baseStats = Array.isArray(reportStats)
+  ? (reportStats[0] ?? {})
+  : (reportStats ?? {});
+
+const {
+  employee_count = 0,
+  supplier_count = 0,
+} = baseStats;
     const { total_products = 0, low_stock_items = [] } = productStats || {};
 
     const today = new Date().toISOString().split("T")[0];
     const [stockOutDate, setStockOutDate] = useState(today);
-    const [inventoryDate, setInventoryDate] = useState(today);
+    const [expenseDate, setExpenseDate] = useState(today);
 
     const API_BASE = "https://invenio-api-production.up.railway.app";
 
     const [stockOutTotal, setStockOutTotal] = useState(stockOutValue?.stock_out_value || 0);
-    const [inventoryTotal, setInventoryTotal] = useState(inventoryValue?.total_inventory_value || 0);
+    const [expenseTotal, setExpenseTotal] = useState(0);
     const [allInventory, setAllInventory] = useState([]);
 
     const totalInventoryCount = allInventory.length || 0;
@@ -49,18 +56,18 @@ export default function Feature({
         }
     };
 
-    const fetchInventoryValue = async (date) => {
+    const fetchExpenseValue = async (date) => {
         try {
-            const res = await axios.post(`${API_BASE}/api/get_inventory_value`, { date });
-            setInventoryTotal(res.data.info.total_inventory_value || 0);
+            const res = await axios.post(`${API_BASE}/api/get_expense_valye`, { date });
+            setExpenseTotal(res.data.info.total_expense_value || 0);
         } catch (err) {
-            console.error("Error fetching inventory value:", err);
+            console.error("Error fetching expense value:", err);
         }
     };
 
     useEffect(() => {
         fetchStockOutValue(stockOutDate);
-        fetchInventoryValue(inventoryDate);
+        fetchExpenseValue(expenseDate);
         fetchAllInventory();
     }, []);
 
@@ -104,14 +111,16 @@ export default function Feature({
                         <PersonOutlined className="cardIcon red" />,
                         "/employees",
                         "Employees:",
-                        employee_count
+                        employee_count,
+                        "#d32f2f" // red color
                     )}
                     {infoCard(
                         "Suppliers",
                         <PersonOutlined className="cardIcon blue" />,
                         "/suppliers",
                         "Suppliers:",
-                        supplier_count
+                        supplier_count,
+                        "#1976d2" // blue color
                     )}
                 </div>
             </div>
@@ -139,7 +148,7 @@ export default function Feature({
                                     <Inventory2Outlined className="cardIcon green" />
                                 </div>
                                 <div className="infoContent">
-                                    <span className="infoLabel">All Inventory:</span>
+                                    <span className="infoLabel">All Inventory Value:</span>
                                     <span className="infoValue green"> Rs. {totalInventoryValue?.toLocaleString()}</span>
                                 </div>
                             </div>
@@ -159,9 +168,8 @@ export default function Feature({
                                         <tr key={idx}>
                                             <td>{item.name}</td>
                                             <td>{item.product_stock}</td>
-                                            <td>Rs. {item.purchase_price.toLocaleString()}</td>
-                                            {/* Using total_inventory directly */}
-                                            <td>Rs. {item.total_value.toLocaleString()}</td>
+                                            <td>Rs. {item.purchase_price?.toLocaleString()}</td>
+                                            <td>Rs. {item.total_value?.toLocaleString()}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -177,19 +185,26 @@ export default function Feature({
                 <span className="featuredTitle">Financials</span>
                 <div className="featuredMoneyContainer">
                     {infoCard(
-                        "Inventory Value",
-                        <LocalAtmOutlined className="cardIcon green" />,
-                        null,
-                        "Inventory Value:",
-                        `Rs. ${inventoryTotal.toLocaleString()}`,
-                        "green",
+                        "Total Expense Value",
+                        <ReceiptLongOutlined className="cardIcon orange" />,
+                        "/expenses",
+                        "Total Expense Value:",
+                        `Rs. ${expenseTotal.toLocaleString()}`,
+                        "#FF6B35",
                         <TextField
                             type="date"
                             size="small"
-                            value={inventoryDate}
+                            value={expenseDate}
                             onChange={(e) => {
-                                setInventoryDate(e.target.value);
-                                fetchInventoryValue(e.target.value);
+                                const newDate = e.target.value;
+                                setExpenseDate(newDate);
+                                fetchExpenseValue(newDate);
+                            }}
+                            sx={{
+                                "& .MuiInputBase-input": {
+                                    padding: "8px",
+                                    fontSize: "0.875rem"
+                                }
                             }}
                         />
                     )}
@@ -205,8 +220,15 @@ export default function Feature({
                             size="small"
                             value={stockOutDate}
                             onChange={(e) => {
-                                setStockOutDate(e.target.value);
-                                fetchStockOutValue(e.target.value);
+                                const newDate = e.target.value;
+                                setStockOutDate(newDate);
+                                fetchStockOutValue(newDate);
+                            }}
+                            sx={{
+                                "& .MuiInputBase-input": {
+                                    padding: "8px",
+                                    fontSize: "0.875rem"
+                                }
                             }}
                         />
                     )}

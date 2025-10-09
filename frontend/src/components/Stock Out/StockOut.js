@@ -138,7 +138,7 @@ const ItemsTable = React.memo(function ItemsTable({ items, onRemoveItem }) {
                   <td>{item.name}</td>
                   <td>{item.quantity}</td>
                   <td>{item.stock}</td>
-                  <td>{item.avg_purchase_price ? Number(item.avg_purchase_price).toFixed(2) : 'N/A'}</td>
+                  <td>{Number(item.avg_purchase_price ?? 0) > 0 ? Number(item.avg_purchase_price).toFixed(2) : 'N/A'}</td>
                   <td>
                     <Button 
                       variant="danger" 
@@ -211,17 +211,15 @@ const StockOutLogsTable = React.memo(function StockOutLogsTable({
                   <td>
                     {log.items.map((it) => (
                       <div key={`${log.so_id}-${it.product_id}-price`} className="log-price">
-                        {/* Display avg_purchase_price from the stock-out API response */}
-                        {it.avg_purchase_price ? Number(it.avg_purchase_price).toFixed(2) : 
-                         it.purchase_price ? Number(it.purchase_price).toFixed(2) : '0.00'}
+                        {Number(it.avg_price || 0).toFixed(2)}
                       </div>
                     ))}
                   </td>
                   <td>
                     {log.items.map((it) => {
-                      // Calculate total value using avg_purchase_price or purchase_price
-                      const price = it.avg_purchase_price || it.purchase_price || 0;
-                      const itemValue = (parseFloat(it.quantity) || 0) * (parseFloat(price) || 0);
+                      const price = Number(it.avg_price || 0);
+                      const qty = Number(it.quantity || 0);
+                      const itemValue = qty * price;
                       return (
                         <div key={`${log.so_id}-${it.product_id}-val`} className="log-value">
                           {itemValue.toFixed(2)}
@@ -302,14 +300,13 @@ export default function StockOut() {
 
       setProducts(productsRes.data || []);
       
-      // Process logs to ensure we have the avg_purchase_price
+      // Normalize logs to have avg_price always available
       const processedLogs = (logsRes.data || []).map(log => ({
         ...log,
-        items: log.items.map(item => ({
-          ...item,
-          // Ensure avg_purchase_price is available, fallback to purchase_price
-          avg_purchase_price: item.avg_purchase_price || item.purchase_price
-        }))
+        items: (log.items || []).map(item => {
+          const price = item.avg_price ?? item.avg_purchase_price ?? item.purchase_price ?? 0;
+          return { ...item, avg_price: Number(price) };
+        })
       }));
       
       setStockOutLogs(processedLogs);
@@ -328,24 +325,21 @@ export default function StockOut() {
     fetchData({ showLoader: true });
   }, [fetchData]);
 
-  // Optimized average price calculation
+  // Weighted average on client (optional; matches backend fallback)
   const calculateAveragePrice = useCallback((purchaseHistory) => {
     if (!purchaseHistory || purchaseHistory.length === 0) return 0;
-    
     let totalValue = 0;
     let totalQuantity = 0;
-    
     for (const record of purchaseHistory) {
       const quantity = Number(record.purchase_quantity || 0);
       const price = Number(record.purchase_price || 0);
       totalValue += quantity * price;
       totalQuantity += quantity;
     }
-    
     return totalQuantity > 0 ? totalValue / totalQuantity : 0;
   }, []);
 
-  // Optimized handlers
+  // Handlers
   const handleProductChange = useCallback((index, product_id) => {
     const selectedProduct = productMap[product_id];
     const avgPrice = selectedProduct ? calculateAveragePrice(selectedProduct.purchase_history) : 0;
@@ -385,38 +379,31 @@ export default function StockOut() {
     setItems(prev => prev.filter((_, i) => i !== index));
   }, []);
 
-  // Optimized validation
   const validateItems = useCallback(() => {
     const errors = [];
-    
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (!item.product_id) {
         errors.push('Please select a product for all items.');
         continue;
       }
-      
       const parsedQuantity = Number(item.quantity);
       if (isNaN(parsedQuantity) || parsedQuantity <= 0) {
         errors.push(`Quantity for product ${item.name || item.product_id} must be a positive number.`);
         continue;
       }
-      
       if (parsedQuantity > Number(item.stock)) {
         errors.push(
           `Not enough stock for product ${item.name || item.product_id}. Available: ${item.stock}, Requested: ${parsedQuantity}.`
         );
       }
     }
-    
     return errors;
   }, [items]);
 
-  // Optimized submission - Send both purchase_price and avg_purchase_price
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     const errors = validateItems();
-    
     if (errors.length > 0) {
       await Swal.fire({ 
         icon: 'error', 
@@ -430,9 +417,11 @@ export default function StockOut() {
       customer_info: customerInfo.trim() === '' ? 'N/A' : customerInfo,
       items: items.map(({ product_id, quantity, avg_purchase_price }) => ({
         product_id,
-        quantity: parseFloat(quantity),
-        purchase_price: avg_purchase_price, // Store as purchase_price
-        avg_purchase_price: avg_purchase_price, // Also store as avg_purchase_price for clarity
+        quantity: Number(quantity),
+        avg_price: Number(avg_purchase_price), // 👈 send the exact UI avg to backend
+        // For backward-compat if your API still consumes these fields:
+        // purchase_price: Number(avg_purchase_price),
+        // avg_purchase_price: Number(avg_purchase_price),
       })),
     };
 
@@ -455,7 +444,6 @@ export default function StockOut() {
     }
   }, [customerInfo, items, validateItems, fetchData]);
 
-  // Optimized delete handler
   const handleDeleteClick = useCallback(async (id) => {
     const result = await Swal.fire({
       title: 'Are you sure?',
@@ -472,10 +460,7 @@ export default function StockOut() {
 
     try {
       await axios.delete(`https://invenio-api-production.up.railway.app/api/stock-out/${id}`);
-      
-      // Optimistic update - remove from local state immediately
       setStockOutLogs(prev => prev.filter(log => log.so_id !== id));
-      
       await Swal.fire({
         icon: 'success',
         title: 'Deleted!',
@@ -484,7 +469,6 @@ export default function StockOut() {
         showConfirmButton: false,
       });
     } catch (err) {
-      // Revert optimistic update on error
       fetchData({ showLoader: false });
       Swal.fire({ 
         icon: 'error', 
@@ -498,7 +482,6 @@ export default function StockOut() {
     setCurrentPage(pageNumber);
   }, []);
 
-  // Memoized pagination items
   const paginationItems = useMemo(() => {
     const items = [];
     for (let i = 1; i <= totalPages; i++) {

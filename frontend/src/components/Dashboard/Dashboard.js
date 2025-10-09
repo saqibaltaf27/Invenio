@@ -4,8 +4,7 @@ import Feature from './Features/Feature';
 import Chart from './chart/Chart';
 import Loader from '../PageStates/Loader';
 import ErrorComponent from '../PageStates/Error';
-import DailyStockReport from '../Daily Stock Report/DailyStockReport'; // Import the DailyStockReport component
-
+import DailyStockReport from '../Daily Stock Report/DailyStockReport'; 
 function Dashboard() {
     const [pageState, setPageState] = useState(1);
     const [reportStats, setReportStats] = useState(null);

@@ -14,7 +14,8 @@ import {
   Supplier, 
   SupplierAddNew, 
   Expense, 
-  ExpenseAddNew,  
+  ExpenseAddNew, 
+  ExpenseItems, // Add this import
   Customer, 
   CustomerAddNew, 
   Order, 
@@ -54,9 +55,9 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="employees" element={
-             
+              <ProtectedRoute>
                 <Employee />
-       
+              </ProtectedRoute>
             } />
             <Route path="employees/addnew" element={
               <ProtectedRoute>
@@ -91,6 +92,11 @@ function App() {
             <Route path="expenses/addnew" element={
               <ProtectedRoute>
                 <ExpenseAddNew />
+              </ProtectedRoute>
+            } />
+            <Route path="expenses/items" element={ // Add this route
+              <ProtectedRoute>
+                <ExpenseItems />
               </ProtectedRoute>
             } />
             <Route path="customers" element={
@@ -128,7 +134,11 @@ function App() {
                 <GoodsReceiveCreate />
               </ProtectedRoute>
             } />
-            <Route path="stockout" element={<StockOut />} /> {/* StockOut is correctly nested */}
+            <Route path="stockout" element={
+              <ProtectedRoute>
+                <StockOut />
+              </ProtectedRoute>
+            } />
           </Route>
         </Routes>
       </BrowserRouter>

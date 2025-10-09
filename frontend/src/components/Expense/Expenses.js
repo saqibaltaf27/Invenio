@@ -1,319 +1,259 @@
-import React, { useEffect, useState } from 'react'
-import { Link } from "react-router-dom"
-import { Modal, OverlayTrigger, Popover } from 'react-bootstrap';
-import './Expenses.scss'
-import Table from '../Table/Table'
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import Modal from 'react-bootstrap/Modal';
+import './Expenses.css';
 
-import moment from 'moment'
+import moment from 'moment';
 import swal from 'sweetalert';
+
+import Table from '../Table/Table';
 import Loader from '../PageStates/Loader';
 import Error from '../PageStates/Error';
 
 function Expenses() {
-	const [pageState, setPageState] = useState(1)
-	const [permission, setPermission] = useState(null)
+  const [pageState, setPageState] = useState(1); // 1: Loading, 2: Success, 3: Error
+  const [expenses, setExpenses] = useState([]);
+  const [expenseCount, setExpenseCount] = useState(0);
+  const [searchInput, setSearchInput] = useState("");
+  const [sortColumn, setSortColumn] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+  const [tablePage, setTablePage] = useState(1);
+  const [data, setData] = useState([]);
 
-	const [expenses, setExpenses] = useState([])
-	const [expenseCount, setExpenseCount] = useState(0)
+  // Modal related state variables
+  const [viewModalShow, setViewModalShow] = useState(false);
+  const [viewExpenseDetails, setViewExpenseDetails] = useState(null);
 
-	const [searchInput, setSearchInput] = useState("")
-	const [sortColumn, setSortColumn] = useState("")
-	const [sortOrder, setSortOrder] = useState("")
-	const [tablePage, setTablePage] = useState(1)
-	const [data, setData] = useState([])
+  const getExpenses = async (searchValue, sc, so, startVal) => {
+    try {
+      let result = await fetch(`http://localhost:5000/api/get_expenses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          search_value: searchValue || '',
+          sort_column: sc || 'created_at',
+          sort_order: so || 'DESC',
+          start_value: startVal || 0
+        }),
+        credentials: 'include'
+      });
 
-	// Modal related state variables
-	const [viewModalShow, setViewModalShow] = useState(false)
-	const [viewExpenseDetails, setViewExpenseDetails] = useState(null)
-	const [productDetails, setProductDetails] = useState([])
+      let body = await result.json();
+      
+      if (body?.info?.expenses) {
+        setExpenses(body.info.expenses);
+        setExpenseCount(body.info.count);
+        setPageState(2);
+      } else {
+        setPageState(3);
+      }
+    } catch (err) {
+      console.error(err);
+      setPageState(3);
+    }
+  };
 
-	useEffect(() => {
+  useEffect(() => {
+    getExpenses(searchInput, sortColumn, sortOrder, (tablePage - 1) * 10);
+  }, [tablePage, sortColumn, sortOrder, searchInput]);
 
-		fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/verifiy_token`, {
-			method: 'POST',
-			credentials: 'include'
-		})
-			.then(async (response) => {
-				let body = await response.json()
-				// console.log(body)
-				if (body.operation === 'success') {
+  useEffect(() => {
+    const tArray = expenses.map((expense, i) => ({
+      sl: i + 1,
+      expense_ref: expense.expense_ref,
+      items_count: expense.items.length,
+      items_preview: expense.items.slice(0, 2).map(item => item.item_name).join(', ') + 
+                    (expense.items.length > 2 ? ` +${expense.items.length - 2} more` : ''),
+      grand_total: `Rs.${expense.grand_total}`,
+      expense_date: moment(expense.expense_date).format('MMMM Do, YYYY'),
+      addedon: moment(expense.created_at).format('MMMM Do, YYYY'),
+      action: (
+        <>
+          <button 
+            className='btn warning' 
+            style={{ marginRight: '0.5rem' }} 
+            onClick={() => viewModalInit(expense.expense_id)}
+          >
+            View
+          </button>
+          <button 
+            className='btn danger' 
+            onClick={() => confirmDelete(expense.expense_id)}
+          >
+            Delete
+          </button>
+        </>
+      )
+    }));
+    setData(tArray);
+  }, [expenses]);
 
-					fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/get_permission`, {
-						method: 'POST',
-						credentials: 'include'
-					})
-						.then(async (response) => {
-							let body = await response.json()
+  const confirmDelete = (id) => {
+    swal({
+      title: "Are you sure?",
+      text: "Once deleted, you will not be able to recover this entry!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then((willDelete) => {
+      if (willDelete) deleteExpense(id);
+    });
+  };
 
-							//console.log(JSON.parse(body.info));
-							let p = JSON.parse(body.info).find(x => x.page === 'expenses')
-							if (p.view !== true) {
-								window.location.href = '/unauthorized';
-							} else {
-								setPermission(p)
-							}
-						})
-						.catch((error) => {
-							console.log(error)
-						})
-				} else {
-					window.location.href = '/login'
-				}
-			})
-			.catch((error) => {
-				console.log(error)
-			})
-	}, [])
+  const deleteExpense = async (id) => {
+    try {
+      let result = await fetch(`http://localhost:5000/api/delete_expense`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expense_id: id }),
+        credentials: 'include'
+      });
 
+      let body = await result.json();
+      if (body.operation === 'success') {
+        getExpenses(searchInput, sortColumn, sortOrder, (tablePage - 1) * 10);
+        swal('Success', body.message, 'success');
+      } else {
+        swal('Oops!', 'Something went wrong', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      swal('Oops!', 'Something went wrong', 'error');
+    }
+  };
 
-	const getExpenses = async (sv, sc, so, scv) => {
-		let result = await fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/get_expenses`, {
-			method: 'POST',
-			headers: {
-				'Content-type': 'application/json; charset=UTF-8'
-			},
-			body: JSON.stringify({ start_value: sv, sort_column: sc, sort_order: so, search_value: scv }),
-			credentials: 'include'
-		})
+  const viewModalInit = async (id) => {
+    try {
+      const result = await fetch(`http://localhost:5000/api/get_expense_details`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expense_id: id }),
+        credentials: 'include'
+      });
 
-		let body = await result.json()
-		setExpenses(body.info.expenses)
-		setExpenseCount(body.info.count)
-	}
+      const body = await result.json();
+      if (body.operation === 'success') {
+        setViewExpenseDetails(body.info);
+        setViewModalShow(true);
+      } else {
+        swal('Error', 'Failed to load expense details', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching expense details:', error);
+      swal('Error', 'Failed to load expense details', 'error');
+    }
+  };
 
-	const getProductsDetailsById = async (value) => {
-		let result = await fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/get_products_details_by_id`, {
-			method: 'POST',
-			headers: {
-				'Content-type': 'application/json; charset=UTF-8'
-			},
-			body: JSON.stringify({ product_id_list: value }),
-			credentials: 'include'
-		})
+  const handleViewModalClose = () => {
+    setViewModalShow(false);
+    setViewExpenseDetails(null);
+  };
 
-		let body = await result.json()
-		setProductDetails(body.info.products);
-	}
+  return (
+    <div className='expenses'>
+      <div className='expense-header'>
+        <div className='title'>Expenses</div>
+        <div>
+          <Link to="/expenses/items" className='btn info' style={{ marginRight: '0.5rem' }}>
+            Manage Expense Items
+          </Link>
+          <Link to="/expenses/addnew" className='btn success'>
+            Add New Expense
+          </Link>
+        </div>
+      </div>
 
-	useEffect(() => {
-		if (permission !== null) {
-			let p1 = getExpenses((tablePage - 1) * 10, sortColumn, sortOrder, searchInput);
-			Promise.all([p1])
-				.then(() => {
-					//console.log('All apis done')
-					setPageState(2);
-				})
-				.catch((err) => {
-					console.log(err)
-					setPageState(3)
-				})
-		}
-	}, [permission])
+      {pageState === 1 && <Loader />}
+      {pageState === 2 && (
+        <div className="card">
+          <div className="container">
+            <Table
+              headers={['S.No', 'Expense Ref', 'Items Count', 'Items', 'Total Amount', 'Expense Date', 'Added on', 'Action']}
+              columnOriginalNames={["expense_ref", "grand_total", "expense_date", "created_at"]}
+              sortColumn={sortColumn}
+              setSortColumn={setSortColumn}
+              sortOrder={sortOrder}
+              setSortOrder={setSortOrder}
+              data={data}
+              data_count={expenseCount}
+              searchInput={searchInput}
+              setSearchInput={setSearchInput}
+              custom_styles={["3rem", "6rem", "5rem", "10rem", "6rem", "8rem", "8rem", "8rem"]}
+              current_page={tablePage}
+              tablePageChangeFunc={setTablePage}
+            />
+          </div>
+        </div>
+      )}
+      {pageState === 3 && <Error />}
 
-	useEffect(() => {
-		if (permission !== null)
-			getExpenses((tablePage - 1) * 10, sortColumn, sortOrder, searchInput);
-	}, [tablePage, sortColumn, sortOrder, searchInput])
+      <Modal show={viewModalShow} onHide={handleViewModalClose} size="lg" centered>
+        <Modal.Header closeButton>
+          <Modal.Title className='fs-4 fw-bold' style={{ color: "#2cd498" }}>
+            Expense Details - {viewExpenseDetails?.expense?.expense_ref}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ backgroundColor: "#fafafa" }}>
+          <div className='container'>
+            <div className='card my_card'>
+              <div className='card-body'>
+                {viewExpenseDetails && (
+                  <>
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className='fst-italic fw-bold'>Expense Reference</label>
+                        <input className='my_form_control' type='text' value={viewExpenseDetails.expense.expense_ref} readOnly />
+                      </div>
+                      <div className="form-group">
+                        <label className='fst-italic fw-bold'>Expense Date</label>
+                        <input className='my_form_control' type='text' value={moment(viewExpenseDetails.expense.expense_date).format('MMMM Do, YYYY')} readOnly />
+                      </div>
+                      <div className="form-group">
+                        <label className='fst-italic fw-bold'>Grand Total</label>
+                        <input className='my_form_control' type='text' value={`Rs.${viewExpenseDetails.expense.grand_total}`} readOnly />
+                      </div>
+                    </div>
 
+                    <div className='form-group mb-2'>
+                      <label className='fst-italic fw-bold mb-2'>Expense Items:</label>
+                      <div className='p-2 border rounded'>
+                        <div className='mb-2 row gx-0'>
+                          <div className='fw-bold text-secondary col-4 d-flex align-items-center text-uppercase justify-content-start' style={{ fontSize: "smaller" }}>Item Name</div>
+                          <div className='fw-bold text-secondary col-2 d-flex align-items-center text-uppercase justify-content-center' style={{ fontSize: "smaller" }}>Size</div>
+                          <div className='fw-bold text-secondary col-2 d-flex align-items-center text-uppercase justify-content-center' style={{ fontSize: "smaller" }}>Qty</div>
+                          <div className='fw-bold text-secondary col-2 d-flex align-items-center text-uppercase justify-content-center' style={{ fontSize: "smaller" }}>Unit Price</div>
+                          <div className='fw-bold text-secondary col-2 d-flex align-items-center text-uppercase justify-content-center' style={{ fontSize: "smaller" }}>Total</div>
+                        </div>
+                        {viewExpenseDetails.items.map((item, ind) => (
+                          <div key={ind} className='py-2 row gx-0' style={{ borderBottom: "1px dashed lightgray" }}>
+                            <div className='col-4 d-flex align-items-center justify-content-start'>{item.item_name}</div>
+                            <div className='col-2 d-flex align-items-center justify-content-center'>{item.size_unit || '-'}</div>
+                            <div className='col-2 d-flex align-items-center justify-content-center'>{item.quantity}</div>
+                            <div className='col-2 d-flex align-items-center justify-content-center'>Rs.{item.unit_price}</div>
+                            <div className='col-2 d-flex align-items-center justify-content-center'>Rs.{item.total_amount}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
 
-
-	const deleteExpense = async (id) => {
-		let result = await fetch(`${process.env.REACT_APP_BACKEND_ORIGIN}/delete_expense`, {
-			method: 'POST',
-			headers: {
-				'Content-type': 'application/json; charset=UTF-8'
-			},
-			body: JSON.stringify({ expense_id: id }),
-			credentials: 'include'
-		})
-
-		let body = await result.json()
-		if (body.operation === 'success') {
-			getExpenses((tablePage - 1) * 10, sortColumn, sortOrder, searchInput);
-			swal('Success', body.message, 'success')
-		} else {
-			swal('Oops!', 'Something went wrong', 'error')
-		}
-	}
-
-	useEffect(() => {
-		if (expenses.length !== 0) {
-			let tArray = expenses.map((obj, i) => {
-				let tObj = {}
-				tObj.sl = i + 1;
-				tObj.expense_ref = obj.expense_ref;
-				tObj.supplier_name = obj.supplier_name;
-				tObj.due_date = moment(obj.due_date).format('MMMM Do, YYYY');
-				tObj.grand_total = obj.grand_total;
-				tObj.addedon = moment(obj.timeStamp).format('MMMM Do, YYYY');
-				tObj.action =
-					<>
-						<button className='btn warning' style={{ marginRight: '0.5rem' }} onClick={() => { viewModalInit(obj.expense_id) }} >View</button>
-						{
-							permission.delete &&
-							<button className='btn danger' style={{ marginLeft: '0.5rem' }}
-								onClick={() => {
-									swal({
-										title: "Are you sure?",
-										text: "Once deleted, you will not be able to recover this entry!",
-										icon: "warning",
-										buttons: true,
-										dangerMode: true,
-									})
-										.then((willDelete) => {
-											if (willDelete) {
-												deleteExpense(obj.expense_id)
-											}
-										});
-								}}
-							>Delete
-							</button>
-						}
-					</>
-				return tObj;
-			})
-			setData(tArray)
-		}
-	}, [expenses])
-
-	const viewModalInit = (id) => {
-		let p = expenses.find(x => x.expense_id === id)
-
-		setViewExpenseDetails(p)
-		setViewModalShow(true);
-
-		getProductsDetailsById(JSON.parse(p.items).map(x => x.product_id))
-	}
-
-	const handleViewModalClose = () => {
-		setViewModalShow(false);
-		setViewExpenseDetails(null)
-		setProductDetails([])
-	}
-
-	return (
-		<div className='expenses'>
-			<div style={{ overflow: "scroll", height: "100%" }} >
-				<div className='expense-header'>
-					<div className='title'>Expenses</div>
-					<Link to={"/expenses/addnew"} className='btn success' style={{ margin: "0 0.5rem", textDecoration: "none" }}>Add New</Link>
-				</div>
-
-				{
-					pageState === 1 ?
-						<Loader />
-						: pageState === 2 ?
-							<div className="card">
-								<div className="container">
-									<Table
-										headers={['Sl.', 'Expense Ref.', 'Supplier Name', 'Due date', 'Grand Total', 'Added on', 'Action']}
-										columnOriginalNames={["expense_ref", "name", "due_date", "grand_total", "timeStamp"]}
-										sortColumn={sortColumn}
-										setSortColumn={setSortColumn}
-										sortOrder={sortOrder}
-										setSortOrder={setSortOrder}
-										data={data}
-										data_count={expenseCount}
-										searchInput={searchInput}
-										setSearchInput={setSearchInput}
-										custom_styles={["3rem", "5rem", "5rem", "8rem", "5rem", "8rem", "10rem"]}
-										current_page={tablePage}
-										tablePageChangeFunc={setTablePage}
-									/>
-								</div>
-							</div>
-							:
-							<Error />
-				}
-
-				<Modal show={viewModalShow} onHide={() => { handleViewModalClose() }} size="lg" centered >
-					<Modal.Header closeButton>
-						<Modal.Title className='fs-4 fw-bold' style={{ color: "#2cd498" }}>View Expense</Modal.Title>
-					</Modal.Header>
-					<Modal.Body style={{ backgroundColor: "#fafafa" }} >
-						<div className='container d-flex gap-2'>
-							<div className='card my_card' style={{ flex: 1 }}>
-								<div className='card-body'>
-									{
-										viewExpenseDetails !== null &&
-										<>
-											<div className='form-group mb-2'>
-												<label className='fst-italic fw-bold'>Expense Reference</label>
-												<input className='my_form_control' type='text' value={viewExpenseDetails.expense_ref} readOnly />
-											</div>
-											<div className='form-group mb-2'>
-												<label className='fst-italic fw-bold'>Supplier Name</label>
-												<input className='my_form_control' type='text' value={viewExpenseDetails.supplier_name} readOnly />
-											</div>
-											<div className='form-group mb-2'>
-												<label className='fst-italic fw-bold'>Due Date</label>
-												<input className='my_form_control' type='text' value={moment(viewExpenseDetails.due_date).format('MMMM Do, YYYY')} readOnly />
-											</div>
-											<div className='form-group mb-2'>
-												<label className='fst-italic fw-bold'>Tax</label>
-												<input className='my_form_control' type='text' value={`${viewExpenseDetails.tax}%`} readOnly />
-											</div>
-											<div className='form-group mb-2'>
-												<label className='fst-italic fw-bold'>Grand Total</label>
-												<input className='my_form_control' type='text' value={viewExpenseDetails.grand_total} readOnly />
-											</div>
-											<div className='form-group mb-2'>
-												<label className='fst-italic fw-bold mb-2'>Item Details:</label>
-												<div className='p-2 border rounded'>
-													<div className='mb-2 row gx-0'>
-														<div className='fw-bold text-secondary col-2 d-flex align-items-center text-uppercase justify-content-center' style={{ fontSize: "smaller" }}>Image</div>
-														<div className='fw-bold text-secondary col-4 d-flex align-items-center text-uppercase justify-content-start' style={{ fontSize: "smaller" }}>Product Name</div>
-														<div className='fw-bold text-secondary col-2 d-flex align-items-center text-uppercase justify-content-center' style={{ fontSize: "smaller" }}>Quantity</div>
-														<div className='fw-bold text-secondary col-2 d-flex align-items-center text-uppercase justify-content-center' style={{ fontSize: "smaller" }}>Rate</div>
-														<div className='fw-bold text-secondary col-2 d-flex align-items-center text-uppercase justify-content-center' style={{ fontSize: "smaller" }}>Total</div>
-													</div>
-													{
-														productDetails.length > 0 && JSON.parse(viewExpenseDetails.items).map((viewItem, ind) => {
-															let img = productDetails.find(x => x.product_id === viewItem.product_id).image
-															return (
-																<div key={ind} className='py-2 row gx-0' style={{ borderBottom: "1px dashed lightgray" }}>
-																	<div className='col-2 d-flex align-items-center justify-content-center'>
-																		<OverlayTrigger
-																			trigger={['hover', 'focus']}
-																			placement="left"
-																			overlay={
-																				(<Popover id="popover-basic" style={{ backgroundColor: "#ebf4ee", boxShadow: "rgb(0 0 0 / 75%) 0px 0px 16px -5px" }}>
-																					<Popover.Body style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "3px" }}>
-																						{
-																							img === null ?
-																								<div className='d-flex align-items-center text-dark fs-5 text-center' style={{ width: "10rem", height: "10rem" }}>No image available</div> :
-																								<img style={{ "width": "14rem", "borderRadius": "5px" }} src={`${process.env.REACT_APP_BACKEND_ORIGIN}/uploads/${img}`} alt="product" />
-																						}
-																					</Popover.Body>
-																				</Popover>)
-																			}
-																		>
-																			<img style={{ "width": "60px", "height": "60px", "borderRadius": "5px", "objectFit": "cover", cursor: "pointer" }} src={img === null ? "https://lh3.googleusercontent.com/SMKEdK_g-LuC3ero8vP9d4lPJBKyzc4t91-GYLQ1vEkhv87KyaxFmWFeEb6ZcyRNet0" : `${process.env.REACT_APP_BACKEND_ORIGIN}/uploads/${img}`} alt="product" />
-																		</OverlayTrigger>
-																	</div>
-																	<div className='col-4 d-flex align-items-center justify-content-start'>{viewItem.product_name}</div>
-																	<div className='col-2 d-flex align-items-center justify-content-center'>{viewItem.quantity}</div>
-																	<div className='col-2 d-flex align-items-center justify-content-center'>{viewItem.rate}</div>
-																	<div className='col-2 d-flex align-items-center justify-content-center'>{viewItem.rate * viewItem.quantity}</div>
-																</div>
-															)
-														})
-													}
-												</div>
-											</div>
-										</>
-									}
-								</div>
-							</div>
-						</div>
-					</Modal.Body>
-					<Modal.Footer>
-						<button className='btn btn-outline-danger' style={{ transition: "color 0.4s, background-color 0.4s" }} onClick={() => { handleViewModalClose() }}>Cancel</button>
-					</Modal.Footer>
-				</Modal>
-			</div>
-		</div>
-	)
+                    {viewExpenseDetails.expense.notes && (
+                      <div className='form-group mb-2'>
+                        <label className='fst-italic fw-bold'>Notes</label>
+                        <textarea className='my_form_control' value={viewExpenseDetails.expense.notes} readOnly rows="3" />
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <button className='btn btn-outline-danger' onClick={handleViewModalClose}>Close</button>
+        </Modal.Footer>
+      </Modal>
+    </div>
+  );
 }
 
-export default Expenses
+export default Expenses;

@@ -14,7 +14,8 @@ export { default as  ProductAddNew} from './Product/ProductAddNew';
 export { default as  Supplier} from './Supplier/Suppliers';
 export { default as  SupplierAddNew} from './Supplier/SupplierAddNew';
 export { default as  Expense} from './Expense/Expenses';
-export { default as  ExpenseAddNew} from './Expense/ExpenseAddNew';
+export { default as ExpenseAddNew } from './Expense/ExpenseAddNew'; // Add this line
+export { default as ExpenseItems } from './Expense/ExpenseItems';   // Add this line
 export { default as  Customer} from './Customer/Customer';
 export { default as  CustomerAddNew} from './Customer/CustomerAddNew';
 export { default as  Order} from './Order/Orders';

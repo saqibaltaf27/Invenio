@@ -1,0 +1,187 @@
+.expenses {
+  flex-grow: 1;
+  background-color: #fafafa;
+  height: calc(100vh - 50px);
+}
+
+.expenses .expense-header {
+  display: flex;
+  justify-content: space-between;
+  margin: 1rem;
+}
+
+.expenses .title {
+  color: #888;
+  font-size: x-large;
+  font-weight: bold;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.expenses .card {
+  background-color: white;
+  transition: 0.3s;
+  margin: 20px;
+  border: 2px rgba(180, 180, 180, 0.329) solid;
+  border-radius: 5px;
+}
+
+.expenses .container {
+  -webkit-box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.47);
+  box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
+  padding: 2px 2px;
+  height: 100%;
+}
+
+.expenses .btn {
+  border: 2px solid black;
+  background-color: white;
+  color: black;
+  padding: 5px 10px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  transition: color 0.4s, background-color 0.4s;
+}
+
+.expenses .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Green */
+.expenses .success {
+  border-color: #04AA6D;
+  color: #04AA6D;
+}
+
+.expenses .success:hover {
+  background-color: #04AA6D;
+  color: white;
+}
+
+/* Blue */
+.expenses .info {
+  border-color: #2196F3;
+  color: dodgerblue;
+}
+
+.expenses .info:hover {
+  background: #2196F3;
+  color: white;
+}
+
+/* Orange */
+.expenses .warning {
+  border-color: #ff9800;
+  color: orange;
+}
+
+.expenses .warning:hover {
+  background: #ff9800;
+  color: white;
+}
+
+/* Red */
+.expenses .danger {
+  border-color: #f44336;
+  color: rgb(222, 72, 72);
+}
+
+.expenses .danger:hover {
+  background: #f44336;
+  color: white;
+}
+
+.expenses .default {
+  border-color: #e7e7e7;
+  color: black;
+}
+
+.expenses .default:hover {
+  background: #e7e7e7;
+}
+
+@media screen and (max-width: 768px) {
+  .expenses {
+    height: 110vh;
+  }
+}
+
+/* Multi-item table styles */
+.expenses .items-preview {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.expenses .items-count {
+  background: #2cd498;
+  color: white;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+/* Modal styles for multi-item display */
+.expenses .my_form_control {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f8f9fa;
+  font-size: 0.9rem;
+}
+
+.expenses .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.expenses .item-details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+.expenses .item-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+  align-items: center;
+}
+
+.expenses .item-row.header {
+  font-weight: bold;
+  background: #f8f9fa;
+  border-bottom: 2px solid #2cd498;
+}
+
+/* Responsive design for modal */
+@media screen and (max-width: 768px) {
+  .expenses .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .expenses .item-row {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+    text-align: center;
+  }
+  
+  .expenses .item-row.header {
+    display: none;
+  }
+}

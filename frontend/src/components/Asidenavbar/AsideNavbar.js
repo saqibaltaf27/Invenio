@@ -12,6 +12,7 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 import LocalMallIcon from "@mui/icons-material/LocalMall";
 import CloseOutlined from "@mui/icons-material/CloseOutlined";
 import Menu from "@mui/icons-material/Menu";
+import ReceiptIcon from "@mui/icons-material/Receipt"; // Added for Expenses
 
 function AsideNavbar() {
   const [userRole, setUserRole] = useState("");
@@ -94,6 +95,14 @@ function AsideNavbar() {
         </li>
       </Link>
 
+      <p className="title">Finance</p>
+      <Link to="/expenses" className="nav-link">
+        <li>
+          <ReceiptIcon className="icon" />
+          <span>Expenses</span>
+        </li>
+      </Link>
+
       <p className="title">User</p>
       <li className="logout" onClick={logout}>
         <ExitToAppIcon className="icon" />
@@ -131,6 +140,14 @@ function AsideNavbar() {
         <li>
           <LocalMallIcon className="icon" />
           <span>Stock Out</span>
+        </li>
+      </Link>
+
+      <p className="title">Finance</p>
+      <Link to="/expenses" className="nav-link">
+        <li>
+          <ReceiptIcon className="icon" />
+          <span>Expenses</span>
         </li>
       </Link>
 
